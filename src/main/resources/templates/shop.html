@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${hindi} ? 'hi-Latn' : 'en'">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${shop.name()}">Shop</title>
+    <meta name="description" th:if="${shop.tagline()}" th:content="${shop.tagline()}">
+    <style>
+        :root { --ink: #1b2452; --muted: #4f587f; --line: #d5d9ea; --bg: #f6f7fb; --surface: #ffffff; --accent: #8a4f00; --wa: #17613f; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; font-size: 1.05rem; line-height: 1.55; color: var(--ink); background: var(--bg); }
+        .draft { background: #fff1d6; color: #5c3a00; padding: 0.6rem 1rem; text-align: center; font-size: 0.95rem; }
+        header { background: var(--ink); color: #ffffff; padding: 2rem 1rem; }
+        .wrap { max-width: 44rem; margin: 0 auto; }
+        h1 { margin: 0; font-size: 2rem; line-height: 1.15; }
+        header p { margin: 0.4rem 0 0; color: #dfe3f7; }
+        main { padding: 1.5rem 1rem 3rem; }
+        section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.2rem; }
+        h2 { margin: 0 0 0.7rem; font-size: 1.25rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.55rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+        tr:last-child th, tr:last-child td { border-bottom: 0; }
+        tbody th { font-weight: 600; }
+        td.price { text-align: right; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .small { display: block; font-weight: 400; font-size: 0.92rem; color: var(--muted); }
+        thead th { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+        thead th.price { text-align: right; }
+        dl { margin: 0; }
+        dt { font-weight: 600; margin-top: 0.8rem; }
+        dt:first-child { margin-top: 0; }
+        dd { margin: 0.15rem 0 0; color: var(--muted); }
+        .order { display: inline-block; background: var(--wa); color: #ffffff; font-weight: 600; text-decoration: none; padding: 0.8rem 1.3rem; border-radius: 8px; font-size: 1.1rem; }
+        .order:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+        footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 0 1rem 2rem; }
+    </style>
+</head>
+<body>
+<div class="draft" role="status" th:if="${draft}">Preview. This shop is not published yet.</div>
+
+<header>
+    <div class="wrap">
+        <h1 th:text="${shop.name()}">Shop name</h1>
+        <p th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+    </div>
+</header>
+
+<main class="wrap">
+    <section aria-labelledby="prices" th:if="${!shop.products().isEmpty()}">
+        <h2 id="prices" th:text="${hindi} ? 'Rate list (daam)' : 'Price list'">Price list</h2>
+        <table>
+            <thead>
+            <tr>
+                <th scope="col" th:text="${hindi} ? 'Cheez' : 'Item'">Item</th>
+                <th scope="col" class="price" th:text="${hindi} ? 'Daam' : 'Price'">Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${shop.products()}">
+                <th scope="row">
+                    <span th:text="${p.name()}">Item</span>
+                    <span class="small" th:if="${p.note()}" th:text="${p.note()}">Note</span>
+                </th>
+                <td class="price">
+                    <span th:text="${money.format(p.priceRupees())}">₹0</span>
+                    <span class="small" th:if="${p.unit()}" th:text="${p.unit()}">per unit</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section aria-labelledby="delivery" th:if="${shop.deliveryNotes() != null or shop.noticeDays() != null}">
+        <h2 id="delivery" th:text="${hindi} ? 'Delivery aur order' : 'Delivery and ordering'">Delivery</h2>
+        <p th:if="${shop.deliveryNotes()}" th:text="${shop.deliveryNotes()}">Delivery notes</p>
+        <p th:if="${shop.noticeDays() != null and shop.noticeDays() > 0}">
+            <strong th:text="${hindi} ? ${shop.noticeDays()} + ' din pehle order karein.' : 'Please order ' + ${shop.noticeDays()} + ' days ahead.'">Order ahead</strong>
+        </p>
+    </section>
+
+    <section aria-labelledby="faq" th:if="${!shop.faqs().isEmpty()}">
+        <h2 id="faq" th:text="${hindi} ? 'Aksar pooche jaane wale sawaal' : 'Common questions'">Common questions</h2>
+        <dl>
+            <th:block th:each="f : ${shop.faqs()}">
+                <dt th:text="${f.question()}">Question</dt>
+                <dd th:text="${f.answer()}">Answer</dd>
+            </th:block>
+        </dl>
+    </section>
+
+    <section aria-labelledby="order" th:if="${whatsappLink}">
+        <h2 id="order" th:text="${hindi} ? 'Order karein' : 'Place an order'">Order</h2>
+        <a class="order" th:href="${whatsappLink}" rel="noopener"
+           th:text="${hindi} ? 'WhatsApp par order karein' : 'Order on WhatsApp'">Order on WhatsApp</a>
+    </section>
+</main>
+
+<footer>Made with BazaarReady</footer>
+</body>
+</html>

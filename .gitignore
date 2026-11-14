@@ -1,0 +1,25 @@
+# Secrets
+.env
+*.pem
+*.key
+
+# Build output
+target/
+frontend/node_modules/
+frontend/dist/
+src/main/resources/static/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploaded chats and photos (may contain customer data)
+uploads/
+
+# Screenshots dropped into the project folder
+/image.png

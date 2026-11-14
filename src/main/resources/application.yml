@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: bazaarready
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:bazaarready}
+    username: ${DB_USER:bazaarready}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+# Secrets come from environment variables (see .env.example). Never put them in this file.
+bazaarready:
+  # Shops are served at {slug}.{app-domain} in production and at /s/{slug} everywhere.
+  app-domain: ${APP_DOMAIN:localhost}
+  anthropic:
+    api-key: ${ANTHROPIC_API_KEY:}
