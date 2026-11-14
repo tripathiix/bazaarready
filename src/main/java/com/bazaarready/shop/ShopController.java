@@ -43,7 +43,7 @@ class ShopController {
                 || (shop.noticeDays() != null && shop.noticeDays() > 0));
         model.addAttribute("htmlLang", Languages.of(shop.ownerLanguage()).htmlLang());
         model.addAttribute("whatsappLink", whatsappLink(shop, labels));
-        model.addAttribute("money", new Money());
+        model.addAttribute("money", new Money(shop.currency()));
         return "shop";
     }
 
@@ -58,6 +58,7 @@ class ShopController {
             return null;
         }
         String digits = shop.whatsappNumber().replaceAll("[^0-9]", "");
+        // A bare 10-digit number is taken to be Indian; the agent is asked to include the country code otherwise.
         if (digits.length() == 10) {
             digits = "91" + digits;
         }
@@ -65,11 +66,17 @@ class ShopController {
         return "https://wa.me/" + digits + "?text=" + text;
     }
 
-    /** Formats rupee amounts for the page: 850 becomes "₹850", 40.5 becomes "₹40.50". */
+    /** Formats prices for the page with the business's currency: 850 becomes "₹850", 40.5 becomes "$40.50". */
     public static final class Money {
+        private final String symbol;
+
+        Money(String symbol) {
+            this.symbol = symbol;
+        }
+
         public String format(BigDecimal rupees) {
             BigDecimal value = rupees.stripTrailingZeros();
-            return "₹" + (value.scale() <= 0 ? value.toBigInteger().toString() : rupees.setScale(2).toPlainString());
+            return symbol + (value.scale() <= 0 ? value.toBigInteger().toString() : rupees.setScale(2).toPlainString());
         }
     }
 }

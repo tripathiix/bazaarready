@@ -47,7 +47,7 @@ export const STRINGS: Record<LanguageCode, Strings> = {
     tellUs: "Tell us about your business",
     hint: "Type or speak. Say what you do or sell, your prices if you have them, where you work, and your WhatsApp number.",
     example:
-      "I teach maths at home for classes 8 to 10 in Indiranagar, Bengaluru. Group class is 2000 rupees a month, one-to-one is 500 an hour. Evenings 5 to 8, Monday to Saturday. WhatsApp 9876543210.",
+      "I bake cakes from home. A chocolate cake is $25, cupcakes are $2 each with a minimum of 12. I deliver within 5 miles on weekends. Please order 2 days ahead. WhatsApp +1 555 010 0199.",
     speak: "Speak instead",
     stopListening: "Stop listening",
     listening: "Listening. Your words will appear in the box above.",

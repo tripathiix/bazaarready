@@ -40,6 +40,10 @@ public class Business {
     @Column(nullable = false)
     private String theme;
 
+    /** Currency symbol shown before prices, such as ₹, $, € or £. */
+    @Column(nullable = false)
+    private String currency;
+
     private String about;
 
     private String location;
@@ -93,6 +97,7 @@ public class Business {
         this.ownerLanguage = "en";
         this.kind = "shop";
         this.theme = "marigold";
+        this.currency = "₹";
         this.status = Status.DRAFT;
         this.createdAt = Instant.now();
     }
@@ -108,6 +113,7 @@ public class Business {
     public String getTagline() { return tagline; }
     public String getKind() { return kind; }
     public String getTheme() { return theme; }
+    public String getCurrency() { return currency; }
     public String getAbout() { return about; }
     public String getLocation() { return location; }
     public String getHours() { return hours; }
@@ -127,6 +133,7 @@ public class Business {
     public void setTagline(String tagline) { this.tagline = tagline; }
     public void setKind(String kind) { this.kind = kind; }
     public void setTheme(String theme) { this.theme = theme; }
+    public void setCurrency(String currency) { this.currency = currency; }
     public void setAbout(String about) { this.about = about; }
     public void setLocation(String location) { this.location = location; }
     public void setHours(String hours) { this.hours = hours; }

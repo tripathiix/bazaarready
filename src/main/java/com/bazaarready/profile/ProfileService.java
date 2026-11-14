@@ -87,6 +87,9 @@ public class ProfileService {
         if (request.theme() != null) {
             business.setTheme(request.theme());
         }
+        if (blankToNull(request.currency()) != null) {
+            business.setCurrency(request.currency().trim());
+        }
         business.setAbout(blankToNull(request.about()));
         business.setLocation(blankToNull(request.location()));
         business.setHours(blankToNull(request.hours()));
@@ -133,7 +136,7 @@ public class ProfileService {
                 .map(f -> new FaqResponse(f.getId(), f.getQuestion(), f.getAnswer(), f.getTimesAsked(), f.getSource()))
                 .toList();
         return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getKind(), b.getTheme(),
-                b.getAbout(), b.getLocation(), b.getHours(), b.getOfferingsTitle(), b.getDetailsTitle(),
+                b.getCurrency(), b.getAbout(), b.getLocation(), b.getHours(), b.getOfferingsTitle(), b.getDetailsTitle(),
                 b.getOwnerLanguage(), b.getWhatsappNumber(), b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(),
                 b.getStatus(), b.getPublishedAt(), "/s/" + b.getSlug(), productList, faqList);
     }
