@@ -146,6 +146,7 @@ public class AgentService {
             case "ask_owner" -> {
                 String question = input.path("question").asText("").trim();
                 session.pause(AgentSession.Status.WAITING_OWNER, toolUseId, name, question);
+                session.setPendingAnswerType("phone".equals(input.path("answerType").asText()) ? "phone" : "text");
                 logAction(session, name, "Asked: " + question, AgentAction.Status.WAITING_OWNER,
                         json.createObjectNode().put("question", question));
             }
@@ -287,7 +288,7 @@ public class AgentService {
         String approval = session.getStatus() == AgentSession.Status.WAITING_APPROVAL
                 ? "Publish your shop so customers can open it?"
                 : null;
-        return new SessionView(session.getId(), session.getStatus(), session.getPendingQuestion(), approval,
+        return new SessionView(session.getId(), session.getStatus(), session.getPendingQuestion(), session.getPendingAnswerType(), approval,
                 session.getFinalMessage(), session.getBusinessId(), shopPath, published, log);
     }
 }

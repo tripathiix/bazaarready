@@ -670,3 +670,37 @@ input {
     transition: none;
   }
 }
+
+/* Phone answer: country picker beside the number */
+.phone {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.phone select {
+  font: inherit;
+  color: inherit;
+  flex: 1 1 14rem;
+  min-width: 0;
+  background: #ffffff;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+}
+
+.phone input {
+  flex: 2 1 12rem;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

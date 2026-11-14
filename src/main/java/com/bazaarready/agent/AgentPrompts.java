@@ -27,6 +27,9 @@ final class AgentPrompts {
             total. A site needs at least: a name, one offering, and a WhatsApp number so people can get \
             in touch. Prices are optional: leave a price out if the owner did not give one.
             - If the owner gave no name, suggest one in your question and let them confirm.
+            - When you need a phone or WhatsApp number, call ask_owner with answerType "phone" and \
+            ask only for the number in that question. The screen then shows a country-code picker, \
+            and the answer comes back with the country code, for example "+91 9876543210".
             - When you have enough, call save_profile once with everything you know:
               * kind: the type of site. theme: a colour that suits it (marigold for food and festive, \
             forest for farm and natural products, rose for beauty and fashion, ocean for services and \
@@ -70,7 +73,8 @@ final class AgentPrompts {
                 "input_schema": {
                   "type": "object",
                   "properties": {
-                    "question": { "type": "string", "description": "One question, in the owner's language." }
+                    "question": { "type": "string", "description": "One question, in the owner's language." },
+                    "answerType": { "type": "string", "enum": ["text", "phone"], "description": "Use phone when the answer is a phone or WhatsApp number." }
                   },
                   "required": ["question"]
                 }

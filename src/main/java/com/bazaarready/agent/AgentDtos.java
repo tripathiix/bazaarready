@@ -30,6 +30,7 @@ public final class AgentDtos {
             UUID id,
             AgentSession.Status status,
             String question,
+            String questionType,
             String approvalRequest,
             String finalMessage,
             UUID businessId,

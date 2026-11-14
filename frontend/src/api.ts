@@ -14,6 +14,7 @@ export interface SessionView {
   id: string;
   status: SessionStatus;
   question: string | null;
+  questionType: "text" | "phone" | null;
   approvalRequest: string | null;
   finalMessage: string | null;
   businessId: string | null;

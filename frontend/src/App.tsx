@@ -1,6 +1,7 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ActionView, SessionView, sendApproval, sendReply, startSession } from "./api";
 import { Bunting, OpenSign, Petals, Shutters } from "./Decor";
+import { countries, defaultCountry } from "./countries";
 import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
 import { EXTRA, HEAR_QUESTION } from "./i18nExtra";
@@ -44,6 +45,8 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [celebrations, setCelebrations] = useState(0);
+  const [country, setCountry] = useState(defaultCountry);
+  const countryList = useMemo(() => countries(language), [language]);
 
   const speech = useSpeech((text) => setDescription((current) => (current ? current + " " + text : text)));
   const answerSpeech = useSpeech((text) => setAnswer((current) => (current ? current + " " + text : text)));
@@ -87,7 +90,8 @@ export default function App() {
     event.preventDefault();
     if (!session) return;
     if (answerSpeech.listening) answerSpeech.stop();
-    const text = answer;
+    const dial = countryList.find((c) => c.iso === country)?.dial ?? "";
+    const text = session.questionType === "phone" ? `+${dial} ${answer.replace(/[^0-9]/g, "")}` : answer;
     setAnswer("");
     void run(() => sendReply(session.id, text));
   }
@@ -218,9 +222,36 @@ export default function App() {
                 <label htmlFor="answer" className="label">
                   {session.question}
                 </label>
-                <input id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} maxLength={2000} required autoFocus />
+                {session.questionType === "phone" ? (
+                  <div className="phone">
+                    <label htmlFor="country" className="visually-hidden">
+                      Country code
+                    </label>
+                    <select id="country" value={country} onChange={(e) => setCountry(e.target.value)}>
+                      {countryList.map((c) => (
+                        <option key={c.iso} value={c.iso}>
+                          {c.flag} {c.name} (+{c.dial})
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      id="answer"
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel-national"
+                      pattern="[0-9 ]{4,17}"
+                      placeholder="98765 43210"
+                      value={answer}
+                      onChange={(e) => setAnswer(e.target.value.replace(/[^0-9 ]/g, ""))}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                ) : (
+                  <input id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} maxLength={2000} required autoFocus />
+                )}
                 <div className="row">
-                  {answerSpeech.supported && (
+                  {answerSpeech.supported && session.questionType !== "phone" && (
                     <button
                       type="button"
                       className={`button mic ${answerSpeech.listening ? "is-listening" : ""}`}
