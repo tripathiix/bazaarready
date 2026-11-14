@@ -18,14 +18,14 @@ import java.util.Locale;
 import java.util.UUID;
 
 /**
- * The single place that reads and writes a business profile. The site page, the tests and the
+ * The single place that reads and writes a business profile. The site pages, the tests and the
  * agent's tools all go through here, so a fix is always a change to the profile and never a
  * hand edit to a page.
  */
 @Service
 public class ProfileService {
 
-    private static final BigDecimal PAISE_PER_RUPEE = BigDecimal.valueOf(100);
+    private static final BigDecimal MINOR_PER_UNIT = BigDecimal.valueOf(100);
 
     private final BusinessRepository businesses;
     private final ProductRepository products;
@@ -75,6 +75,21 @@ public class ProfileService {
                 .orElseThrow(() -> new NotFoundException("No site at this address")));
     }
 
+    @Transactional(readOnly = true)
+    public ProfileResponse getByOwnerKey(UUID ownerKey) {
+        return toResponse(businesses.findByOwnerKey(ownerKey)
+                .orElseThrow(() -> new NotFoundException("This owner link is not valid")));
+    }
+
+    /** Whether a kind of business gets a cart, a booking form, or neither. */
+    public static String styleOf(String kind) {
+        return switch (kind) {
+            case "shop", "food" -> "STORE";
+            case "services", "classes", "transport", "events" -> "BOOKING";
+            default -> "SHOWCASE";
+        };
+    }
+
     private Business find(UUID id) {
         return businesses.findById(id).orElseThrow(() -> new NotFoundException("Business not found"));
     }
@@ -112,9 +127,17 @@ public class ProfileService {
         List<ProductRequest> productRequests = request.products() != null ? request.products() : List.of();
         for (int i = 0; i < productRequests.size(); i++) {
             ProductRequest p = productRequests.get(i);
-            products.save(new Product(businessId, p.name().trim(), blankToNull(p.description()),
-                    p.priceRupees() == null ? null : toPaise(p.priceRupees()),
-                    blankToNull(p.priceNote()), blankToNull(p.unit()), blankToNull(p.note()), i));
+            Product product = new Product(businessId, p.name().trim(), i);
+            product.setDescription(blankToNull(p.description()));
+            product.setCategory(blankToNull(p.category()));
+            product.setPricePaise(p.priceRupees() == null ? null : toMinor(p.priceRupees()));
+            product.setPriceNote(blankToNull(p.priceNote()));
+            product.setUnit(blankToNull(p.unit()));
+            product.setNote(blankToNull(p.note()));
+            product.setOrigin(blankToNull(p.origin()));
+            product.setDestination(blankToNull(p.destination()));
+            product.setSchedule(blankToNull(p.schedule()));
+            products.save(product);
         }
 
         List<FaqRequest> faqRequests = request.faqs() != null ? request.faqs() : List.of();
@@ -128,17 +151,18 @@ public class ProfileService {
 
     private ProfileResponse toResponse(Business b) {
         List<ProductResponse> productList = products.findByBusinessIdOrderBySortOrder(b.getId()).stream()
-                .map(p -> new ProductResponse(p.getId(), p.getName(), p.getDescription(),
-                        p.getPricePaise() == null ? null : toRupees(p.getPricePaise()),
-                        p.getPriceNote(), p.getUnit(), p.getNote()))
+                .map(p -> new ProductResponse(p.getId(), p.getName(), p.getDescription(), p.getCategory(),
+                        p.getPricePaise() == null ? null : toUnits(p.getPricePaise()),
+                        p.getPriceNote(), p.getUnit(), p.getNote(), p.getOrigin(), p.getDestination(), p.getSchedule()))
                 .toList();
         List<FaqResponse> faqList = faqs.findByBusinessIdOrderBySortOrder(b.getId()).stream()
                 .map(f -> new FaqResponse(f.getId(), f.getQuestion(), f.getAnswer(), f.getTimesAsked(), f.getSource()))
                 .toList();
-        return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getKind(), b.getTheme(),
-                b.getCurrency(), b.getAbout(), b.getLocation(), b.getHours(), b.getOfferingsTitle(), b.getDetailsTitle(),
-                b.getOwnerLanguage(), b.getWhatsappNumber(), b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(),
-                b.getStatus(), b.getPublishedAt(), "/s/" + b.getSlug(), productList, faqList);
+        return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getKind(),
+                styleOf(b.getKind()), b.getTheme(), b.getCurrency(), b.getAbout(), b.getLocation(), b.getHours(),
+                b.getOfferingsTitle(), b.getDetailsTitle(), b.getOwnerLanguage(), b.getWhatsappNumber(),
+                b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(), b.getStatus(), b.getPublishedAt(),
+                "/s/" + b.getSlug(), "/owner/" + b.getOwnerKey(), productList, faqList);
     }
 
     /**
@@ -178,12 +202,13 @@ public class ProfileService {
         return slug;
     }
 
-    private static long toPaise(BigDecimal rupees) {
-        return rupees.multiply(PAISE_PER_RUPEE).setScale(0, RoundingMode.HALF_UP).longValueExact();
+    /** Whole currency units to the smallest unit: 850 rupees becomes 85000 paise. */
+    public static long toMinor(BigDecimal units) {
+        return units.multiply(MINOR_PER_UNIT).setScale(0, RoundingMode.HALF_UP).longValueExact();
     }
 
-    private static BigDecimal toRupees(long paise) {
-        return BigDecimal.valueOf(paise).divide(PAISE_PER_RUPEE, 2, RoundingMode.UNNECESSARY);
+    public static BigDecimal toUnits(long minor) {
+        return BigDecimal.valueOf(minor).divide(MINOR_PER_UNIT, 2, RoundingMode.UNNECESSARY);
     }
 
     private static String blankToNull(String value) {

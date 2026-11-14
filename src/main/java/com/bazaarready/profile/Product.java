@@ -8,8 +8,8 @@ import jakarta.persistence.Table;
 import java.util.UUID;
 
 /**
- * Something the business offers: an item, a service, a class, a piece of work. The price is
- * optional and is stored in paise so there is no rounding.
+ * Something the business offers: an item, a service, a class, a route, a piece of work. The price
+ * is optional and is stored in the currency's smallest unit (paise, cents) so there is no rounding.
  */
 @Entity
 @Table(name = "product")
@@ -26,6 +26,8 @@ public class Product {
 
     private String description;
 
+    private String category;
+
     @Column(name = "price_paise")
     private Long pricePaise;
 
@@ -37,6 +39,13 @@ public class Product {
 
     private String note;
 
+    /** For transport: where the route starts and ends, and when it runs. */
+    private String origin;
+
+    private String destination;
+
+    private String schedule;
+
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
@@ -44,16 +53,10 @@ public class Product {
         // for JPA
     }
 
-    public Product(UUID businessId, String name, String description, Long pricePaise, String priceNote,
-                   String unit, String note, int sortOrder) {
+    public Product(UUID businessId, String name, int sortOrder) {
         this.id = UUID.randomUUID();
         this.businessId = businessId;
         this.name = name;
-        this.description = description;
-        this.pricePaise = pricePaise;
-        this.priceNote = priceNote;
-        this.unit = unit;
-        this.note = note;
         this.sortOrder = sortOrder;
     }
 
@@ -61,9 +64,23 @@ public class Product {
     public UUID getBusinessId() { return businessId; }
     public String getName() { return name; }
     public String getDescription() { return description; }
+    public String getCategory() { return category; }
     public Long getPricePaise() { return pricePaise; }
     public String getPriceNote() { return priceNote; }
     public String getUnit() { return unit; }
     public String getNote() { return note; }
+    public String getOrigin() { return origin; }
+    public String getDestination() { return destination; }
+    public String getSchedule() { return schedule; }
     public int getSortOrder() { return sortOrder; }
+
+    public void setDescription(String description) { this.description = description; }
+    public void setCategory(String category) { this.category = category; }
+    public void setPricePaise(Long pricePaise) { this.pricePaise = pricePaise; }
+    public void setPriceNote(String priceNote) { this.priceNote = priceNote; }
+    public void setUnit(String unit) { this.unit = unit; }
+    public void setNote(String note) { this.note = note; }
+    public void setOrigin(String origin) { this.origin = origin; }
+    public void setDestination(String destination) { this.destination = destination; }
+    public void setSchedule(String schedule) { this.schedule = schedule; }
 }
