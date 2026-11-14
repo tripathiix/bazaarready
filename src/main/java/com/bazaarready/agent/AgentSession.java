@@ -43,6 +43,9 @@ public class AgentSession {
     @Column(name = "final_message")
     private String finalMessage;
 
+    /** Language code the owner picked on the start screen; see Languages. */
+    private String language;
+
     @Column(name = "model_calls", nullable = false)
     private int modelCalls;
 
@@ -56,8 +59,9 @@ public class AgentSession {
         // for JPA
     }
 
-    public AgentSession(String messages) {
+    public AgentSession(String messages, String language) {
         this.id = UUID.randomUUID();
+        this.language = language;
         this.status = Status.RUNNING;
         this.messages = messages;
         this.createdAt = Instant.now();
@@ -101,6 +105,7 @@ public class AgentSession {
     public String getPendingQuestion() { return pendingQuestion; }
     public String getFinalMessage() { return finalMessage; }
     public int getModelCalls() { return modelCalls; }
+    public String getLanguage() { return language; }
 
     public void setBusinessId(UUID businessId) { this.businessId = businessId; }
     public void setMessages(String messages) { this.messages = messages; }

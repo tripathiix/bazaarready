@@ -4,6 +4,7 @@ import com.bazaarready.agent.AgentDtos.ActionView;
 import com.bazaarready.agent.AgentDtos.SessionView;
 import com.bazaarready.claude.ClaudeClient;
 import com.bazaarready.claude.ClaudeException;
+import com.bazaarready.common.Languages;
 import com.bazaarready.common.NotFoundException;
 import com.bazaarready.profile.Business;
 import com.bazaarready.profile.ProfileDtos.ProfileRequest;
@@ -57,14 +58,14 @@ public class AgentService {
         this.tools = (ArrayNode) json.readTree(AgentPrompts.TOOLS);
     }
 
-    public SessionView start(String description) {
+    public SessionView start(String description, String language) {
         if (!claude.isConfigured()) {
             throw new ClaudeException("The Claude API key is not set. Add ANTHROPIC_API_KEY to the .env file and restart.");
         }
         ArrayNode messages = json.createArrayNode();
         messages.addObject().put("role", "user").put("content", description.trim());
-        AgentSession session = sessions.save(new AgentSession(messages.toString()));
-        logAction(session, "start", "Read your description", AgentAction.Status.DONE);
+        AgentSession session = sessions.save(new AgentSession(messages.toString(), Languages.of(language).code()));
+        logAction(session, "start", "Read your description", AgentAction.Status.DONE, null);
         return run(session, messages);
     }
 
@@ -73,7 +74,11 @@ public class AgentService {
         requireStatus(session, AgentSession.Status.WAITING_OWNER);
         ArrayNode messages = readMessages(session);
         addToolResult(messages, session.getPendingToolUseId(), "The owner answered: " + answer.trim(), false);
-        resolveLastAction(session, AgentAction.Status.DONE, "Asked: " + session.getPendingQuestion() + " You answered: " + answer.trim());
+        ObjectNode asked = json.createObjectNode();
+        asked.put("question", session.getPendingQuestion());
+        asked.put("answer", answer.trim());
+        resolveLastAction(session, AgentAction.Status.DONE,
+                "Asked: " + session.getPendingQuestion() + " You answered: " + answer.trim(), asked);
         session.resume();
         return run(session, messages);
     }
@@ -86,11 +91,11 @@ public class AgentService {
             ProfileResponse shop = profiles.publish(session.getBusinessId());
             addToolResult(messages, session.getPendingToolUseId(),
                     "The owner approved. The shop is published at " + shop.shopPath(), false);
-            resolveLastAction(session, AgentAction.Status.APPROVED, "Published your shop");
+            resolveLastAction(session, AgentAction.Status.APPROVED, "Published your shop", null);
         } else {
             addToolResult(messages, session.getPendingToolUseId(),
                     "The owner declined to publish for now. Do not ask again; finish with a short message.", false);
-            resolveLastAction(session, AgentAction.Status.DECLINED, "You chose not to publish yet");
+            resolveLastAction(session, AgentAction.Status.DECLINED, "You chose not to publish yet", null);
         }
         session.resume();
         return run(session, messages);
@@ -102,6 +107,7 @@ public class AgentService {
 
     /** Calls Claude repeatedly, running the tool it picks each time, until it finishes or must wait for the owner. */
     private SessionView run(AgentSession session, ArrayNode messages) {
+        String system = AgentPrompts.SYSTEM + AgentPrompts.languageRule(Languages.of(session.getLanguage()));
         try {
             while (session.getStatus() == AgentSession.Status.RUNNING) {
                 if (session.getModelCalls() >= MAX_MODEL_CALLS) {
@@ -109,7 +115,7 @@ public class AgentService {
                     break;
                 }
                 session.countModelCall();
-                JsonNode response = claude.createMessage(ClaudeClient.AGENT_MODEL, MAX_TOKENS, AgentPrompts.SYSTEM, tools, messages);
+                JsonNode response = claude.createMessage(ClaudeClient.AGENT_MODEL, MAX_TOKENS, system, tools, messages);
                 JsonNode content = response.path("content");
                 messages.addObject().put("role", "assistant").set("content", content);
 
@@ -123,7 +129,7 @@ public class AgentService {
         } catch (ClaudeException e) {
             log.warn("Agent session {} failed: {}", session.getId(), e.getMessage());
             session.finish(AgentSession.Status.FAILED, e.getMessage());
-            logAction(session, "error", "Stopped: " + e.getMessage(), AgentAction.Status.FAILED);
+            logAction(session, "error", "Stopped: " + e.getMessage(), AgentAction.Status.FAILED, null);
         }
         session.setMessages(messages.toString());
         session.touch();
@@ -140,21 +146,22 @@ public class AgentService {
             case "ask_owner" -> {
                 String question = input.path("question").asText("").trim();
                 session.pause(AgentSession.Status.WAITING_OWNER, toolUseId, name, question);
-                logAction(session, name, "Asked: " + question, AgentAction.Status.WAITING_OWNER);
+                logAction(session, name, "Asked: " + question, AgentAction.Status.WAITING_OWNER,
+                        json.createObjectNode().put("question", question));
             }
             case "save_profile" -> saveProfile(session, messages, toolUseId, input);
             case "publish_shop" -> {
                 if (session.getBusinessId() == null) {
                     addToolResult(messages, toolUseId, "There is no saved profile yet. Call save_profile first.", true);
-                    logAction(session, name, "Tried to publish before saving the details", AgentAction.Status.FAILED);
+                    logAction(session, name, "Tried to publish before saving the details", AgentAction.Status.FAILED, null);
                 } else {
                     session.pause(AgentSession.Status.WAITING_APPROVAL, toolUseId, name, null);
-                    logAction(session, name, "Ready to publish your shop. Waiting for your approval", AgentAction.Status.WAITING_APPROVAL);
+                    logAction(session, name, "Ready to publish your shop. Waiting for your approval", AgentAction.Status.WAITING_APPROVAL, null);
                 }
             }
             default -> {
                 addToolResult(messages, toolUseId, "Unknown tool: " + name, true);
-                logAction(session, name, "Tried a tool that does not exist", AgentAction.Status.FAILED);
+                logAction(session, name, "Tried a tool that does not exist", AgentAction.Status.FAILED, null);
             }
         }
     }
@@ -167,7 +174,7 @@ public class AgentService {
             request = json.treeToValue(copy, ProfileRequest.class);
         } catch (JsonProcessingException | IllegalArgumentException | ClassCastException e) {
             addToolResult(messages, toolUseId, "The profile could not be read: " + e.getMessage(), true);
-            logAction(session, "save_profile", "Could not read the details; trying again", AgentAction.Status.FAILED);
+            logAction(session, "save_profile", "Could not read the details; trying again", AgentAction.Status.FAILED, null);
             return;
         }
 
@@ -178,7 +185,7 @@ public class AgentService {
                     .sorted()
                     .collect(Collectors.joining("; "));
             addToolResult(messages, toolUseId, "Not saved. Fix these and call save_profile again: " + list, true);
-            logAction(session, "save_profile", "Some details were not valid; correcting them", AgentAction.Status.FAILED);
+            logAction(session, "save_profile", "Some details were not valid; correcting them", AgentAction.Status.FAILED, null);
             return;
         }
 
@@ -189,7 +196,8 @@ public class AgentService {
         addToolResult(messages, toolUseId, "Saved. The shop preview is at " + saved.shopPath()
                 + ". It is not published yet.", false);
         logAction(session, "save_profile", "Saved your business details: " + saved.products().size()
-                + " item(s), " + saved.faqs().size() + " question(s)", AgentAction.Status.DONE);
+                + " item(s), " + saved.faqs().size() + " question(s)", AgentAction.Status.DONE,
+                json.createObjectNode().put("items", saved.products().size()).put("faqs", saved.faqs().size()));
     }
 
     private void addToolResult(ArrayNode messages, String toolUseId, String text, boolean isError) {
@@ -223,16 +231,28 @@ public class AgentService {
         return text.toString().trim();
     }
 
-    private void logAction(AgentSession session, String tool, String summary, AgentAction.Status status) {
+    private void logAction(AgentSession session, String tool, String summary, AgentAction.Status status, ObjectNode data) {
         int step = actions.countBySessionId(session.getId()) + 1;
-        actions.save(new AgentAction(session.getId(), session.getBusinessId(), step, tool, summary, status));
+        actions.save(new AgentAction(session.getId(), session.getBusinessId(), step, tool, summary, status,
+                data == null ? null : data.toString()));
     }
 
-    private void resolveLastAction(AgentSession session, AgentAction.Status status, String summary) {
+    private void resolveLastAction(AgentSession session, AgentAction.Status status, String summary, ObjectNode data) {
         actions.findFirstBySessionIdOrderByStepNoDesc(session.getId()).ifPresent(action -> {
-            action.resolve(status, summary);
+            action.resolve(status, summary, data == null ? null : data.toString());
             actions.save(action);
         });
+    }
+
+    private JsonNode readData(String data) {
+        if (data == null) {
+            return null;
+        }
+        try {
+            return json.readTree(data);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
     }
 
     private ArrayNode readMessages(AgentSession session) {
@@ -255,7 +275,7 @@ public class AgentService {
 
     private SessionView toView(AgentSession session) {
         List<ActionView> log = actions.findBySessionIdOrderByStepNo(session.getId()).stream()
-                .map(a -> new ActionView(a.getStepNo(), a.getResultSummary(), a.getStatus()))
+                .map(a -> new ActionView(a.getStepNo(), a.getTool(), a.getResultSummary(), a.getStatus(), readData(a.getData())))
                 .toList();
         String shopPath = null;
         boolean published = false;

@@ -1,5 +1,6 @@
 package com.bazaarready.shop;
 
+import com.bazaarready.common.Languages;
 import com.bazaarready.common.NotFoundException;
 import com.bazaarready.profile.Business;
 import com.bazaarready.profile.ProfileDtos.ProfileResponse;
@@ -32,10 +33,16 @@ class ShopController {
     @GetMapping("/s/{slug}")
     String shop(@PathVariable String slug, Model model) {
         ProfileResponse shop = profiles.getBySlug(slug);
+        ShopLabels labels = ShopLabels.forLanguage(shop.ownerLanguage());
         model.addAttribute("shop", shop);
         model.addAttribute("draft", shop.status() == Business.Status.DRAFT);
-        model.addAttribute("hindi", !"en".equals(shop.ownerLanguage()));
-        model.addAttribute("whatsappLink", whatsappLink(shop));
+        model.addAttribute("labels", labels);
+        model.addAttribute("offeringsTitle", shop.offeringsTitle() != null ? shop.offeringsTitle() : labels.offerings());
+        model.addAttribute("detailsTitle", shop.detailsTitle() != null ? shop.detailsTitle() : labels.details());
+        model.addAttribute("hasDetails", shop.deliveryNotes() != null || shop.hours() != null || shop.location() != null
+                || (shop.noticeDays() != null && shop.noticeDays() > 0));
+        model.addAttribute("htmlLang", Languages.of(shop.ownerLanguage()).htmlLang());
+        model.addAttribute("whatsappLink", whatsappLink(shop, labels));
         model.addAttribute("money", new Money());
         return "shop";
     }
@@ -46,7 +53,7 @@ class ShopController {
         return "shop-not-found";
     }
 
-    private static String whatsappLink(ProfileResponse shop) {
+    private static String whatsappLink(ProfileResponse shop, ShopLabels labels) {
         if (shop.whatsappNumber() == null) {
             return null;
         }
@@ -54,7 +61,7 @@ class ShopController {
         if (digits.length() == 10) {
             digits = "91" + digits;
         }
-        String text = URLEncoder.encode("Namaste! " + shop.name() + " se order karna hai.", StandardCharsets.UTF_8);
+        String text = URLEncoder.encode(String.format(labels.orderMessage(), shop.name()), StandardCharsets.UTF_8);
         return "https://wa.me/" + digits + "?text=" + text;
     }
 

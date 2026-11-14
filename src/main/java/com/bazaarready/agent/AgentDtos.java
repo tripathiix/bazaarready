@@ -1,6 +1,9 @@
 package com.bazaarready.agent;
 
+import com.bazaarready.common.Languages;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -11,7 +14,9 @@ public final class AgentDtos {
     private AgentDtos() {
     }
 
-    public record StartRequest(@NotBlank @Size(max = 4000) String description) {
+    public record StartRequest(
+            @NotBlank @Size(max = 4000) String description,
+            @Pattern(regexp = Languages.CODE_PATTERN) String language) {
     }
 
     public record ReplyRequest(@NotBlank @Size(max = 2000) String answer) {
@@ -33,6 +38,10 @@ public final class AgentDtos {
             List<ActionView> actions) {
     }
 
-    public record ActionView(int stepNo, String text, AgentAction.Status status) {
+    /**
+     * One line of the activity log. The screen shows it in the owner's language from {@code tool},
+     * {@code status} and {@code data}; {@code text} is an English fallback.
+     */
+    public record ActionView(int stepNo, String tool, String text, AgentAction.Status status, JsonNode data) {
     }
 }

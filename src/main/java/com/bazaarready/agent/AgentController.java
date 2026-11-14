@@ -32,7 +32,7 @@ class AgentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     SessionView start(@Valid @RequestBody StartRequest request) {
-        return agent.start(request.description());
+        return agent.start(request.description(), request.language());
     }
 
     @GetMapping("/{id}")

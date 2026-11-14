@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 /**
- * The single place that reads and writes a business profile. The shop page, the tests and the
+ * The single place that reads and writes a business profile. The site page, the tests and the
  * agent's tools all go through here, so a fix is always a change to the profile and never a
  * hand edit to a page.
  */
@@ -40,7 +40,8 @@ public class ProfileService {
     @Transactional
     public ProfileResponse create(ProfileRequest request) {
         Business.Source source = request.source() != null ? request.source() : Business.Source.DESCRIPTION;
-        Business business = new Business(request.name().trim(), uniqueSlug(request.name()), source);
+        String slug = uniqueSlug(request.addressName(), request.name());
+        Business business = new Business(request.name().trim(), slug, source);
         applyDetails(business, request);
         businesses.save(business);
         replaceItems(business.getId(), request);
@@ -71,7 +72,7 @@ public class ProfileService {
     @Transactional(readOnly = true)
     public ProfileResponse getBySlug(String slug) {
         return toResponse(businesses.findBySlug(slug)
-                .orElseThrow(() -> new NotFoundException("No shop at this address")));
+                .orElseThrow(() -> new NotFoundException("No site at this address")));
     }
 
     private Business find(UUID id) {
@@ -80,6 +81,17 @@ public class ProfileService {
 
     private void applyDetails(Business business, ProfileRequest request) {
         business.setTagline(blankToNull(request.tagline()));
+        if (request.kind() != null) {
+            business.setKind(request.kind());
+        }
+        if (request.theme() != null) {
+            business.setTheme(request.theme());
+        }
+        business.setAbout(blankToNull(request.about()));
+        business.setLocation(blankToNull(request.location()));
+        business.setHours(blankToNull(request.hours()));
+        business.setOfferingsTitle(blankToNull(request.offeringsTitle()));
+        business.setDetailsTitle(blankToNull(request.detailsTitle()));
         if (request.ownerLanguage() != null) {
             business.setOwnerLanguage(request.ownerLanguage());
         }
@@ -97,8 +109,9 @@ public class ProfileService {
         List<ProductRequest> productRequests = request.products() != null ? request.products() : List.of();
         for (int i = 0; i < productRequests.size(); i++) {
             ProductRequest p = productRequests.get(i);
-            products.save(new Product(businessId, p.name().trim(), toPaise(p.priceRupees()),
-                    blankToNull(p.unit()), blankToNull(p.note()), i));
+            products.save(new Product(businessId, p.name().trim(), blankToNull(p.description()),
+                    p.priceRupees() == null ? null : toPaise(p.priceRupees()),
+                    blankToNull(p.priceNote()), blankToNull(p.unit()), blankToNull(p.note()), i));
         }
 
         List<FaqRequest> faqRequests = request.faqs() != null ? request.faqs() : List.of();
@@ -112,34 +125,52 @@ public class ProfileService {
 
     private ProfileResponse toResponse(Business b) {
         List<ProductResponse> productList = products.findByBusinessIdOrderBySortOrder(b.getId()).stream()
-                .map(p -> new ProductResponse(p.getId(), p.getName(), toRupees(p.getPricePaise()), p.getUnit(), p.getNote()))
+                .map(p -> new ProductResponse(p.getId(), p.getName(), p.getDescription(),
+                        p.getPricePaise() == null ? null : toRupees(p.getPricePaise()),
+                        p.getPriceNote(), p.getUnit(), p.getNote()))
                 .toList();
         List<FaqResponse> faqList = faqs.findByBusinessIdOrderBySortOrder(b.getId()).stream()
                 .map(f -> new FaqResponse(f.getId(), f.getQuestion(), f.getAnswer(), f.getTimesAsked(), f.getSource()))
                 .toList();
-        return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getOwnerLanguage(),
-                b.getWhatsappNumber(), b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(), b.getStatus(),
-                b.getPublishedAt(), "/s/" + b.getSlug(), productList, faqList);
+        return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getKind(), b.getTheme(),
+                b.getAbout(), b.getLocation(), b.getHours(), b.getOfferingsTitle(), b.getDetailsTitle(),
+                b.getOwnerLanguage(), b.getWhatsappNumber(), b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(),
+                b.getStatus(), b.getPublishedAt(), "/s/" + b.getSlug(), productList, faqList);
     }
 
-    /** "Sunita's Cakes" becomes "sunitas-cakes"; a number is added if that address is taken. */
-    private String uniqueSlug(String name) {
-        String base = Normalizer.normalize(name, Normalizer.Form.NFKD)
-                .replaceAll("\\p{M}", "")
-                .toLowerCase(Locale.ROOT)
-                .replaceAll("['’]", "")
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("(^-+|-+$)", "");
+    /**
+     * Builds the web address. "Sunita's Cakes" becomes "sunitas-cakes". A name in another script
+     * (किसान डायरेक्ट) has no English letters, so the address comes from the English-letter name the
+     * agent supplies ("kisan direct"). A number is added if the address is taken.
+     */
+    private String uniqueSlug(String addressName, String name) {
+        String base = slugify(addressName);
         if (base.isEmpty()) {
-            base = "shop";
+            base = slugify(name);
         }
-        if (base.length() > 40) {
-            base = base.substring(0, 40).replaceAll("-+$", "");
+        if (base.isEmpty()) {
+            base = "site";
         }
         String slug = base;
         int n = 2;
         while (businesses.existsBySlug(slug)) {
             slug = base + "-" + n++;
+        }
+        return slug;
+    }
+
+    private static String slugify(String text) {
+        if (text == null) {
+            return "";
+        }
+        String slug = Normalizer.normalize(text, Normalizer.Form.NFKD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("['’]", "")
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("(^-+|-+$)", "");
+        if (slug.length() > 40) {
+            slug = slug.substring(0, 40).replaceAll("-+$", "");
         }
         return slug;
     }

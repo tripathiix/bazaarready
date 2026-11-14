@@ -6,6 +6,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -35,6 +37,11 @@ public class AgentAction {
     @Column(name = "result_summary")
     private String resultSummary;
 
+    /** Small JSON object with the details the screen needs to show this line in any language. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "input")
+    private String data;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
@@ -46,7 +53,7 @@ public class AgentAction {
         // for JPA
     }
 
-    public AgentAction(UUID sessionId, UUID businessId, int stepNo, String tool, String resultSummary, Status status) {
+    public AgentAction(UUID sessionId, UUID businessId, int stepNo, String tool, String resultSummary, Status status, String data) {
         this.id = UUID.randomUUID();
         this.sessionId = sessionId;
         this.businessId = businessId;
@@ -54,12 +61,14 @@ public class AgentAction {
         this.tool = tool;
         this.resultSummary = resultSummary;
         this.status = status;
+        this.data = data;
         this.createdAt = Instant.now();
     }
 
-    public void resolve(Status status, String resultSummary) {
+    public void resolve(Status status, String resultSummary, String data) {
         this.status = status;
         this.resultSummary = resultSummary;
+        this.data = data;
     }
 
     public UUID getId() { return id; }
@@ -67,4 +76,5 @@ public class AgentAction {
     public String getTool() { return tool; }
     public String getResultSummary() { return resultSummary; }
     public Status getStatus() { return status; }
+    public String getData() { return data; }
 }
