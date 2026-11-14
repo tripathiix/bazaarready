@@ -64,3 +64,15 @@ export const OPEN_SIGN: { lang: string; text: string }[] = [
   { lang: "kn", text: "ಅಂಗಡಿ ತೆರೆದಿದೆ" },
   { lang: "id", text: "Buka" },
 ];
+
+/** Label for the button that reads the agent's question aloud. */
+export const HEAR_QUESTION: Record<LanguageCode, string> = {
+  en: "Hear the question",
+  hi: "सवाल सुनें",
+  kn: "ಪ್ರಶ್ನೆ ಕೇಳಿ",
+  ta: "கேள்வியைக் கேளுங்கள்",
+  te: "ప్రశ్న వినండి",
+  mr: "प्रश्न ऐका",
+  bn: "প্রশ্ন শুনুন",
+  gu: "પ્રશ્ન સાંભળો",
+};

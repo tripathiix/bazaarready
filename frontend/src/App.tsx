@@ -3,8 +3,8 @@ import { ActionView, SessionView, sendApproval, sendReply, startSession } from "
 import { Bunting, OpenSign, Petals, Shutters } from "./Decor";
 import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
-import { EXTRA } from "./i18nExtra";
-import { useSpeech } from "./useSpeech";
+import { EXTRA, HEAR_QUESTION } from "./i18nExtra";
+import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
 
 /** One activity-log line in the owner's language, built from what the agent did. */
 function actionText(action: ActionView, t: Strings): string {
@@ -46,6 +46,7 @@ export default function App() {
   const [celebrations, setCelebrations] = useState(0);
 
   const speech = useSpeech((text) => setDescription((current) => (current ? current + " " + text : text)));
+  const answerSpeech = useSpeech((text) => setAnswer((current) => (current ? current + " " + text : text)));
   const live = session?.status === "DONE" && session.published;
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function App() {
 
   function chooseLanguage(code: LanguageCode) {
     if (speech.listening) speech.stop();
+    if (answerSpeech.listening) answerSpeech.stop();
     setLanguage(code);
     rememberLanguage(code);
   }
@@ -84,6 +86,7 @@ export default function App() {
   function onReply(event: FormEvent) {
     event.preventDefault();
     if (!session) return;
+    if (answerSpeech.listening) answerSpeech.stop();
     const text = answer;
     setAnswer("");
     void run(() => sendReply(session.id, text));
@@ -217,10 +220,35 @@ export default function App() {
                 </label>
                 <input id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} maxLength={2000} required autoFocus />
                 <div className="row">
+                  {answerSpeech.supported && (
+                    <button
+                      type="button"
+                      className={`button mic ${answerSpeech.listening ? "is-listening" : ""}`}
+                      onClick={() => (answerSpeech.listening ? answerSpeech.stop() : answerSpeech.start(t.speech))}
+                    >
+                      <span className="bars" aria-hidden="true">
+                        <i />
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                      {answerSpeech.listening ? t.stopListening : t.speak}
+                    </button>
+                  )}
+                  {canSpeakAloud() && session.question && (
+                    <button type="button" className="button" onClick={() => speakAloud(session.question ?? "", t.speech)}>
+                      {HEAR_QUESTION[language]}
+                    </button>
+                  )}
                   <button type="submit" className="button primary">
                     {t.sendAnswer}
                   </button>
                 </div>
+                {answerSpeech.listening && (
+                  <p className="hint" role="status">
+                    {t.listening}
+                  </p>
+                )}
               </form>
             )}
 

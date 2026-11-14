@@ -51,3 +51,14 @@ export function useSpeech(onText: (text: string) => void) {
 
   return { supported, listening, start, stop };
 }
+
+/** Reads a piece of text aloud in the given language, if the device has a voice for it. */
+export function speakAloud(text: string, lang: string) {
+  if (!("speechSynthesis" in window) || !text) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  window.speechSynthesis.speak(utterance);
+}
+
+export const canSpeakAloud = () => "speechSynthesis" in window;
