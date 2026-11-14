@@ -1,21 +1,56 @@
-import { FormEvent, useState } from "react";
-import { SessionView, sendApproval, sendReply, startSession } from "./api";
+import { FormEvent, useEffect, useState } from "react";
+import { ActionView, SessionView, sendApproval, sendReply, startSession } from "./api";
+import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
 import { useSpeech } from "./useSpeech";
 
-const EXAMPLE =
-  "Main ghar se cake banati hoon, Bengaluru mein. Chocolate cake 850 ka 1 kg, eggless 900. " +
-  "Cupcakes 40 rupaye each, minimum 12. Indiranagar aur Koramangala free delivery, Whitefield 60 extra. " +
-  "2 din pehle order chahiye. WhatsApp 9876543210.";
+/** One activity-log line in the owner's language, built from what the agent did. */
+function actionText(action: ActionView, t: Strings): string {
+  switch (action.tool) {
+    case "start":
+      return t.logStart;
+    case "ask_owner": {
+      const question = action.data?.question ?? "";
+      const answer = action.data?.answer;
+      return answer ? `${t.logAsked}: ${question} ${t.logAnswered}: ${answer}` : `${t.logAsked}: ${question}`;
+    }
+    case "save_profile":
+      if (action.status === "FAILED") return t.logRetry;
+      return t.logSaved
+        .replace("{items}", String(action.data?.items ?? 0))
+        .replace("{faqs}", String(action.data?.faqs ?? 0));
+    case "publish_shop":
+      if (action.status === "APPROVED") return t.logPublished;
+      if (action.status === "DECLINED") return t.logDeclined;
+      if (action.status === "FAILED") return t.logRetry;
+      return t.logReady;
+    case "error":
+      return t.logStopped;
+    default:
+      return action.text;
+  }
+}
 
 export default function App() {
+  const [language, setLanguage] = useState<LanguageCode>(initialLanguage);
+  const t = STRINGS[language];
+
   const [description, setDescription] = useState("");
-  const [speechLang, setSpeechLang] = useState("hi-IN");
   const [session, setSession] = useState<SessionView | null>(null);
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const speech = useSpeech((text) => setDescription((current) => (current ? current + " " + text : text)));
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  function chooseLanguage(code: LanguageCode) {
+    if (speech.listening) speech.stop();
+    setLanguage(code);
+    rememberLanguage(code);
+  }
 
   async function run(work: () => Promise<SessionView>) {
     setBusy(true);
@@ -32,7 +67,7 @@ export default function App() {
   function onStart(event: FormEvent) {
     event.preventDefault();
     if (speech.listening) speech.stop();
-    void run(() => startSession(description));
+    void run(() => startSession(description, language));
   }
 
   function onReply(event: FormEvent) {
@@ -52,56 +87,56 @@ export default function App() {
 
   return (
     <main className="page">
-      <header>
-        <p className="eyebrow">Launch agent for small businesses</p>
-        <h1>BazaarReady</h1>
+      <header className="top">
+        <div>
+          <p className="eyebrow">{t.eyebrow}</p>
+          <h1>BazaarReady</h1>
+        </div>
+        <div className="picker">
+          <label htmlFor="language">{t.language}</label>
+          <select id="language" value={language} onChange={(e) => chooseLanguage(e.target.value as LanguageCode)}>
+            {(Object.keys(STRINGS) as LanguageCode[]).map((code) => (
+              <option key={code} value={code} lang={code}>
+                {STRINGS[code].name}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
 
       {!session && (
         <form className="card" onSubmit={onStart}>
           <label htmlFor="description" className="label">
-            Tell us about your business
+            {t.tellUs}
           </label>
-          <p className="hint">
-            Type or speak, in Hindi, Hinglish or English. Say what you sell, your prices, where you deliver and your
-            WhatsApp number.
-          </p>
+          <p className="hint">{t.hint}</p>
           <textarea
             id="description"
             rows={7}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder={EXAMPLE}
+            placeholder={t.example}
             maxLength={4000}
             required
           />
           <div className="row">
             {speech.supported ? (
-              <>
-                <label htmlFor="speechLang" className="visually-hidden">
-                  Language for speaking
-                </label>
-                <select id="speechLang" value={speechLang} onChange={(e) => setSpeechLang(e.target.value)} disabled={speech.listening}>
-                  <option value="hi-IN">Hindi</option>
-                  <option value="en-IN">English</option>
-                </select>
-                <button type="button" className="button" onClick={() => (speech.listening ? speech.stop() : speech.start(speechLang))}>
-                  {speech.listening ? "Stop listening" : "Speak instead"}
-                </button>
-              </>
+              <button type="button" className="button" onClick={() => (speech.listening ? speech.stop() : speech.start(t.speech))}>
+                {speech.listening ? t.stopListening : t.speak}
+              </button>
             ) : (
-              <span className="hint">Speaking works in Chrome and Edge.</span>
+              <span className="hint">{t.speechUnsupported}</span>
             )}
-            <button type="button" className="button" onClick={() => setDescription(EXAMPLE)}>
-              Use the example
+            <button type="button" className="button" onClick={() => setDescription(t.example)}>
+              {t.useExample}
             </button>
             <button type="submit" className="button primary" disabled={busy || description.trim().length === 0}>
-              {busy ? "Working…" : "Build my shop"}
+              {busy ? t.working : t.build}
             </button>
           </div>
           {speech.listening && (
             <p className="hint" role="status">
-              Listening. Your words will appear in the box above.
+              {t.listening}
             </p>
           )}
         </form>
@@ -116,18 +151,18 @@ export default function App() {
       {session && (
         <>
           <section className="card" aria-labelledby="activity">
-            <h2 id="activity">What the agent has done</h2>
+            <h2 id="activity">{t.activity}</h2>
             <ol className="log">
               {session.actions.map((action) => (
                 <li key={action.stepNo} className={`log-${action.status.toLowerCase()}`}>
                   <span className="mark" aria-hidden="true" />
-                  <span>{action.text}</span>
+                  <span>{actionText(action, t)}</span>
                 </li>
               ))}
               {busy && (
                 <li className="log-working" role="status">
                   <span className="mark" aria-hidden="true" />
-                  <span>Working…</span>
+                  <span>{t.working}</span>
                 </li>
               )}
             </ol>
@@ -141,7 +176,7 @@ export default function App() {
               <input id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} maxLength={2000} required autoFocus />
               <div className="row">
                 <button type="submit" className="button primary">
-                  Send answer
+                  {t.sendAnswer}
                 </button>
               </div>
             </form>
@@ -149,20 +184,20 @@ export default function App() {
 
           {session.status === "WAITING_APPROVAL" && !busy && (
             <section className="card ask" aria-labelledby="approve">
-              <h2 id="approve">{session.approvalRequest}</h2>
+              <h2 id="approve">{t.approveQuestion}</h2>
               {session.shopPath && (
                 <p>
                   <a href={session.shopPath} target="_blank" rel="noreferrer">
-                    Look at the preview first
+                    {t.lookPreview}
                   </a>
                 </p>
               )}
               <div className="row">
                 <button type="button" className="button primary" onClick={() => void run(() => sendApproval(session.id, true))}>
-                  Publish
+                  {t.publish}
                 </button>
                 <button type="button" className="button" onClick={() => void run(() => sendApproval(session.id, false))}>
-                  Not yet
+                  {t.notYet}
                 </button>
               </div>
             </section>
@@ -171,16 +206,16 @@ export default function App() {
           {(session.status === "DONE" || session.status === "FAILED") && (
             <section className={`card ${session.status === "FAILED" ? "failed" : "done"}`}>
               {session.finalMessage && <p>{session.finalMessage}</p>}
-              {session.shopPath && (
-                <p>
+              <div className="row">
+                {session.shopPath && (
                   <a className="button primary" href={session.shopPath} target="_blank" rel="noreferrer">
-                    {session.published ? "Open your shop" : "Open the preview"}
+                    {session.published ? t.openSite : t.openPreview}
                   </a>
-                </p>
-              )}
-              <button type="button" className="button" onClick={startOver}>
-                Start another business
-              </button>
+                )}
+                <button type="button" className="button" onClick={startOver}>
+                  {t.startAnother}
+                </button>
+              </div>
             </section>
           )}
         </>

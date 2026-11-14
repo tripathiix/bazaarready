@@ -4,8 +4,10 @@ export type ActionStatus = "DONE" | "WAITING_OWNER" | "WAITING_APPROVAL" | "APPR
 
 export interface ActionView {
   stepNo: number;
+  tool: string;
   text: string;
   status: ActionStatus;
+  data: { question?: string; answer?: string; items?: number; faqs?: number } | null;
 }
 
 export interface SessionView {
@@ -39,7 +41,8 @@ async function post<T>(url: string, body: unknown): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const startSession = (description: string) => post<SessionView>("/api/agent/sessions", { description });
+export const startSession = (description: string, language: string) =>
+  post<SessionView>("/api/agent/sessions", { description, language });
 
 export const sendReply = (id: string, answer: string) =>
   post<SessionView>(`/api/agent/sessions/${id}/reply`, { answer });

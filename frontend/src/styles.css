@@ -8,7 +8,7 @@
   --marigold-soft: #fff1d6;
   --good: #1e6b4a;
   --bad: #a8322b;
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: "Segoe UI", "Nirmala UI", "Noto Sans", system-ui, sans-serif;
   color: var(--ink);
   background: var(--bg);
 }
@@ -116,7 +116,7 @@ textarea {
   align-items: center;
 }
 
-.row .primary {
+.row .primary:last-child {
   margin-left: auto;
 }
 
@@ -207,4 +207,25 @@ a:focus-visible {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.picker select {
+  font-size: 1rem;
+  min-width: 9rem;
 }
