@@ -43,7 +43,11 @@
         .hero { background: var(--brand); color: #ffffff; position: relative; overflow: hidden; }
         .hero::after { content: ""; position: absolute; inset-inline-end: -8rem; top: -8rem; width: 26rem; height: 26rem; border-radius: 50%; background: var(--accent); opacity: 0.28; }
         .hero::before { content: ""; position: absolute; inset-inline-end: 6rem; bottom: -11rem; width: 18rem; height: 18rem; border-radius: 50%; border: 2.5rem solid var(--accent); opacity: 0.18; }
-        .hero .wrap { position: relative; z-index: 1; padding-top: 4rem; padding-bottom: 3.5rem; }
+        .hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .hero.has-photo::before { content: ""; position: absolute; inset: 0; z-index: 1; width: auto; height: auto; border: 0; border-radius: 0; opacity: 1;
+            background: linear-gradient(100deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 82%, transparent) 45%, color-mix(in srgb, var(--brand) 20%, transparent) 100%); }
+        .hero.has-photo::after { display: none; }
+        .hero .wrap { position: relative; z-index: 2; padding-top: 4rem; padding-bottom: 3.5rem; }
         h1 { margin: 0; font-weight: 800; font-size: clamp(2.3rem, 7vw, 4rem); line-height: 1.1; max-width: 18ch; }
         .tagline { margin: 0.8rem 0 0; font-size: clamp(1.1rem, 2.6vw, 1.4rem); max-width: 38rem; opacity: 0.94; }
         .cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.8rem; }
@@ -68,7 +72,9 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: 1.1rem; padding: 0; margin: 0; list-style: none; }
         .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.15s ease, box-shadow 0.15s ease; }
         .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(20, 20, 40, 0.12); }
-        .tile { display: grid; place-items: center; height: 7.5rem; background: var(--tint); text-decoration: none; }
+        .tile { display: grid; place-items: center; height: 10.5rem; background: var(--tint); text-decoration: none; overflow: hidden; }
+        .tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+        .card:hover .tile img { transform: scale(1.06); }
         .tile span { font-family: var(--display), "Nirmala UI", sans-serif; font-weight: 800; font-size: 3.4rem; color: var(--brand); opacity: 0.85; }
         .card-body { padding: 1rem 1.1rem 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1; }
         .card h3 { margin: 0; font-size: 1.2rem; line-height: 1.3; }
@@ -122,6 +128,8 @@
         .tick { width: 4.5rem; height: 4.5rem; border-radius: 50%; background: var(--wa); color: #ffffff; display: grid; place-items: center; font-size: 2.4rem; margin: 0 auto 1rem; animation: pop 0.4s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
         @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
 
+        .credits { font-size: 0.8rem; }
+        .credits a { color: var(--muted); }
         footer { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 0 1rem 2.5rem; }
         @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .card, .btn { transition: none; } .tick { animation: none; } }
     </style>
@@ -146,7 +154,10 @@
 
 <li th:fragment="card(p)" class="card"
     th:attr="data-text=${p.name() + ' ' + (p.description() ?: '') + ' ' + (p.category() ?: '')},data-category=${p.category() ?: ''},data-origin=${p.origin() ?: ''},data-destination=${p.destination() ?: ''}">
-    <a class="tile" th:href="${base + '/item/' + p.id()}" tabindex="-1" aria-hidden="true"><span th:text="${#strings.substring(p.name(), 0, 1)}">A</span></a>
+    <a class="tile" th:href="${base + '/item/' + p.id()}" tabindex="-1" aria-hidden="true">
+        <img th:if="${thumbs.get(p.id()) != null}" th:src="${thumbs.get(p.id()).url()}" alt="" loading="lazy" decoding="async">
+        <span th:unless="${thumbs.get(p.id()) != null}" th:text="${#strings.substring(p.name(), 0, 1)}">A</span>
+    </a>
     <div class="card-body">
         <h3><a th:href="${base + '/item/' + p.id()}" th:text="${p.name()}">Offering</a></h3>
         <p class="route" th:if="${p.origin() != null and p.destination() != null}"><span th:text="${p.origin()}">A</span> → <span th:text="${p.destination()}">B</span></p>
@@ -170,6 +181,9 @@
 
 <footer th:fragment="foot">
     <p><span th:text="${shop.name()}">Name</span> · Made with BazaarReady</p>
+    <p class="credits" th:if="${!credits.isEmpty()}">Photos on <a href="https://www.pexels.com" rel="noopener">Pexels</a> by
+        <th:block th:each="c, it : ${credits}"><a th:href="${c.photographerUrl()}" rel="noopener" th:text="${c.photographer()}">Name</a><span th:unless="${it.last}">, </span></th:block>
+    </p>
     <script th:inline="none">
     (function () {
         var body = document.body;

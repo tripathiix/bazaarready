@@ -106,6 +106,7 @@ public class ProfileService {
             business.setCurrency(request.currency().trim());
         }
         business.setAbout(blankToNull(request.about()));
+        business.setHeroQuery(blankToNull(request.heroImageQuery()));
         business.setLocation(blankToNull(request.location()));
         business.setHours(blankToNull(request.hours()));
         business.setOfferingsTitle(blankToNull(request.offeringsTitle()));
@@ -137,6 +138,7 @@ public class ProfileService {
             product.setOrigin(blankToNull(p.origin()));
             product.setDestination(blankToNull(p.destination()));
             product.setSchedule(blankToNull(p.schedule()));
+            product.setImageQuery(blankToNull(p.imageQuery()));
             products.save(product);
         }
 
@@ -153,13 +155,13 @@ public class ProfileService {
         List<ProductResponse> productList = products.findByBusinessIdOrderBySortOrder(b.getId()).stream()
                 .map(p -> new ProductResponse(p.getId(), p.getName(), p.getDescription(), p.getCategory(),
                         p.getPricePaise() == null ? null : toUnits(p.getPricePaise()),
-                        p.getPriceNote(), p.getUnit(), p.getNote(), p.getOrigin(), p.getDestination(), p.getSchedule()))
+                        p.getPriceNote(), p.getUnit(), p.getNote(), p.getOrigin(), p.getDestination(), p.getSchedule(), p.getImageQuery()))
                 .toList();
         List<FaqResponse> faqList = faqs.findByBusinessIdOrderBySortOrder(b.getId()).stream()
                 .map(f -> new FaqResponse(f.getId(), f.getQuestion(), f.getAnswer(), f.getTimesAsked(), f.getSource()))
                 .toList();
         return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getKind(),
-                styleOf(b.getKind()), b.getTheme(), b.getCurrency(), b.getAbout(), b.getLocation(), b.getHours(),
+                styleOf(b.getKind()), b.getTheme(), b.getCurrency(), b.getAbout(), b.getHeroQuery(), b.getLocation(), b.getHours(),
                 b.getOfferingsTitle(), b.getDetailsTitle(), b.getOwnerLanguage(), b.getWhatsappNumber(),
                 b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(), b.getStatus(), b.getPublishedAt(),
                 "/s/" + b.getSlug(), "/owner/" + b.getOwnerKey(), productList, faqList);

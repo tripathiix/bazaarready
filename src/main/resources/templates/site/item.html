@@ -7,7 +7,10 @@
 <main class="wrap">
     <p style="margin:0"><a th:href="${base + '/catalogue'}">← <span th:text="${offeringsTitle}">Catalogue</span></a></p>
     <section class="detail">
-        <div class="tile" aria-hidden="true"><span th:text="${#strings.substring(item.name(), 0, 1)}">A</span></div>
+        <div class="tile">
+            <img th:if="${pictures.get(item.id()) != null}" th:src="${pictures.get(item.id()).url()}" th:alt="${item.name()}">
+            <span th:unless="${pictures.get(item.id()) != null}" aria-hidden="true" th:text="${#strings.substring(item.name(), 0, 1)}">A</span>
+        </div>
         <div>
             <span class="chip" th:if="${item.category()}" th:text="${item.category()}">Category</span>
             <h1 style="color:var(--brand);font-size:clamp(2rem,5vw,3rem);margin-top:0.4rem" th:text="${item.name()}">Item</h1>

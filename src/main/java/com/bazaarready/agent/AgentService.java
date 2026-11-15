@@ -10,6 +10,7 @@ import com.bazaarready.profile.Business;
 import com.bazaarready.profile.ProfileDtos.ProfileRequest;
 import com.bazaarready.profile.ProfileDtos.ProfileResponse;
 import com.bazaarready.profile.ProfileService;
+import com.bazaarready.site.ImageService;
 import com.bazaarready.site.SiteLabelService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,17 +44,19 @@ public class AgentService {
     private final ClaudeClient claude;
     private final ProfileService profiles;
     private final SiteLabelService siteLabels;
+    private final ImageService images;
     private final AgentSessionRepository sessions;
     private final AgentActionRepository actions;
     private final ObjectMapper json;
     private final Validator validator;
     private final ArrayNode tools;
 
-    AgentService(ClaudeClient claude, ProfileService profiles, SiteLabelService siteLabels, AgentSessionRepository sessions,
+    AgentService(ClaudeClient claude, ProfileService profiles, SiteLabelService siteLabels, ImageService images, AgentSessionRepository sessions,
                  AgentActionRepository actions, ObjectMapper json, Validator validator) throws JsonProcessingException {
         this.claude = claude;
         this.profiles = profiles;
         this.siteLabels = siteLabels;
+        this.images = images;
         this.sessions = sessions;
         this.actions = actions;
         this.json = json;
@@ -199,6 +202,10 @@ public class AgentService {
         session.setBusinessId(saved.id());
         // The site's buttons and headings are translated once per language, here, so page views never wait.
         siteLabels.ensure(saved.ownerLanguage());
+        List<String> queries = new java.util.ArrayList<>();
+        queries.add(saved.heroImageQuery());
+        saved.products().forEach(p -> queries.add(p.imageQuery()));
+        images.ensure(queries);
         addToolResult(messages, toolUseId, "Saved. The shop preview is at " + saved.shopPath()
                 + ". It is not published yet.", false);
         logAction(session, "save_profile", "Saved your business details: " + saved.products().size()

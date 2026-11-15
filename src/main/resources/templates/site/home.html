@@ -4,7 +4,8 @@
 <body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
-<section class="hero">
+<section class="hero" th:classappend="${hero != null} ? 'has-photo'">
+    <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
     <div class="wrap">
         <h1 th:text="${shop.name()}">Name</h1>
         <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>

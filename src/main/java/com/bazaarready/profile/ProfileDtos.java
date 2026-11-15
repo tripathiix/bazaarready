@@ -28,6 +28,8 @@ public final class ProfileDtos {
             @Pattern(regexp = Business.THEME_PATTERN) String theme,
             @Size(max = 4) String currency,
             @Size(max = 700) String about,
+            /** Stock photo search words for the banner, in English. */
+            @Size(max = 80) String heroImageQuery,
             @Size(max = 200) String location,
             @Size(max = 200) String hours,
             @Size(max = 60) String offeringsTitle,
@@ -52,7 +54,8 @@ public final class ProfileDtos {
             @Size(max = 200) String note,
             @Size(max = 80) String origin,
             @Size(max = 80) String destination,
-            @Size(max = 120) String schedule) {
+            @Size(max = 120) String schedule,
+            @Size(max = 80) String imageQuery) {
     }
 
     public record FaqRequest(
@@ -72,6 +75,7 @@ public final class ProfileDtos {
             String theme,
             String currency,
             String about,
+            String heroImageQuery,
             String location,
             String hours,
             String offeringsTitle,
@@ -91,7 +95,8 @@ public final class ProfileDtos {
 
     public record ProductResponse(UUID id, String name, String description, String category,
                                   BigDecimal priceRupees, String priceNote, String unit, String note,
-                                  String origin, String destination, String schedule) {
+                                  String origin, String destination, String schedule,
+                                  String imageQuery) {
     }
 
     public record FaqResponse(UUID id, String question, String answer, int timesAsked, Faq.Source source) {

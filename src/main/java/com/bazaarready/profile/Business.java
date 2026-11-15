@@ -46,6 +46,10 @@ public class Business {
 
     private String about;
 
+    /** Stock photo search words for the site's banner. */
+    @Column(name = "hero_query")
+    private String heroQuery;
+
     private String location;
 
     private String hours;
@@ -120,6 +124,7 @@ public class Business {
     public String getTheme() { return theme; }
     public String getCurrency() { return currency; }
     public String getAbout() { return about; }
+    public String getHeroQuery() { return heroQuery; }
     public String getLocation() { return location; }
     public String getHours() { return hours; }
     public String getOfferingsTitle() { return offeringsTitle; }
@@ -141,6 +146,7 @@ public class Business {
     public void setTheme(String theme) { this.theme = theme; }
     public void setCurrency(String currency) { this.currency = currency; }
     public void setAbout(String about) { this.about = about; }
+    public void setHeroQuery(String heroQuery) { this.heroQuery = heroQuery; }
     public void setLocation(String location) { this.location = location; }
     public void setHours(String hours) { this.hours = hours; }
     public void setOfferingsTitle(String offeringsTitle) { this.offeringsTitle = offeringsTitle; }

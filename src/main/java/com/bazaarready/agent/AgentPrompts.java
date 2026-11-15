@@ -45,6 +45,9 @@ final class AgentPrompts {
             offering with origin, destination and schedule.
               * faqs: only questions that the owner's details actually answer.
               * addressName: the name written in English letters, used for the web address.
+              * heroImageQuery, and imageQuery on each offering: two to four plain English words \
+            describing a photo that shows it, for a stock photo search ("chocolate layer cake", \
+            "wheat grain sacks", "minivan on highway"). Describe what is seen, never a brand or a name.
               * currency: the symbol for the owner's prices (₹, $, €, £ and so on), taken from what \
             they wrote or the country they mention. If prices are given and the currency is unclear, ask.
               * whatsappNumber: digits with the country code when the owner is outside India.
@@ -90,6 +93,7 @@ final class AgentPrompts {
                   "properties": {
                     "name": { "type": "string", "description": "Name of the business, up to 80 characters." },
                     "addressName": { "type": "string", "description": "The name in English letters only, for the web address. Example: kisan direct." },
+                    "heroImageQuery": { "type": "string", "description": "2 to 4 English words for a stock photo that suits the whole business." },
                     "kind": { "type": "string", "enum": ["shop", "food", "services", "classes", "transport", "portfolio", "events", "organisation", "other"] },
                     "theme": { "type": "string", "enum": ["marigold", "indigo", "forest", "rose", "ocean", "slate"] },
                     "currency": { "type": "string", "description": "Currency symbol for the prices, up to 4 characters: ₹, $, €, £, Rp." },
@@ -115,6 +119,7 @@ final class AgentPrompts {
                           "origin": { "type": "string", "description": "Transport only: where the route starts." },
                           "destination": { "type": "string", "description": "Transport only: where the route ends." },
                           "schedule": { "type": "string", "description": "Transport, classes or events: days and times it runs." },
+                          "imageQuery": { "type": "string", "description": "2 to 4 English words for a stock photo of this offering." },
                           "priceRupees": { "type": "number", "description": "Leave out if the owner gave no price." },
                           "priceNote": { "type": "string", "description": "Shown with or instead of the price: from, on request, per month." },
                           "unit": { "type": "string", "description": "For example: 1 kg, each, per plate, per hour." },

@@ -46,6 +46,10 @@ public class Product {
 
     private String schedule;
 
+    /** Stock photo search words for this offering, in English. */
+    @Column(name = "image_query")
+    private String imageQuery;
+
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
@@ -72,6 +76,7 @@ public class Product {
     public String getOrigin() { return origin; }
     public String getDestination() { return destination; }
     public String getSchedule() { return schedule; }
+    public String getImageQuery() { return imageQuery; }
     public int getSortOrder() { return sortOrder; }
 
     public void setDescription(String description) { this.description = description; }
@@ -83,4 +88,5 @@ public class Product {
     public void setOrigin(String origin) { this.origin = origin; }
     public void setDestination(String destination) { this.destination = destination; }
     public void setSchedule(String schedule) { this.schedule = schedule; }
+    public void setImageQuery(String imageQuery) { this.imageQuery = imageQuery; }
 }

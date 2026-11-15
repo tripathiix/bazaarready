@@ -22,6 +22,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -60,8 +65,11 @@ class SiteController {
     private final SiteLabelService labelService;
     private final OrderService orders;
     private final ObjectMapper json;
+    private final ImageService images;
 
-    SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json) {
+    SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json,
+                   ImageService images) {
+        this.images = images;
         this.profiles = profiles;
         this.labelService = labelService;
         this.orders = orders;
@@ -228,7 +236,44 @@ class SiteController {
         all.forEach(order -> placed.put(order.getId(), PLACED_AT.format(order.getCreatedAt())));
         model.addAttribute("placed", placed);
         model.addAttribute("enquiries", orders.enquiriesFor(shop.id()));
+        model.addAttribute("ownerKey", ownerKey);
         return "site/owner";
+    }
+
+    /** The owner adds or replaces the photo for one offering, or for the banner when the name is empty. */
+    @PostMapping("/owner/{ownerKey}/photo")
+    String uploadPhoto(@PathVariable UUID ownerKey, @RequestParam(defaultValue = "") String item,
+                       @RequestParam(required = false) MultipartFile file,
+                       @RequestParam(defaultValue = "upload") String action) throws java.io.IOException {
+        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        boolean known = item.isEmpty() || shop.products().stream().anyMatch(p -> p.name().equals(item));
+        if (!known) {
+            return "redirect:/owner/" + ownerKey + "?photo=unknown";
+        }
+        if ("remove".equals(action)) {
+            images.removeUpload(shop.id(), item);
+            return "redirect:/owner/" + ownerKey + "?photo=removed#photos";
+        }
+        if (file == null || file.isEmpty() || file.getSize() > ImageService.MAX_UPLOAD) {
+            return "redirect:/owner/" + ownerKey + "?photo=size#photos";
+        }
+        byte[] data = file.getBytes();
+        String type = ImageService.detectType(data);
+        if (type == null) {
+            return "redirect:/owner/" + ownerKey + "?photo=type#photos";
+        }
+        images.saveUpload(shop.id(), item, type, data);
+        return "redirect:/owner/" + ownerKey + "?photo=saved#photos";
+    }
+
+    @GetMapping("/media/{id}")
+    @ResponseBody
+    ResponseEntity<byte[]> media(@PathVariable UUID id) {
+        return images.upload(id)
+                .map(u -> ResponseEntity.ok().contentType(MediaType.parseMediaType(u.contentType()))
+                        .cacheControl(CacheControl.maxAge(java.time.Duration.ofDays(30)).cachePublic())
+                        .header("X-Content-Type-Options", "nosniff").body(u.data()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @ExceptionHandler(NotFoundException.class)
@@ -268,6 +313,31 @@ class SiteController {
         model.addAttribute("fontsUrl", "https://fonts.googleapis.com/css2?family=" + fonts[0].replace(' ', '+')
                 + ":wght@600;800&family=" + fonts[1].replace(' ', '+') + ":wght@400;600&display=swap");
         model.addAttribute("fontVars", "--display:'" + fonts[0] + "';--body:'" + fonts[1] + "'");
+        addPictures(shop, model);
+    }
+
+    /** Pictures for the banner and every offering, plus the photographers to credit. */
+    private void addPictures(ProfileResponse shop, Model model) {
+        Map<UUID, ImageService.Picture> thumbs = new HashMap<>();
+        Map<UUID, ImageService.Picture> large = new HashMap<>();
+        Map<String, ImageService.Picture> credits = new java.util.LinkedHashMap<>();
+        for (ProductResponse p : shop.products()) {
+            images.resolve(shop.id(), p.name(), p.imageQuery(), true).ifPresent(pic -> thumbs.put(p.id(), pic));
+            images.resolve(shop.id(), p.name(), p.imageQuery(), false).ifPresent(pic -> {
+                large.put(p.id(), pic);
+                if (pic.isStock()) {
+                    credits.putIfAbsent(pic.photographer(), pic);
+                }
+            });
+        }
+        ImageService.Picture hero = images.resolve(shop.id(), "", shop.heroImageQuery(), false).orElse(null);
+        if (hero != null && hero.isStock()) {
+            credits.putIfAbsent(hero.photographer(), hero);
+        }
+        model.addAttribute("hero", hero);
+        model.addAttribute("thumbs", thumbs);
+        model.addAttribute("pictures", large);
+        model.addAttribute("credits", credits.values());
     }
 
     private void addOrder(Model model, ProfileResponse shop, ShopOrder order) {

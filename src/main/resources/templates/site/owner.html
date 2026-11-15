@@ -36,6 +36,44 @@
         </div>
     </section>
 
+    <section aria-labelledby="photos" id="photos">
+        <h2 id="photos-title">Photos</h2>
+        <p th:if="${param.photo != null and param.photo[0] == 'saved'}" class="chip">Photo saved.</p>
+        <p th:if="${param.photo != null and param.photo[0] == 'removed'}" class="chip">Your photo was removed.</p>
+        <p th:if="${param.photo != null and param.photo[0] == 'size'}" class="error">Choose a picture smaller than 3 MB.</p>
+        <p th:if="${param.photo != null and param.photo[0] == 'type'}" class="error">That file is not a JPEG, PNG or WebP picture.</p>
+        <p style="color:var(--muted)">Stock photos are chosen for you. Upload your own to replace any of them.</p>
+        <ul class="grid">
+            <li class="card">
+                <div class="tile"><img th:if="${hero != null}" th:src="${hero.url()}" alt=""><span th:unless="${hero != null}">★</span></div>
+                <div class="card-body">
+                    <h3>Banner</h3>
+                    <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/photo'}" class="form">
+                        <input type="hidden" name="item" value="">
+                        <label for="file-banner" class="unit">New photo</label>
+                        <input id="file-banner" type="file" name="file" accept="image/jpeg,image/png,image/webp">
+                        <div class="card-actions"><button class="btn small" name="action" value="upload">Upload</button>
+                        <button class="btn small outline" th:if="${hero != null and !hero.isStock()}" name="action" value="remove">Remove mine</button></div>
+                    </form>
+                </div>
+            </li>
+            <li class="card" th:each="p, it : ${shop.products()}">
+                <div class="tile"><img th:if="${thumbs.get(p.id()) != null}" th:src="${thumbs.get(p.id()).url()}" alt="">
+                    <span th:unless="${thumbs.get(p.id()) != null}" th:text="${#strings.substring(p.name(), 0, 1)}">A</span></div>
+                <div class="card-body">
+                    <h3 th:text="${p.name()}">Item</h3>
+                    <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/photo'}" class="form">
+                        <input type="hidden" name="item" th:value="${p.name()}">
+                        <label th:for="${'file-' + it.index}" class="unit">New photo</label>
+                        <input th:id="${'file-' + it.index}" type="file" name="file" accept="image/jpeg,image/png,image/webp">
+                        <div class="card-actions"><button class="btn small" name="action" value="upload">Upload</button>
+                        <button class="btn small outline" th:if="${thumbs.get(p.id()) != null and !thumbs.get(p.id()).isStock()}" name="action" value="remove">Remove mine</button></div>
+                    </form>
+                </div>
+            </li>
+        </ul>
+    </section>
+
     <section aria-labelledby="messages">
         <h2 id="messages">Messages (<span th:text="${enquiries.size()}">0</span>)</h2>
         <p th:if="${enquiries.isEmpty()}">Nothing yet. Messages from your contact page will appear here.</p>
