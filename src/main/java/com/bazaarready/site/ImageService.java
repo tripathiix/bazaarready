@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -20,9 +22,10 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Pictures for generated sites. An owner's own upload always wins; otherwise a free stock photo
- * from Pexels is used, found with search words the agent chose; otherwise the page shows a
- * coloured letter tile. Searches are stored, so each one is made once.
+ * Pictures for generated sites. An owner's own upload always wins; otherwise a free stock photo is
+ * used, found with search words the agent chose; otherwise the page shows a coloured letter tile.
+ * Stock photos come from Pexels when a key is set, and from Wikimedia Commons (no key needed)
+ * otherwise. Each search is made once and stored.
  */
 @Service
 public class ImageService {
@@ -32,37 +35,44 @@ public class ImageService {
     /** Largest upload accepted, in bytes. */
     public static final int MAX_UPLOAD = 3 * 1024 * 1024;
 
+    /** Wikimedia asks automated clients to identify themselves. */
+    private static final String USER_AGENT = "BazaarReady/0.1 (hackathon prototype; https://github.com/tripathiix/bazaarready)";
+
+    /** Licences Commons photos may have to be used here: free, and fine for commercial sites. */
+    private static final List<String> ALLOWED_LICENCES = List.of("cc0", "public domain", "pd", "cc by", "cc-by");
+
     /** A picture ready for a page. Credit fields are empty for an owner's own photo. */
-    public record Picture(String url, String photographer, String photographerUrl, String pageUrl) {
+    public record Picture(String url, String photographer, String photographerUrl, String pageUrl,
+                          String source, String licence, String licenceUrl) {
         public boolean isStock() {
-            return photographer != null;
+            return source != null;
         }
     }
 
     public record Upload(String contentType, byte[] data) {
     }
 
-    private final JdbcTemplate jdbc;
-    private final RestClient pexels;
-    private final String apiKey;
-
-    ImageService(JdbcTemplate jdbc, RestClient.Builder builder, @Value("${bazaarready.pexels.api-key:}") String apiKey) {
-        this.jdbc = jdbc;
-        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory();
-        factory.setReadTimeout(Duration.ofSeconds(8));
-        this.pexels = builder.baseUrl("https://api.pexels.com").requestFactory(factory).build();
-        this.apiKey = apiKey == null ? "" : apiKey.trim();
+    private record Found(String imageUrl, String thumbUrl, String photographer, String photographerUrl, String pageUrl,
+                         String source, String licence, String licenceUrl) {
     }
 
-    public boolean stockEnabled() {
-        return !apiKey.isEmpty();
+    private final JdbcTemplate jdbc;
+    private final RestClient pexels;
+    private final RestClient commons;
+    private final String pexelsKey;
+
+    ImageService(JdbcTemplate jdbc, RestClient.Builder builder, @Value("${bazaarready.pexels.api-key:}") String pexelsKey) {
+        this.jdbc = jdbc;
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory();
+        factory.setReadTimeout(Duration.ofSeconds(10));
+        this.pexels = builder.clone().baseUrl("https://api.pexels.com").requestFactory(factory).build();
+        this.commons = builder.clone().baseUrl("https://commons.wikimedia.org").requestFactory(factory)
+                .defaultHeader("User-Agent", USER_AGENT).build();
+        this.pexelsKey = pexelsKey == null ? "" : pexelsKey.trim();
     }
 
     /** Looks up any searches not seen before. Called when the agent saves a profile. */
     public void ensure(Collection<String> queries) {
-        if (!stockEnabled()) {
-            return;
-        }
         Set<String> wanted = new LinkedHashSet<>();
         for (String query : queries) {
             String q = normalise(query);
@@ -76,7 +86,8 @@ public class ImageService {
                 continue;
             }
             try {
-                fetch(query);
+                Optional<Found> found = pexelsKey.isEmpty() ? searchCommons(query) : searchPexels(query);
+                store(query, found.orElse(null));
             } catch (Exception e) {
                 // Not stored, so the next save tries again.
                 log.warn("Stock photo search for '{}' failed: {}", query, e.getMessage());
@@ -84,24 +95,76 @@ public class ImageService {
         }
     }
 
-    private void fetch(String query) {
+    private Optional<Found> searchPexels(String query) {
         JsonNode body = pexels.get()
                 .uri(uri -> uri.path("/v1/search").queryParam("query", query).queryParam("per_page", 1)
                         .queryParam("orientation", "landscape").build())
-                .header("Authorization", apiKey)
+                .header("Authorization", pexelsKey)
                 .retrieve()
                 .body(JsonNode.class);
         JsonNode photo = body == null ? null : body.path("photos").path(0);
         if (photo == null || photo.isMissingNode()) {
+            return Optional.empty();
+        }
+        return Optional.of(new Found(photo.path("src").path("large").asText(), photo.path("src").path("medium").asText(),
+                photo.path("photographer").asText(), photo.path("photographer_url").asText(), photo.path("url").asText(),
+                "Pexels", null, null));
+    }
+
+    /** Searches Wikimedia Commons for a landscape photo under a free licence that allows commercial use. */
+    private Optional<Found> searchCommons(String query) {
+        JsonNode body = commons.get()
+                .uri(uri -> uri.path("/w/api.php")
+                        .queryParam("action", "query").queryParam("format", "json")
+                        .queryParam("generator", "search").queryParam("gsrnamespace", 6).queryParam("gsrlimit", 12)
+                        .queryParam("gsrsearch", query + " filetype:bitmap")
+                        .queryParam("prop", "imageinfo").queryParam("iiprop", "url|size|mime|extmetadata")
+                        .queryParam("iiurlwidth", 1200)
+                        .build())
+                .retrieve()
+                .body(JsonNode.class);
+        JsonNode pages = body == null ? null : body.path("query").path("pages");
+        if (pages == null || !pages.isObject()) {
+            return Optional.empty();
+        }
+        List<JsonNode> ranked = new ArrayList<>();
+        pages.forEach(ranked::add);
+        ranked.sort(Comparator.comparingInt(page -> page.path("index").asInt(Integer.MAX_VALUE)));
+
+        for (JsonNode page : ranked) {
+            JsonNode info = page.path("imageinfo").path(0);
+            JsonNode meta = info.path("extmetadata");
+            String mime = info.path("mime").asText();
+            int width = info.path("width").asInt();
+            int height = info.path("height").asInt();
+            String licence = meta.path("LicenseShortName").path("value").asText("").trim();
+            boolean nonFree = "true".equalsIgnoreCase(meta.path("NonFree").path("value").asText(""));
+            boolean free = ALLOWED_LICENCES.stream().anyMatch(l -> licence.toLowerCase(Locale.ROOT).startsWith(l));
+            boolean landscape = width >= 900 && width >= height * 1.15;
+            if (nonFree || !free || !landscape || !(mime.equals("image/jpeg") || mime.equals("image/png"))) {
+                continue;
+            }
+            String url = info.path("thumburl").asText(info.path("url").asText());
+            String artist = plainText(meta.path("Artist").path("value").asText(""));
+            return Optional.of(new Found(url, url, artist.isEmpty() ? "Unknown author" : artist, null,
+                    info.path("descriptionurl").asText(), "Wikimedia Commons", licence,
+                    meta.path("LicenseUrl").path("value").asText(null)));
+        }
+        return Optional.empty();
+    }
+
+    private void store(String query, Found found) {
+        if (found == null) {
             jdbc.update("insert into stock_photo (query, found) values (?, false) on conflict (query) do nothing", query);
             return;
         }
         jdbc.update("""
-                insert into stock_photo (query, found, image_url, thumb_url, photographer, photographer_url, page_url)
-                values (?, true, ?, ?, ?, ?, ?) on conflict (query) do nothing
+                insert into stock_photo (query, found, image_url, thumb_url, photographer, photographer_url, page_url,
+                                         source, licence, licence_url)
+                values (?, true, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (query) do nothing
                 """,
-                query, photo.path("src").path("large").asText(), photo.path("src").path("medium").asText(),
-                photo.path("photographer").asText(), photo.path("photographer_url").asText(), photo.path("url").asText());
+                query, found.imageUrl(), found.thumbUrl(), found.photographer(), found.photographerUrl(), found.pageUrl(),
+                found.source(), found.licence(), found.licenceUrl());
     }
 
     /** The picture for one offering (or, with an empty name, the banner). */
@@ -109,22 +172,24 @@ public class ImageService {
         List<UUID> uploads = jdbc.queryForList("select id from item_photo where business_id = ? and item_name = ?",
                 UUID.class, businessId, itemName == null ? "" : itemName);
         if (!uploads.isEmpty()) {
-            return Optional.of(new Picture("/media/" + uploads.get(0), null, null, null));
+            return Optional.of(new Picture("/media/" + uploads.get(0), null, null, null, null, null, null));
         }
         String q = normalise(query);
         if (q == null) {
             return Optional.empty();
         }
-        List<Map<String, Object>> rows = jdbc.queryForList(
-                "select image_url, thumb_url, photographer, photographer_url, page_url from stock_photo where query = ? and found",
-                q);
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select image_url, thumb_url, photographer, photographer_url, page_url, source, licence, licence_url
+                from stock_photo where query = ? and found
+                """, q);
         if (rows.isEmpty()) {
             return Optional.empty();
         }
         Map<String, Object> row = rows.get(0);
         String url = (String) row.get(thumbnail ? "thumb_url" : "image_url");
         return Optional.of(new Picture(url, (String) row.get("photographer"), (String) row.get("photographer_url"),
-                (String) row.get("page_url")));
+                (String) row.get("page_url"), (String) row.get("source"), (String) row.get("licence"),
+                (String) row.get("licence_url")));
     }
 
     /** Stores an owner's photo for an offering, replacing any earlier one. */
@@ -161,6 +226,13 @@ public class ImageService {
             return "image/webp";
         }
         return null;
+    }
+
+    /** Commons stores the author as HTML; keep only the readable text. */
+    private static String plainText(String html) {
+        String text = html.replaceAll("<[^>]+>", " ").replace("&amp;", "&").replace("&nbsp;", " ")
+                .replaceAll("\\s+", " ").trim();
+        return text.length() > 60 ? text.substring(0, 57) + "..." : text;
     }
 
     private static String normalise(String query) {

@@ -181,8 +181,8 @@
 
 <footer th:fragment="foot">
     <p><span th:text="${shop.name()}">Name</span> · Made with BazaarReady</p>
-    <p class="credits" th:if="${!credits.isEmpty()}">Photos on <a href="https://www.pexels.com" rel="noopener">Pexels</a> by
-        <th:block th:each="c, it : ${credits}"><a th:href="${c.photographerUrl()}" rel="noopener" th:text="${c.photographer()}">Name</a><span th:unless="${it.last}">, </span></th:block>
+    <p class="credits" th:if="${!credits.isEmpty()}">Photos:
+        <th:block th:each="c, it : ${credits}"><a th:href="${c.pageUrl()}" rel="noopener" th:text="${c.photographer()}">Name</a><span th:if="${c.licence()}"> (<a th:href="${c.licenceUrl()}" rel="noopener license" th:text="${c.licence()}">CC BY</a>)</span> <span th:text="${'via ' + c.source()}">via Pexels</span><span th:unless="${it.last}">; </span></th:block>
     </p>
     <script th:inline="none">
     (function () {
