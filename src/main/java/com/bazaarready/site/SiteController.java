@@ -121,6 +121,13 @@ class SiteController {
         return "site/cart";
     }
 
+    /** Someone opening the checkout address directly is sent to the cart instead of an error page. */
+    @GetMapping("/s/{slug}/checkout")
+    String checkoutPage(@PathVariable String slug) {
+        profiles.getBySlug(slug);
+        return "redirect:/s/" + slug + "/cart";
+    }
+
     @PostMapping("/s/{slug}/checkout")
     String checkout(@PathVariable String slug, @RequestParam String name, @RequestParam String phone,
                     @RequestParam String address, @RequestParam(required = false) String note,
