@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { OPEN_SIGN } from "./i18nExtra";
+import { Photo, RecentSite } from "./showcase";
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -63,7 +64,17 @@ export function OpenSign() {
 const SHUTTER_THEMES = ["rani", "indigo", "leaf"] as const;
 
 /** Three shopfronts. Each shutter rolls up when pressed to show the kind of site inside. */
-export function Shutters({ labels, hint, allOpen }: { labels: [string, string, string]; hint: string; allOpen: boolean }) {
+export function Shutters({
+  labels,
+  hint,
+  allOpen,
+  photos,
+}: {
+  labels: [string, string, string];
+  hint: string;
+  allOpen: boolean;
+  photos: (Photo | null)[];
+}) {
   const [open, setOpen] = useState<boolean[]>([false, false, false]);
   const toggle = (i: number) => setOpen((current) => current.map((value, k) => (k === i ? !value : value)));
   return (
@@ -80,7 +91,8 @@ export function Shutters({ labels, hint, allOpen }: { labels: [string, string, s
               onClick={() => toggle(i)}
             >
               <span className="awning" />
-              <span className="inside">
+              {photos[i] && <img className="inside-photo" src={photos[i]!.url} alt="" loading="lazy" />}
+              <span className={`inside ${photos[i] ? "has-photo" : ""}`}>
                 <span className="mini-head">{label}</span>
                 <span className="mini-line w80" />
                 <span className="mini-line w60" />
@@ -99,8 +111,54 @@ export function Shutters({ labels, hint, allOpen }: { labels: [string, string, s
           );
         })}
       </div>
-      <p className="shutter-hint">{hint}</p>
+      <p className="shutter-hint hand">
+        <svg className="arrow" viewBox="0 0 60 40" aria-hidden="true">
+          <path d="M4 34 C 18 30, 34 22, 46 8 M46 8 L 36 10 M46 8 L 46 19" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+        {hint}
+      </p>
     </section>
+  );
+}
+
+/** Sites people have built, as a row of cards with photos. */
+export function Gallery({ sites, title, hint }: { sites: RecentSite[]; title: string; hint: string }) {
+  if (sites.length === 0) return null;
+  return (
+    <section className="gallery" aria-labelledby="gallery-title">
+      <h2 id="gallery-title" className="hand gallery-title">{title}</h2>
+      <p className="hint">{hint}</p>
+      <ul className="gallery-row">
+        {sites.map((site, i) => (
+          <li key={site.path} className="polaroid" style={{ ["--tilt" as string]: `${[-3, 2, -1.5, 3, -2.5, 1.5][i % 6]}deg` }}>
+            <a href={site.path} target="_blank" rel="noreferrer">
+              <img src={site.photo.url} alt="" loading="lazy" />
+              <span className="polaroid-name hand">{site.name}</span>
+              {site.tagline && <span className="polaroid-tag">{site.tagline}</span>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Credits for stock photos shown on the home page. */
+export function PhotoCredits({ photos, label }: { photos: Photo[]; label: string }) {
+  const seen = new Set<string>();
+  const unique = photos.filter((p) => p.credit && !seen.has(p.credit) && seen.add(p.credit));
+  if (unique.length === 0) return null;
+  return (
+    <p className="photo-credits">
+      {label}:{" "}
+      {unique.map((p, i) => (
+        <span key={p.credit}>
+          <a href={p.creditUrl ?? undefined} target="_blank" rel="noreferrer">{p.credit}</a>
+          {p.licence ? ` (${p.licence})` : ""} via {p.source}
+          {i < unique.length - 1 ? "; " : ""}
+        </span>
+      ))}
+    </p>
   );
 }
 

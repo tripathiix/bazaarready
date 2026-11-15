@@ -21,7 +21,8 @@ export function applyFonts(language: LanguageCode) {
   // The brand name is always in Latin letters, so Baloo 2 and Anek Latin are always loaded.
   const families = Array.from(new Set(["Baloo 2", display])).map((f) => `family=${f.replace(/ /g, "+")}:wght@600;800`);
   const bodies = Array.from(new Set(["Anek Latin", body])).map((f) => `family=${f.replace(/ /g, "+")}:wght@400;600`);
-  const href = `https://fonts.googleapis.com/css2?${[...families, ...bodies].join("&")}&display=swap`;
+  const handwriting = ["en", "hi", "mr"].includes(language) ? ["family=Kalam:wght@400;700"] : [];
+  const href = `https://fonts.googleapis.com/css2?${[...families, ...bodies, ...handwriting].join("&")}&display=swap`;
 
   let link = document.getElementById("language-fonts") as HTMLLinkElement | null;
   if (!link) {
@@ -35,4 +36,5 @@ export function applyFonts(language: LanguageCode) {
   const root = document.documentElement.style;
   root.setProperty("--display", `"${display}", "Baloo 2", ${FALLBACK}`);
   root.setProperty("--body", `"${body}", "Anek Latin", ${FALLBACK}`);
+  root.setProperty("--hand", handwriting.length ? `"Kalam", "${display}", ${FALLBACK}` : `"${display}", ${FALLBACK}`);
 }

@@ -38,8 +38,12 @@ public class ImageService {
     /** Wikimedia asks automated clients to identify themselves. */
     private static final String USER_AGENT = "BazaarReady/0.1 (hackathon prototype; https://github.com/tripathiix/bazaarready)";
 
-    /** Licences Commons photos may have to be used here: free, and fine for commercial sites. */
-    private static final List<String> ALLOWED_LICENCES = List.of("cc0", "public domain", "pd", "cc by", "cc-by");
+    /**
+     * Licences a Commons photo may have to be used here: CC0, public domain, or plain CC BY (any
+     * version). CC BY-NC is excluded because sites are commercial; BY-SA and BY-ND are excluded too.
+     */
+    private static final java.util.regex.Pattern ALLOWED_LICENCE = java.util.regex.Pattern.compile(
+            "cc0( 1\\.0)?|public domain|pd(-[a-z0-9.-]+)?|cc[ -]by( [0-9.]+)?", java.util.regex.Pattern.CASE_INSENSITIVE);
 
     /** A picture ready for a page. Credit fields are empty for an owner's own photo. */
     public record Picture(String url, String photographer, String photographerUrl, String pageUrl,
@@ -139,7 +143,7 @@ public class ImageService {
             int height = info.path("height").asInt();
             String licence = meta.path("LicenseShortName").path("value").asText("").trim();
             boolean nonFree = "true".equalsIgnoreCase(meta.path("NonFree").path("value").asText(""));
-            boolean free = ALLOWED_LICENCES.stream().anyMatch(l -> licence.toLowerCase(Locale.ROOT).startsWith(l));
+            boolean free = ALLOWED_LICENCE.matcher(licence).matches();
             boolean landscape = width >= 900 && width >= height * 1.15;
             if (nonFree || !free || !landscape || !(mime.equals("image/jpeg") || mime.equals("image/png"))) {
                 continue;

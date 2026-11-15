@@ -1,11 +1,12 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ActionView, SessionView, sendApproval, sendReply, startSession } from "./api";
-import { Bunting, OpenSign, Petals, Shutters } from "./Decor";
+import { Bunting, Gallery, OpenSign, Petals, PhotoCredits, Shutters } from "./Decor";
 import { countries, defaultCountry } from "./countries";
 import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
 import { EXTRA, HEAR_QUESTION, ORDERS_LINK } from "./i18nExtra";
 import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
+import { NOTES, useShowcase } from "./showcase";
 
 /** One activity-log line in the owner's language, built from what the agent did. */
 function actionText(action: ActionView, t: Strings): string {
@@ -38,6 +39,7 @@ export default function App() {
   const [language, setLanguage] = useState<LanguageCode>(initialLanguage);
   const t = STRINGS[language];
   const extra = EXTRA[language];
+  const notes = NOTES[language];
 
   const [description, setDescription] = useState("");
   const [session, setSession] = useState<SessionView | null>(null);
@@ -45,6 +47,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [celebrations, setCelebrations] = useState(0);
+  const showcase = useShowcase(celebrations);
   const [country, setCountry] = useState(defaultCountry);
   const countryList = useMemo(() => countries(language), [language]);
 
@@ -116,6 +119,9 @@ export default function App() {
               Bazaar<span>Ready</span>
             </h1>
             <p className="headline">{extra.headline}</p>
+            <svg className="scribble" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M4 14 C 60 4, 120 18, 180 9 S 260 6, 296 12" fill="none" stroke="var(--rani)" strokeWidth="4" strokeLinecap="round" />
+            </svg>
           </div>
           <OpenSign />
         </div>
@@ -138,7 +144,7 @@ export default function App() {
         </div>
 
         <div className="wrap">
-          <Shutters labels={extra.shutters} hint={extra.shutterHint} allOpen={!!live} />
+          <Shutters labels={extra.shutters} hint={extra.shutterHint} allOpen={!!live} photos={showcase?.examples ?? [null, null, null]} />
         </div>
       </header>
 
@@ -149,6 +155,7 @@ export default function App() {
               {t.tellUs}
             </label>
             <p className="hint">{t.hint}</p>
+            <p className="hand talk-note">{notes.talk}</p>
             <textarea
               id="description"
               rows={6}
@@ -331,6 +338,11 @@ export default function App() {
             )}
           </>
         )}
+        <Gallery sites={showcase?.recent ?? []} title={notes.gallery} hint={notes.galleryHint} />
+        <PhotoCredits
+          label={notes.photos}
+          photos={[...(showcase?.examples ?? []).filter((p): p is NonNullable<typeof p> => !!p), ...(showcase?.recent ?? []).map((r) => r.photo)]}
+        />
       </main>
 
       <footer className="foot">BazaarReady</footer>
