@@ -21,7 +21,7 @@ public class Business {
 
     /** Accepted site kinds and colour themes, for request validation. */
     public static final String KIND_PATTERN = "shop|food|services|classes|transport|portfolio|events|organisation|other";
-    public static final String LAYOUT_PATTERN = "classic|split|boutique|magazine";
+    public static final String LAYOUT_PATTERN = "classic|split|boutique|magazine|bento|noir|mart";
     public static final String THEME_PATTERN = "marigold|indigo|forest|rose|ocean|slate";
 
     @Id

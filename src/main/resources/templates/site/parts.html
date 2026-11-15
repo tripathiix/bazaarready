@@ -202,6 +202,61 @@
         .small-note { font-size: 0.85rem; color: var(--muted); }
         .reply-box { font-size: 0.95rem; }
         .facts { white-space: pre-wrap; font-size: 0.85rem; background: var(--bg); border-radius: 10px; padding: 0.7rem; margin: 0.4rem 0 0; }
+        .field-error { color: var(--bad); font-weight: 600; font-size: 0.92rem; margin: 0.3rem 0 0; }
+        .has-error input, .has-error textarea, .has-error select { border-color: var(--bad); }
+
+        /* ---- Bento ---- */
+        .hero-bento .wrap { padding-top: 2rem; padding-bottom: 1rem; }
+        .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 9.5rem; gap: 0.8rem; }
+        .bento > * { border-radius: 24px; overflow: hidden; position: relative; }
+        .b-main { grid-column: span 2; grid-row: span 2; background: var(--brand); color: #ffffff; padding: 1.8rem; display: flex; flex-direction: column; justify-content: flex-end; }
+        .b-main h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); letter-spacing: -0.03em; }
+        .b-main .eyebrow { color: #ffffff; opacity: 0.75; }
+        .b-photo { grid-column: span 2; grid-row: span 2; background: var(--tint); display: grid; place-items: center; }
+        .b-photo img, .b-item img { width: 100%; height: 100%; object-fit: cover; }
+        .b-photo span { font-family: var(--display), sans-serif; font-weight: 800; font-size: 7rem; color: var(--brand); }
+        .b-stat { background: var(--tint); padding: 1.1rem 1.3rem; display: flex; flex-direction: column; justify-content: flex-end; }
+        .b-stat strong { font-family: var(--display), sans-serif; font-size: 2.2rem; color: var(--brand); line-height: 1; }
+        .b-item { display: block; color: #ffffff; text-decoration: none; }
+        .b-item span { position: absolute; left: 1rem; bottom: 0.8rem; font-weight: 700; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6); }
+        .layout-bento .card, .layout-bento .info div, .layout-bento .panel { border-radius: 24px; }
+        @media (max-width: 720px) { .bento { grid-template-columns: repeat(2, 1fr); } }
+
+        /* ---- Noir ---- */
+        .layout-noir { --bg: #0e0e10; --surface: #17171a; --ink: #f2eee6; --muted: #a8a399; --line: #2a2a2f; --tint: #1d1c20; --accent: #c9a96a; }
+        .layout-noir .top { background: rgba(14, 14, 16, 0.92); backdrop-filter: blur(8px); }
+        .layout-noir .links a { color: var(--ink); }
+        .layout-noir .brand, .layout-noir h1, .layout-noir h2, .layout-noir .amount { color: var(--accent); }
+        .layout-noir .btn { background: var(--accent); border-color: var(--accent); color: #0e0e10; }
+        .layout-noir .btn.outline, .layout-noir .btn.ghost { background: transparent; color: var(--accent); }
+        .layout-noir .chip { background: #262420; color: var(--accent); }
+        .layout-noir .links a.pill { background: var(--accent); color: #0e0e10; }
+        .layout-noir .links a.pill b { background: #0e0e10; color: var(--accent); }
+        .layout-noir .band { background: #17171a; border: 1px solid var(--line); }
+        .layout-noir input, .layout-noir textarea, .layout-noir select { background: #17171a; color: var(--ink); }
+        .layout-noir .card h3 a { color: var(--ink); }
+        .hero-noir { position: relative; min-height: 32rem; display: grid; place-items: center; text-align: center; overflow: hidden; }
+        .hero-noir .hero-photo { opacity: 0.4; filter: grayscale(0.3); }
+        .hero-noir .wrap { position: relative; z-index: 1; padding-top: 4rem; padding-bottom: 4rem; }
+        .hero-noir h1 { font-weight: 400; font-size: clamp(2.8rem, 8vw, 5.5rem); max-width: none; letter-spacing: -0.01em; }
+        .hero-noir .rule { width: 4rem; height: 1px; background: var(--accent); margin: 1.4rem auto; }
+        .hero-noir .tagline { margin-inline: auto; color: var(--ink); opacity: 0.85; }
+        .hero-noir .cta { justify-content: center; }
+
+        /* ---- Mart ---- */
+        .hero-mart { background: var(--brand); color: #ffffff; }
+        .hero-mart .wrap { padding-top: 2.2rem; padding-bottom: 2.2rem; display: grid; gap: 1rem; }
+        .hero-mart h1 { font-size: clamp(2rem, 5vw, 3rem); max-width: none; }
+        .mart-search { display: flex; gap: 0.5rem; max-width: 40rem; }
+        .mart-search input { border: 0; border-radius: 999px; padding: 0.8rem 1.2rem; font-size: 1.05rem; }
+        .mart-search .btn { background: var(--accent); border-color: var(--accent); }
+        .mart-strip { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; font-size: 0.95rem; opacity: 0.9; }
+        .layout-mart .grid { grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: 0.8rem; }
+        .layout-mart .tile { height: 9rem; }
+        .layout-mart .card-body { padding: 0.8rem 0.9rem; }
+        .layout-mart .card h3 { font-size: 1.05rem; }
+        .layout-mart .amount { font-size: 1.3rem; }
+
         .credits { font-size: 0.8rem; }
         .credits a { color: var(--muted); }
         footer { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 0 1rem 2.5rem; }
@@ -246,9 +301,9 @@
         </div>
         <div class="card-actions">
             <button type="button" class="btn small" th:if="${store and p.priceRupees() != null}"
-                    th:attr="data-add=${p.id()},data-label=${L.of('add_to_cart')},data-added=${L.of('added')}" th:text="${L.of('add_to_cart')}">Add to cart</button>
-            <a class="btn small" th:if="${booking}" th:href="${base + '/book?item=' + p.id()}" th:text="${L.of('book_now')}">Book</a>
-            <a th:href="${base + '/item/' + p.id()}" th:text="${L.of('view')}">View details</a>
+                    th:attr="data-add=${p.id()},data-label=${L.of('add_to_cart')},data-added=${L.of('added')},aria-label=${L.of('add_to_cart') + ': ' + p.name()}" th:text="${L.of('add_to_cart')}">Add to cart</button>
+            <a class="btn small" th:if="${booking}" th:href="${base + '/book?item=' + p.id()}" th:attr="aria-label=${L.of('book_now') + ': ' + p.name()}" th:text="${L.of('book_now')}">Book</a>
+            <a th:href="${base + '/item/' + p.id()}" th:attr="aria-label=${L.of('view') + ': ' + p.name()}" th:text="${L.of('view')}">View details</a>
         </div>
     </div>
 </li>
@@ -295,6 +350,7 @@
             el.hidden = n === 0;
         }
         if (body.dataset.clearCart === 'true') write({});
+        if (body.dataset.keptCart) { try { var kept = JSON.parse(body.dataset.keptCart); if (Object.keys(kept).length) write(kept); } catch (e) { /* ignore */ } }
         badge();
 
         // "Add to cart" buttons anywhere on the site.
@@ -312,6 +368,7 @@
         var grid = document.querySelector('[data-grid]');
         if (grid) {
             var search = document.querySelector('[data-search]');
+            try { var q = new URLSearchParams(location.search).get('q'); if (q && search) search.value = q; } catch (e) { /* no query */ }
             var from = document.querySelector('[data-from]');
             var to = document.querySelector('[data-to]');
             var empty = document.querySelector('[data-none]');
@@ -330,6 +387,7 @@
                 if (empty) empty.hidden = shown !== 0;
             };
             [search, from, to].forEach(function (input) { if (input) input.addEventListener('input', apply); });
+            if (search && search.value) apply();
             Array.prototype.forEach.call(document.querySelectorAll('[data-category-button]'), function (button) {
                 button.addEventListener('click', function () {
                     category = button.dataset.categoryButton;

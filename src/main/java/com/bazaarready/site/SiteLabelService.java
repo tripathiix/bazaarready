@@ -46,7 +46,7 @@ public class SiteLabelService {
             return cached;
         }
         SiteLabels stored = load(code);
-        if (stored != null) {
+        if (stored != null && stored.complete()) {
             cache.put(code, stored);
             return stored;
         }
@@ -61,18 +61,19 @@ public class SiteLabelService {
             worker.setDaemon(true);
             worker.start();
         }
-        return ENGLISH;
+        return stored != null ? stored : ENGLISH;
     }
 
     /** Makes sure labels exist for a language, translating them now if needed. Called when a profile is saved. */
     public void ensure(String language) {
         String code = normalise(language);
-        if (code.equals("en") || cache.containsKey(code) || load(code) != null || !claude.isConfigured()) {
+        SiteLabels existing = cache.containsKey(code) ? cache.get(code) : load(code);
+        if (code.equals("en") || (existing != null && existing.complete()) || !claude.isConfigured()) {
             return;
         }
         try {
             Map<String, String> translated = translate(code);
-            jdbc.update("insert into site_labels (language, labels) values (?, ?) on conflict (language) do nothing",
+            jdbc.update("insert into site_labels (language, labels) values (?, ?) on conflict (language) do update set labels = excluded.labels, created_at = now()",
                     code, json.writeValueAsString(translated));
             cache.put(code, new SiteLabels(translated));
         } catch (Exception e) {

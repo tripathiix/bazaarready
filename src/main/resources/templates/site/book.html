@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
 <head th:replace="~{site/parts :: head(${L.of('book_title') + ' · ' + shop.name()})}"></head>
-<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
 <main class="wrap">
@@ -10,7 +10,7 @@
         <p th:if="${shop.noticeDays() != null and shop.noticeDays() > 0}" style="color:var(--muted)" th:text="${L.of('order_ahead', 'days', shop.noticeDays())}">Notice</p>
 
         <form class="panel form" method="post" th:action="${base + '/book'}" style="margin-top:1.5rem">
-            <p class="error" role="alert" th:if="${error}" th:text="${L.of('fill_all')}">Please fill in your details.</p>
+            <p class="error" role="alert" th:if="${error}" th:text="${L.of('check_below')}">Please fix the highlighted fields.</p>
             <div>
                 <label for="item" th:text="${offeringsTitle}">Offering</label>
                 <select id="item" name="item" required>
@@ -22,26 +22,29 @@
             <div class="two">
                 <div>
                     <label for="date" th:text="${L.of('date')}">Date</label>
-                    <input id="date" name="date" type="date" th:min="${today}" required>
+                    <input id="date" name="date" type="date" th:min="${today}" required th:value="${form != null ? form.get('date') : ''}">
+                    <p class="field-error" th:if="${errors != null and errors.containsKey('date')}" th:text="${L.of(errors.get('date'))}">Error</p>
                 </div>
                 <div>
                     <label for="time" th:text="${L.of('time')}">Preferred time</label>
-                    <input id="time" name="time" type="time">
+                    <input id="time" name="time" type="time" th:value="${form != null ? form.get('time') : ''}">
                 </div>
             </div>
             <div class="two">
                 <div>
                     <label for="name" th:text="${L.of('name')}">Your name</label>
-                    <input id="name" name="name" autocomplete="name" maxlength="80" required>
+                    <input id="name" name="name" autocomplete="name" maxlength="80" required th:value="${form != null ? form.get('name') : ''}">
+                    <p class="field-error" th:if="${errors != null and errors.containsKey('name')}" th:text="${L.of(errors.get('name'))}">Error</p>
                 </div>
                 <div>
                     <label for="phone" th:text="${L.of('phone')}">Phone number</label>
-                    <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="20" required>
+                    <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="20" required th:value="${form != null ? form.get('phone') : ''}">
+                    <p class="field-error" th:if="${errors != null and errors.containsKey('phone')}" th:text="${L.of(errors.get('phone'))}">Error</p>
                 </div>
             </div>
             <div>
                 <label for="note" th:text="${L.of('note')}">Note</label>
-                <input id="note" name="note" maxlength="300">
+                <input id="note" name="note" maxlength="300" th:value="${form != null ? form.get('note') : ''}">
             </div>
             <button type="submit" class="btn" th:text="${L.of('send_request')}">Send request</button>
         </form>

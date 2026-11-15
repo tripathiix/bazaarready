@@ -50,6 +50,13 @@ public final class SiteLabels {
         put("address", "Delivery address");
         put("note", "Note (optional)");
         put("checkout", "Checkout");
+        put("delivery_date", "Preferred delivery date (optional)");
+        put("err_required", "Please fill this in.");
+        put("err_phone", "Enter a phone number with at least 6 digits.");
+        put("err_date", "Choose a date from today onwards.");
+        put("check_below", "Some details need fixing. See the highlighted fields.");
+        put("whatsapp_number", "WhatsApp number");
+        put("search_placeholder", "What are you looking for?");
         put("fill_all", "Please fill in your name, phone number and address.");
         put("pay_title", "Payment");
         put("pay_demo", "This is a demo payment page. No money will be taken and no card details are sent.");
@@ -85,6 +92,11 @@ public final class SiteLabels {
 
     private static void put(String key, String english) {
         ENGLISH.put(key, english);
+    }
+
+    /** Whether every built-in label has a translation; false after new labels are added. */
+    boolean complete() {
+        return values.keySet().containsAll(ENGLISH.keySet());
     }
 
     /** The label for a key, falling back to English and then to the key itself. */

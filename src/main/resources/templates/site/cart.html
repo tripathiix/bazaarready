@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
 <head th:replace="~{site/parts :: head(${L.of('cart_title') + ' · ' + shop.name()})}"></head>
-<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()},data-kept-cart=${keptCart}">
 <header th:replace="~{site/parts :: nav}"></header>
 
 <main class="wrap">
@@ -32,20 +32,28 @@
 
     <form class="panel form" method="post" th:action="${base + '/checkout'}" data-checkout hidden aria-labelledby="details">
         <h2 id="details" th:text="${L.of('your_details')}">Your details</h2>
-        <p class="error" role="alert" th:if="${error}" th:text="${L.of('fill_all')}">Please fill in your details.</p>
+        <p class="error" role="alert" th:if="${error}" th:text="${L.of('check_below')}">Please fix the highlighted fields.</p>
         <div class="two">
-            <div>
+            <div th:classappend="${errors != null and errors.containsKey('name')} ? 'has-error'">
                 <label for="name" th:text="${L.of('name')}">Your name</label>
                 <input id="name" name="name" autocomplete="name" maxlength="80" required th:value="${form != null ? form.get('name') : ''}">
+                <p class="field-error" th:if="${errors != null and errors.containsKey('name')}" th:text="${L.of(errors.get('name'))}">Error</p>
             </div>
-            <div>
+            <div th:classappend="${errors != null and errors.containsKey('phone')} ? 'has-error'">
                 <label for="phone" th:text="${L.of('phone')}">Phone number</label>
                 <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="20" required th:value="${form != null ? form.get('phone') : ''}">
+                <p class="field-error" th:if="${errors != null and errors.containsKey('phone')}" th:text="${L.of(errors.get('phone'))}">Error</p>
             </div>
         </div>
-        <div>
+        <div th:classappend="${errors != null and errors.containsKey('address')} ? 'has-error'">
             <label for="address" th:text="${L.of('address')}">Delivery address</label>
             <textarea id="address" name="address" rows="3" autocomplete="street-address" maxlength="300" required th:text="${form != null ? form.get('address') : ''}"></textarea>
+            <p class="field-error" th:if="${errors != null and errors.containsKey('address')}" th:text="${L.of(errors.get('address'))}">Error</p>
+        </div>
+        <div th:classappend="${errors != null and errors.containsKey('deliveryDate')} ? 'has-error'">
+            <label for="deliveryDate" th:text="${L.of('delivery_date')}">Preferred delivery date</label>
+            <input id="deliveryDate" name="deliveryDate" type="date" th:value="${form != null ? form.get('deliveryDate') : ''}">
+            <p class="field-error" th:if="${errors != null and errors.containsKey('deliveryDate')}" th:text="${L.of(errors.get('deliveryDate'))}">Error</p>
         </div>
         <div>
             <label for="note" th:text="${L.of('note')}">Note</label>

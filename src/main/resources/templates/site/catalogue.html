@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
 <head th:replace="~{site/parts :: head(${offeringsTitle + ' · ' + shop.name()})}"></head>
-<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
 <main class="wrap">
