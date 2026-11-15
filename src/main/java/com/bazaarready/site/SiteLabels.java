@@ -20,6 +20,7 @@ public final class SiteLabels {
         put("nav_cart", "Cart");
         put("nav_book", "Book");
         put("draft_banner", "Preview. This site is not published yet.");
+        put("offerings", "What we offer");
         put("about_title", "About us");
         put("details_title", "Good to know");
         put("order_ahead", "Please give {days} days' notice.");
@@ -48,7 +49,7 @@ public final class SiteLabels {
         put("phone", "Phone number");
         put("address", "Delivery address");
         put("note", "Note (optional)");
-        put("place_order", "Place order");
+        put("checkout", "Checkout");
         put("fill_all", "Please fill in your name, phone number and address.");
         put("pay_title", "Payment");
         put("pay_demo", "This is a demo payment page. No money will be taken and no card details are sent.");
@@ -87,7 +88,7 @@ public final class SiteLabels {
     }
 
     /** The label for a key, falling back to English and then to the key itself. */
-    public String t(String key) {
+    public String of(String key) {
         String value = values.get(key);
         if (value == null || value.isBlank()) {
             value = ENGLISH.getOrDefault(key, key);
@@ -95,8 +96,8 @@ public final class SiteLabels {
         return value;
     }
 
-    /** The label with one placeholder filled in, for example t("pay_now", "amount", "₹850"). */
-    public String t(String key, String placeholder, Object replacement) {
-        return t(key).replace("{" + placeholder + "}", String.valueOf(replacement));
+    /** The label with one placeholder filled in, for example of("pay_now", "amount", "₹850"). */
+    public String of(String key, String placeholder, Object replacement) {
+        return of(key).replace("{" + placeholder + "}", String.valueOf(replacement));
     }
 }

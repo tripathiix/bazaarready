@@ -19,6 +19,7 @@ export interface SessionView {
   finalMessage: string | null;
   businessId: string | null;
   shopPath: string | null;
+  ownerPath: string | null;
   published: boolean;
   actions: ActionView[];
 }

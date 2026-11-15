@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${L.of('book_title') + ' · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<main class="wrap">
+    <section aria-labelledby="title">
+        <h1 id="title" style="color:var(--brand)" th:text="${L.of('book_title')}">Request a booking</h1>
+        <p th:if="${shop.noticeDays() != null and shop.noticeDays() > 0}" style="color:var(--muted)" th:text="${L.of('order_ahead', 'days', shop.noticeDays())}">Notice</p>
+
+        <form class="panel form" method="post" th:action="${base + '/book'}" style="margin-top:1.5rem">
+            <p class="error" role="alert" th:if="${error}" th:text="${L.of('fill_all')}">Please fill in your details.</p>
+            <div>
+                <label for="item" th:text="${offeringsTitle}">Offering</label>
+                <select id="item" name="item" required>
+                    <option value="" th:text="${L.of('choose')}">Choose</option>
+                    <option th:each="p : ${shop.products()}" th:value="${p.id()}" th:selected="${p.id() == selected}"
+                            th:text="${p.name() + (p.priceRupees() != null ? ' — ' + money.format(p.priceRupees()) + (p.unit() != null ? ' ' + p.unit() : '') : '')}">Offering</option>
+                </select>
+            </div>
+            <div class="two">
+                <div>
+                    <label for="date" th:text="${L.of('date')}">Date</label>
+                    <input id="date" name="date" type="date" th:min="${today}" required>
+                </div>
+                <div>
+                    <label for="time" th:text="${L.of('time')}">Preferred time</label>
+                    <input id="time" name="time" type="time">
+                </div>
+            </div>
+            <div class="two">
+                <div>
+                    <label for="name" th:text="${L.of('name')}">Your name</label>
+                    <input id="name" name="name" autocomplete="name" maxlength="80" required>
+                </div>
+                <div>
+                    <label for="phone" th:text="${L.of('phone')}">Phone number</label>
+                    <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="20" required>
+                </div>
+            </div>
+            <div>
+                <label for="note" th:text="${L.of('note')}">Note</label>
+                <input id="note" name="note" maxlength="300">
+            </div>
+            <button type="submit" class="btn" th:text="${L.of('send_request')}">Send request</button>
+        </form>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

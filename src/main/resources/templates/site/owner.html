@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{site/parts :: head(${'Orders · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+
+<!-- The owner's private page. It is in English for now; the public site is in the owner's language. -->
+<main class="wrap">
+    <section aria-labelledby="title">
+        <p style="margin:0"><a th:href="${base}" target="_blank" rel="noopener">Open the public site</a></p>
+        <h1 id="title" style="color:var(--brand)" th:text="${shop.name()}">Name</h1>
+        <p class="demo" role="note" style="margin-top:1rem">This page is private. Anyone with this link can see your orders, so do not share it.</p>
+    </section>
+
+    <section aria-labelledby="orders">
+        <h2 id="orders">Orders and bookings (<span th:text="${orders.size()}">0</span>)</h2>
+        <p th:if="${orders.isEmpty()}">Nothing yet. Orders and booking requests from your site will appear here.</p>
+        <div class="panel" th:each="o : ${orders}" style="margin-bottom:1rem">
+            <div class="head-row">
+                <strong><span th:text="${o.getKind().name() == 'BOOKING'} ? 'Booking' : 'Order'">Order</span> <span th:text="${o.getNumber()}">ABC12345</span></strong>
+                <span class="chip" th:text="${o.getKind().name() == 'BOOKING'} ? 'Request' : (${o.getStatus().name() == 'PAID_DEMO'} ? 'Paid (demo)' : 'Pay on delivery')">Status</span>
+            </div>
+            <p style="margin:0.5rem 0"><span th:text="${o.getCustomerName()}">Customer</span> · <span th:text="${o.getCustomerPhone()}">Phone</span></p>
+            <p style="margin:0.5rem 0" th:if="${o.getAddress()}" th:text="${o.getAddress()}">Address</p>
+            <p style="margin:0.5rem 0" th:if="${o.getBookingDate() != null}">For <strong th:text="${o.getBookingDate()}">date</strong> <span th:if="${o.getBookingTime()}" th:text="${o.getBookingTime()}">time</span></p>
+            <table>
+                <tbody>
+                <tr th:each="line : ${lines.get(o.getId())}">
+                    <td><span th:text="${line.name()}">Item</span> × <span th:text="${line.quantity()}">1</span></td>
+                    <td class="num" th:if="${line.unitPricePaise() > 0}" th:text="${money.minor(line.lineTotalPaise())}">0</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="total" th:if="${o.getTotalPaise() > 0}"><span>Total</span><span th:text="${money.minor(o.getTotalPaise())}">0</span></div>
+            <p style="margin:0.6rem 0 0;color:var(--muted)" th:if="${o.getNote()}">Note: <span th:text="${o.getNote()}">Note</span></p>
+            <p style="margin:0.6rem 0 0;color:var(--muted);font-size:0.9rem" th:text="${placed.get(o.getId())}">time</p>
+        </div>
+    </section>
+
+    <section aria-labelledby="messages">
+        <h2 id="messages">Messages (<span th:text="${enquiries.size()}">0</span>)</h2>
+        <p th:if="${enquiries.isEmpty()}">Nothing yet. Messages from your contact page will appear here.</p>
+        <div class="panel" th:each="e : ${enquiries}" style="margin-bottom:1rem">
+            <p style="margin:0"><strong th:text="${e.getName()}">Name</strong> · <span th:text="${e.getContact()}">Contact</span></p>
+            <p style="margin:0.5rem 0 0" th:text="${e.getMessage()}">Message</p>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

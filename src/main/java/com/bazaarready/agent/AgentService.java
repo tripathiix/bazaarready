@@ -10,6 +10,7 @@ import com.bazaarready.profile.Business;
 import com.bazaarready.profile.ProfileDtos.ProfileRequest;
 import com.bazaarready.profile.ProfileDtos.ProfileResponse;
 import com.bazaarready.profile.ProfileService;
+import com.bazaarready.site.SiteLabelService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,16 +42,18 @@ public class AgentService {
 
     private final ClaudeClient claude;
     private final ProfileService profiles;
+    private final SiteLabelService siteLabels;
     private final AgentSessionRepository sessions;
     private final AgentActionRepository actions;
     private final ObjectMapper json;
     private final Validator validator;
     private final ArrayNode tools;
 
-    AgentService(ClaudeClient claude, ProfileService profiles, AgentSessionRepository sessions,
+    AgentService(ClaudeClient claude, ProfileService profiles, SiteLabelService siteLabels, AgentSessionRepository sessions,
                  AgentActionRepository actions, ObjectMapper json, Validator validator) throws JsonProcessingException {
         this.claude = claude;
         this.profiles = profiles;
+        this.siteLabels = siteLabels;
         this.sessions = sessions;
         this.actions = actions;
         this.json = json;
@@ -194,6 +197,8 @@ public class AgentService {
                 ? profiles.create(request)
                 : profiles.update(session.getBusinessId(), request);
         session.setBusinessId(saved.id());
+        // The site's buttons and headings are translated once per language, here, so page views never wait.
+        siteLabels.ensure(saved.ownerLanguage());
         addToolResult(messages, toolUseId, "Saved. The shop preview is at " + saved.shopPath()
                 + ". It is not published yet.", false);
         logAction(session, "save_profile", "Saved your business details: " + saved.products().size()
@@ -279,16 +284,18 @@ public class AgentService {
                 .map(a -> new ActionView(a.getStepNo(), a.getTool(), a.getResultSummary(), a.getStatus(), readData(a.getData())))
                 .toList();
         String shopPath = null;
+        String ownerPath = null;
         boolean published = false;
         if (session.getBusinessId() != null) {
             ProfileResponse shop = profiles.get(session.getBusinessId());
             shopPath = shop.shopPath();
+            ownerPath = shop.ownerPath();
             published = shop.status() == Business.Status.PUBLISHED;
         }
         String approval = session.getStatus() == AgentSession.Status.WAITING_APPROVAL
                 ? "Publish your shop so customers can open it?"
                 : null;
         return new SessionView(session.getId(), session.getStatus(), session.getPendingQuestion(), session.getPendingAnswerType(), approval,
-                session.getFinalMessage(), session.getBusinessId(), shopPath, published, log);
+                session.getFinalMessage(), session.getBusinessId(), shopPath, ownerPath, published, log);
     }
 }

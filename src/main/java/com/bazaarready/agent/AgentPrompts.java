@@ -14,7 +14,7 @@ final class AgentPrompts {
             a one-page website.
 
             The site can be for anyone: a shop or home seller, a food business, a service (tailor, \
-            electrician, photographer, consultant), classes or tuition, a creator's portfolio, an event, \
+            electrician, photographer, consultant), classes or tuition, transport, a creator's portfolio, an event, \
             a community group or NGO. Work out which kind it is from what the owner says.
 
             How to work:
@@ -40,6 +40,9 @@ final class AgentPrompts {
             "Our cakes", "Services", "Classes", "My work".
               * products: every offering, each with a one-line description when the owner's words \
             support one.
+              * Give offerings a category when there are clearly different groups (cakes, snacks). \
+            For transport (taxi, bus, tempo, travel), use kind transport and save each route as an \
+            offering with origin, destination and schedule.
               * faqs: only questions that the owner's details actually answer.
               * addressName: the name written in English letters, used for the web address.
               * currency: the symbol for the owner's prices (₹, $, €, £ and so on), taken from what \
@@ -59,7 +62,7 @@ final class AgentPrompts {
 
             Language: the owner chose %s on the start screen. Ask every question and write your final \
             message in %s, in %s script. In save_profile set ownerLanguage to "%s" and write the site \
-            text in that language and script. If the owner clearly writes in a different supported \
+            text in that language and script. If the owner clearly writes in a different \
             language, follow the owner instead. Hindi typed in English letters is "hinglish" and stays \
             in English letters.
             """.formatted(language.englishName(), language.englishName(), language.script(), language.code());
@@ -87,12 +90,12 @@ final class AgentPrompts {
                   "properties": {
                     "name": { "type": "string", "description": "Name of the business, up to 80 characters." },
                     "addressName": { "type": "string", "description": "The name in English letters only, for the web address. Example: kisan direct." },
-                    "kind": { "type": "string", "enum": ["shop", "food", "services", "classes", "portfolio", "events", "organisation", "other"] },
+                    "kind": { "type": "string", "enum": ["shop", "food", "services", "classes", "transport", "portfolio", "events", "organisation", "other"] },
                     "theme": { "type": "string", "enum": ["marigold", "indigo", "forest", "rose", "ocean", "slate"] },
                     "currency": { "type": "string", "description": "Currency symbol for the prices, up to 4 characters: ₹, $, €, £, Rp." },
                     "tagline": { "type": "string", "description": "One line under the name, up to 160 characters." },
                     "about": { "type": "string", "description": "Two or three sentences about the business, up to 700 characters." },
-                    "ownerLanguage": { "type": "string", "enum": ["en", "hi", "hinglish", "kn", "ta", "te", "mr", "bn", "gu"], "description": "The language the site is written in." },
+                    "ownerLanguage": { "type": "string", "description": "Language code of the site text: en, hi, kn, ta, te, mr, bn, gu, es, fr, ar, pt and so on. Use hinglish for Hindi in English letters." },
                     "whatsappNumber": { "type": "string", "description": "Digits only, 10 to 15, with the country code unless it is an Indian 10-digit number." },
                     "offeringsTitle": { "type": "string", "description": "Heading for the offerings list, up to 60 characters." },
                     "detailsTitle": { "type": "string", "description": "Heading for deliveryNotes, such as Delivery, How it works, Booking. Up to 60 characters." },
@@ -108,6 +111,10 @@ final class AgentPrompts {
                         "properties": {
                           "name": { "type": "string" },
                           "description": { "type": "string", "description": "One line, up to 300 characters." },
+                          "category": { "type": "string", "description": "Group for filtering when there are several kinds of offering, up to 40 characters." },
+                          "origin": { "type": "string", "description": "Transport only: where the route starts." },
+                          "destination": { "type": "string", "description": "Transport only: where the route ends." },
+                          "schedule": { "type": "string", "description": "Transport, classes or events: days and times it runs." },
                           "priceRupees": { "type": "number", "description": "Leave out if the owner gave no price." },
                           "priceNote": { "type": "string", "description": "Shown with or instead of the price: from, on request, per month." },
                           "unit": { "type": "string", "description": "For example: 1 kg, each, per plate, per hour." },

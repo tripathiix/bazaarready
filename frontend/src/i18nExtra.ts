@@ -76,3 +76,15 @@ export const HEAR_QUESTION: Record<LanguageCode, string> = {
   bn: "প্রশ্ন শুনুন",
   gu: "પ્રશ્ન સાંભળો",
 };
+
+/** Label for the owner's link to orders, bookings and messages. */
+export const ORDERS_LINK: Record<LanguageCode, string> = {
+  en: "Orders and messages",
+  hi: "ऑर्डर और संदेश",
+  kn: "ಆರ್ಡರ್‌ಗಳು ಮತ್ತು ಸಂದೇಶಗಳು",
+  ta: "ஆர்டர்கள் மற்றும் செய்திகள்",
+  te: "ఆర్డర్లు మరియు సందేశాలు",
+  mr: "ऑर्डर आणि संदेश",
+  bn: "অর্ডার ও বার্তা",
+  gu: "ઓર્ડર અને સંદેશા",
+};

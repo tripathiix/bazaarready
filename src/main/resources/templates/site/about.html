@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${L.of('about_title') + ' · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<main class="wrap">
+    <section aria-labelledby="title">
+        <h1 id="title" style="color:var(--brand)" th:text="${L.of('about_title')}">About us</h1>
+        <p class="lead" style="margin-top:1.2rem" th:text="${shop.about() ?: shop.tagline()}">About</p>
+    </section>
+
+    <section aria-labelledby="details" th:if="${hasDetails}">
+        <h2 id="details" th:text="${L.of('details_title')}">Good to know</h2>
+        <div class="info">
+            <div th:if="${shop.deliveryNotes()}">
+                <h3 th:text="${detailsTitle}">Details</h3>
+                <p th:text="${shop.deliveryNotes()}">Notes</p>
+            </div>
+            <div th:if="${shop.noticeDays() != null and shop.noticeDays() > 0}">
+                <p><strong th:text="${L.of('order_ahead', 'days', shop.noticeDays())}">Notice</strong></p>
+            </div>
+            <div th:if="${shop.hours()}">
+                <h3 th:text="${L.of('hours')}">Timings</h3>
+                <p th:text="${shop.hours()}">Hours</p>
+            </div>
+            <div th:if="${shop.location()}">
+                <h3 th:text="${L.of('location')}">Where we are</h3>
+                <p th:text="${shop.location()}">Location</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq" aria-labelledby="faq" th:if="${!shop.faqs().isEmpty()}">
+        <h2 id="faq" th:text="${L.of('faq')}">Common questions</h2>
+        <details th:each="f : ${shop.faqs()}">
+            <summary th:text="${f.question()}">Question</summary>
+            <p th:text="${f.answer()}">Answer</p>
+        </details>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

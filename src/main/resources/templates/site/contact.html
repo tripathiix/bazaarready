@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${L.of('contact_title') + ' · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<main class="wrap">
+    <section aria-labelledby="title">
+        <h1 id="title" style="color:var(--brand)" th:text="${L.of('contact_title')}">Get in touch</h1>
+        <p th:if="${whatsappLink}" style="margin-top:1.2rem">
+            <a class="btn wa" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
+        </p>
+
+        <form class="panel form" method="post" th:action="${base + '/contact'}" style="margin-top:1.5rem">
+            <p class="error" role="alert" th:if="${error}" th:text="${L.of('fill_all')}">Please fill in your details.</p>
+            <div class="two">
+                <div>
+                    <label for="name" th:text="${L.of('name')}">Your name</label>
+                    <input id="name" name="name" autocomplete="name" maxlength="80" required>
+                </div>
+                <div>
+                    <label for="contact" th:text="${L.of('your_contact')}">Phone or email</label>
+                    <input id="contact" name="contact" maxlength="120" required>
+                </div>
+            </div>
+            <div>
+                <label for="message" th:text="${L.of('message')}">Your message</label>
+                <textarea id="message" name="message" rows="5" maxlength="2000" required></textarea>
+            </div>
+            <div class="trap" aria-hidden="true">
+                <label for="website">Website</label>
+                <input id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <button type="submit" class="btn" th:text="${L.of('send_message')}">Send message</button>
+        </form>
+    </section>
+
+    <section aria-labelledby="where" th:if="${shop.location() != null or shop.hours() != null}">
+        <div class="info">
+            <div th:if="${shop.location()}">
+                <h3 id="where" th:text="${L.of('location')}">Where we are</h3>
+                <p th:text="${shop.location()}">Location</p>
+            </div>
+            <div th:if="${shop.hours()}">
+                <h3 th:text="${L.of('hours')}">Timings</h3>
+                <p th:text="${shop.hours()}">Hours</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

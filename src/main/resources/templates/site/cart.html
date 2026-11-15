@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${L.of('cart_title') + ' · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<main class="wrap">
+    <section aria-labelledby="title" data-cart th:attr="data-currency=${shop.currency()},data-remove=${L.of('remove')}">
+        <h1 id="title" style="color:var(--brand)" th:text="${L.of('cart_title')}">Your cart</h1>
+
+        <div data-empty hidden style="margin-top:1.5rem">
+            <p th:text="${L.of('cart_empty')}">Your cart is empty.</p>
+            <a class="btn" th:href="${base + '/catalogue'}" th:text="${L.of('continue_shopping')}">Keep shopping</a>
+        </div>
+
+        <div class="panel" data-filled hidden style="margin-top:1.5rem">
+            <table>
+                <thead>
+                <tr>
+                    <th scope="col" th:text="${offeringsTitle}">Item</th>
+                    <th scope="col" th:text="${L.of('quantity')}">Quantity</th>
+                    <th scope="col" class="num" th:text="${L.of('total')}">Total</th>
+                    <th scope="col"><span style="position:absolute;left:-9999px" th:text="${L.of('remove')}">Remove</span></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="total"><span th:text="${L.of('total')}">Total</span><span data-total>0</span></div>
+            <p style="margin:1rem 0 0"><a th:href="${base + '/catalogue'}" th:text="${L.of('continue_shopping')}">Keep shopping</a></p>
+        </div>
+    </section>
+
+    <form class="panel form" method="post" th:action="${base + '/checkout'}" data-checkout hidden aria-labelledby="details">
+        <h2 id="details" th:text="${L.of('your_details')}">Your details</h2>
+        <p class="error" role="alert" th:if="${error}" th:text="${L.of('fill_all')}">Please fill in your details.</p>
+        <div class="two">
+            <div>
+                <label for="name" th:text="${L.of('name')}">Your name</label>
+                <input id="name" name="name" autocomplete="name" maxlength="80" required th:value="${form != null ? form.get('name') : ''}">
+            </div>
+            <div>
+                <label for="phone" th:text="${L.of('phone')}">Phone number</label>
+                <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="20" required th:value="${form != null ? form.get('phone') : ''}">
+            </div>
+        </div>
+        <div>
+            <label for="address" th:text="${L.of('address')}">Delivery address</label>
+            <textarea id="address" name="address" rows="3" autocomplete="street-address" maxlength="300" required th:text="${form != null ? form.get('address') : ''}"></textarea>
+        </div>
+        <div>
+            <label for="note" th:text="${L.of('note')}">Note</label>
+            <input id="note" name="note" maxlength="300" th:value="${form != null ? form.get('note') : ''}">
+        </div>
+        <input type="hidden" name="cart" value="{}">
+        <button type="submit" class="btn" th:text="${L.of('checkout')}">Checkout</button>
+    </form>
+
+    <script type="application/json" id="products" th:utext="${productsJson}">[]</script>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

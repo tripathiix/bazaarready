@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<section class="hero">
+    <div class="wrap">
+        <h1 th:text="${shop.name()}">Name</h1>
+        <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+        <div class="cta">
+            <a class="btn light" th:if="${!shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">What we offer</a>
+            <a class="btn ghost" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Request a booking</a>
+            <a class="btn ghost" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
+        </div>
+        <ul class="facts">
+            <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">offerings</span></li>
+            <li th:if="${shop.location()}" th:text="${shop.location()}">Location</li>
+            <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+        </ul>
+    </div>
+</section>
+
+<main class="wrap">
+    <section aria-labelledby="about" th:if="${shop.about()}">
+        <h2 id="about" th:text="${L.of('about_title')}">About us</h2>
+        <p class="lead" th:text="${shop.about()}">About</p>
+    </section>
+
+    <section aria-labelledby="offerings" th:if="${!featured.isEmpty()}">
+        <div class="head-row">
+            <h2 id="offerings" th:text="${offeringsTitle}">What we offer</h2>
+            <a class="btn outline small" th:if="${shop.products().size() > featured.size()}" th:href="${base + '/catalogue'}" th:text="${L.of('view_all')}">See everything</a>
+        </div>
+        <ul class="grid">
+            <th:block th:each="p : ${featured}">
+                <li th:replace="~{site/parts :: card(${p})}"></li>
+            </th:block>
+        </ul>
+    </section>
+
+    <section aria-labelledby="details" th:if="${hasDetails}">
+        <h2 id="details" th:text="${L.of('details_title')}">Good to know</h2>
+        <div class="info">
+            <div th:if="${shop.deliveryNotes()}">
+                <h3 th:text="${detailsTitle}">Details</h3>
+                <p th:text="${shop.deliveryNotes()}">Notes</p>
+            </div>
+            <div th:if="${shop.noticeDays() != null and shop.noticeDays() > 0}">
+                <p><strong th:text="${L.of('order_ahead', 'days', shop.noticeDays())}">Notice</strong></p>
+            </div>
+            <div th:if="${shop.hours()}">
+                <h3 th:text="${L.of('hours')}">Timings</h3>
+                <p th:text="${shop.hours()}">Hours</p>
+            </div>
+            <div th:if="${shop.location()}">
+                <h3 th:text="${L.of('location')}">Where we are</h3>
+                <p th:text="${shop.location()}">Location</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq" aria-labelledby="faq" th:if="${!shop.faqs().isEmpty()}">
+        <h2 id="faq" th:text="${L.of('faq')}">Common questions</h2>
+        <details th:each="f : ${shop.faqs()}">
+            <summary th:text="${f.question()}">Question</summary>
+            <p th:text="${f.answer()}">Answer</p>
+        </details>
+    </section>
+
+    <section class="band" aria-labelledby="contact">
+        <h2 id="contact" th:text="${L.of('contact_title')}">Get in touch</h2>
+        <div class="cta" style="justify-content:center;margin-top:0">
+            <a class="btn light" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
+            <a class="btn ghost" th:href="${base + '/contact'}" th:text="${L.of('send_message')}">Send message</a>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

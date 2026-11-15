@@ -35,6 +35,7 @@ public final class AgentDtos {
             String finalMessage,
             UUID businessId,
             String shopPath,
+            String ownerPath,
             boolean published,
             List<ActionView> actions) {
     }

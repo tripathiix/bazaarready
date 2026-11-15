@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${offeringsTitle + ' · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<main class="wrap">
+    <section aria-labelledby="title">
+        <h1 id="title" style="color:var(--brand)" th:text="${offeringsTitle}">What we offer</h1>
+
+        <div class="filters" style="margin:1.5rem 0 1rem">
+            <input type="search" data-search th:placeholder="${L.of('search')}" th:attr="aria-label=${L.of('search')}">
+            <input type="search" data-from th:if="${hasRoutes}" th:placeholder="${L.of('from')}" th:attr="aria-label=${L.of('from')}">
+            <input type="search" data-to th:if="${hasRoutes}" th:placeholder="${L.of('to')}" th:attr="aria-label=${L.of('to')}">
+        </div>
+
+        <div class="cats" th:if="${categories.size() > 1}" style="margin-bottom:1.5rem">
+            <button type="button" class="cat" data-category-button="" aria-pressed="true" th:text="${L.of('all')}">All</button>
+            <button type="button" class="cat" th:each="c : ${categories}" th:attr="data-category-button=${c}" aria-pressed="false" th:text="${c}">Category</button>
+        </div>
+
+        <ul class="grid" data-grid>
+            <th:block th:each="p : ${shop.products()}">
+                <li th:replace="~{site/parts :: card(${p})}"></li>
+            </th:block>
+        </ul>
+        <p data-none hidden th:text="${L.of('nothing_found')}">Nothing matches your search.</p>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

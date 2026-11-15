@@ -20,7 +20,7 @@ public class Business {
     public enum Status { DRAFT, PUBLISHED }
 
     /** Accepted site kinds and colour themes, for request validation. */
-    public static final String KIND_PATTERN = "shop|food|services|classes|portfolio|events|organisation|other";
+    public static final String KIND_PATTERN = "shop|food|services|classes|transport|portfolio|events|organisation|other";
     public static final String THEME_PATTERN = "marigold|indigo|forest|rose|ocean|slate";
 
     @Id
@@ -79,6 +79,10 @@ public class Business {
     @Column(nullable = false)
     private Status status;
 
+    /** Makes up the owner's private link to orders and messages. Never shown on the public site. */
+    @Column(name = "owner_key", nullable = false)
+    private UUID ownerKey;
+
     @Column(name = "published_at")
     private Instant publishedAt;
 
@@ -99,6 +103,7 @@ public class Business {
         this.theme = "marigold";
         this.currency = "₹";
         this.status = Status.DRAFT;
+        this.ownerKey = UUID.randomUUID();
         this.createdAt = Instant.now();
     }
 
@@ -126,6 +131,7 @@ public class Business {
     public String getReplyStyle() { return replyStyle; }
     public Source getSource() { return source; }
     public Status getStatus() { return status; }
+    public UUID getOwnerKey() { return ownerKey; }
     public Instant getPublishedAt() { return publishedAt; }
     public Instant getCreatedAt() { return createdAt; }
 

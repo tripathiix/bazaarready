@@ -51,13 +51,15 @@ public class SiteLabelService {
             return stored;
         }
         if (claude.isConfigured() && inProgress.add(code)) {
-            Thread.ofPlatform().daemon().start(() -> {
+            Thread worker = new Thread(() -> {
                 try {
                     ensure(code);
                 } finally {
                     inProgress.remove(code);
                 }
-            });
+            }, "site-labels-" + code);
+            worker.setDaemon(true);
+            worker.start();
         }
         return ENGLISH;
     }

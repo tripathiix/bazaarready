@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()},data-clear-cart=${doneKind == 'order'}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<main class="wrap">
+    <section class="done" aria-labelledby="title">
+        <div class="tick" aria-hidden="true">✓</div>
+
+        <th:block th:if="${doneKind == 'message'}">
+            <h1 id="title" style="color:var(--brand);max-width:none" th:text="${L.of('message_done')}">Message sent</h1>
+        </th:block>
+
+        <th:block th:if="${doneKind != 'message'}">
+            <h1 id="title" style="color:var(--brand);max-width:none" th:text="${doneKind == 'booking'} ? ${L.of('booking_done')} : ${L.of('order_done')}">Order received</h1>
+            <p class="lead" style="margin:1rem auto" th:text="${L.of('thanks', 'name', shop.name())}">Thank you!</p>
+
+            <div class="panel" style="text-align:start;margin-top:1.5rem">
+                <p style="margin:0 0 0.6rem"><span th:text="${L.of('order_number')}">Reference</span>: <strong th:text="${order.getNumber()}">ABC12345</strong></p>
+                <table>
+                    <tbody>
+                    <tr th:each="line : ${orderLines}">
+                        <td><span th:text="${line.name()}">Item</span><span th:if="${doneKind == 'order'}"> × <span th:text="${line.quantity()}">1</span></span></td>
+                        <td class="num" th:if="${line.unitPricePaise() > 0}" th:text="${money.minor(line.lineTotalPaise())}">0</td>
+                    </tr>
+                    <tr th:if="${order.getBookingDate() != null}">
+                        <td th:text="${L.of('date')}">Date</td>
+                        <td class="num"><span th:text="${order.getBookingDate()}">2026-01-01</span> <span th:if="${order.getBookingTime()}" th:text="${order.getBookingTime()}">10:00</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="total" th:if="${doneKind == 'order'}">
+                    <span th:text="${L.of('total')}">Total</span><span th:text="${money.minor(order.getTotalPaise())}">0</span>
+                </div>
+                <p th:if="${doneKind == 'order'}" style="margin:0.8rem 0 0">
+                    <span class="chip" th:text="${order.getStatus().name() == 'PAID_DEMO'} ? ${L.of('paid_demo')} : ${L.of('pay_on_delivery')}">Payment</span>
+                </p>
+            </div>
+        </th:block>
+
+        <p style="margin-top:2rem"><a class="btn" th:href="${base}" th:text="${L.of('back_home')}">Back to home</a></p>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

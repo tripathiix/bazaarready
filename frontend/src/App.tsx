@@ -4,7 +4,7 @@ import { Bunting, OpenSign, Petals, Shutters } from "./Decor";
 import { countries, defaultCountry } from "./countries";
 import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
-import { EXTRA, HEAR_QUESTION } from "./i18nExtra";
+import { EXTRA, HEAR_QUESTION, ORDERS_LINK } from "./i18nExtra";
 import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
 
 /** One activity-log line in the owner's language, built from what the agent did. */
@@ -316,6 +316,11 @@ export default function App() {
                   {session.shopPath && (
                     <a className="button primary" href={session.shopPath} target="_blank" rel="noreferrer">
                       {session.published ? t.openSite : t.openPreview}
+                    </a>
+                  )}
+                  {session.ownerPath && session.published && (
+                    <a className="button" href={session.ownerPath} target="_blank" rel="noreferrer">
+                      {ORDERS_LINK[language]}
                     </a>
                   )}
                   <button type="button" className="button" onClick={startOver}>
