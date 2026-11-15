@@ -35,6 +35,40 @@ class AgentController {
         return agent.start(request.description(), request.language());
     }
 
+    /** Upload WhatsApp chat exports (.txt or .zip). Files are read in memory and never stored. */
+    @PostMapping("/whatsapp")
+    @ResponseStatus(HttpStatus.CREATED)
+    SessionView startFromChats(@org.springframework.web.bind.annotation.RequestParam("files") java.util.List<org.springframework.web.multipart.MultipartFile> files,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "en") String language,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "") String ownerName) throws java.io.IOException {
+        if (files.isEmpty() || files.size() > 20) {
+            throw new IllegalArgumentException("Upload between 1 and 20 chat files.");
+        }
+        java.util.List<byte[]> data = new java.util.ArrayList<>();
+        java.util.List<String> names = new java.util.ArrayList<>();
+        for (var file : files) {
+            data.add(file.getBytes());
+            names.add(file.getOriginalFilename());
+        }
+        var texts = com.bazaarready.intake.WhatsAppChat.readFiles(data, names);
+        var messages = com.bazaarready.intake.WhatsAppChat.parse(texts);
+        if (messages.size() < 3) {
+            throw new IllegalArgumentException("These files don't look like WhatsApp chat exports. In WhatsApp, open a chat, choose Export chat, then Without media.");
+        }
+        String language2 = language.matches(com.bazaarready.common.Languages.CODE_PATTERN) ? language : "en";
+        return agent.startFromChats(com.bazaarready.intake.WhatsAppChat.clean(messages, ownerName), language2);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    ProblemDetail badUpload(IllegalArgumentException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(java.io.IOException.class)
+    ProblemDetail unreadable(java.io.IOException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The files could not be read: " + e.getMessage());
+    }
+
     @GetMapping("/{id}")
     SessionView view(@PathVariable UUID id) {
         return agent.view(id);

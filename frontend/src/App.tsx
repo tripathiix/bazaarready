@@ -1,16 +1,18 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ActionView, SessionView, sendApproval, sendReply, startSession } from "./api";
+import { ActionView, SessionView, sendApproval, sendReply, startFromChats, startSession } from "./api";
 import { Gallery, OpenSign, Petals, PhotoCredits, Shutters, StringLights } from "./Decor";
 import { countries, defaultCountry } from "./countries";
 import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
-import { EXTRA, HEAR_QUESTION, ORDERS_LINK } from "./i18nExtra";
+import { CHATS, EXTRA, HEAR_QUESTION, ORDERS_LINK } from "./i18nExtra";
 import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
 import { NOTES, useShowcase } from "./showcase";
 
 /** One activity-log line in the owner's language, built from what the agent did. */
-function actionText(action: ActionView, t: Strings): string {
+function actionText(action: ActionView, t: Strings, readChats: string): string {
   switch (action.tool) {
+    case "import_chats":
+      return readChats.replace("{messages}", String(action.data?.messages ?? 0)).replace("{customers}", String(action.data?.customers ?? 0));
     case "start":
       return t.logStart;
     case "ask_owner": {
@@ -40,6 +42,8 @@ export default function App() {
   const t = STRINGS[language];
   const extra = EXTRA[language];
   const notes = NOTES[language];
+  const chatWords = CHATS[language];
+  const [ownerName, setOwnerName] = useState("");
 
   const [description, setDescription] = useState("");
   const [session, setSession] = useState<SessionView | null>(null);
@@ -201,6 +205,39 @@ export default function App() {
                 {t.listening}
               </p>
             )}
+            <div className="chats">
+              <p className="chats-or">{chatWords.or}</p>
+              <p className="hint">{chatWords.how}</p>
+              <div className="row">
+                <label htmlFor="chat-owner" className="visually-hidden">
+                  {chatWords.owner}
+                </label>
+                <input
+                  id="chat-owner"
+                  className="chat-owner"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  placeholder={chatWords.owner}
+                  maxLength={60}
+                />
+                <label className="button" htmlFor="chat-files">
+                  {chatWords.button}
+                </label>
+                <input
+                  id="chat-files"
+                  className="visually-hidden"
+                  type="file"
+                  accept=".txt,.zip,text/plain,application/zip"
+                  multiple
+                  disabled={busy}
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files ?? []);
+                    e.target.value = "";
+                    if (files.length) void run(() => startFromChats(files, language, ownerName));
+                  }}
+                />
+              </div>
+            </div>
           </form>
         )}
 
@@ -218,7 +255,7 @@ export default function App() {
                 {session.actions.map((action) => (
                   <li key={action.stepNo} className={`log-${action.status.toLowerCase()}`}>
                     <span className="mark" aria-hidden="true" />
-                    <span>{actionText(action, t)}</span>
+                    <span>{actionText(action, t, chatWords.read)}</span>
                   </li>
                 ))}
                 {busy && (

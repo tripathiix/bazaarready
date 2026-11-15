@@ -49,6 +49,10 @@ public class AgentSession {
     /** Language code the owner picked on the start screen; see Languages. */
     private String language;
 
+    /** DESCRIPTION or WHATSAPP: what the owner gave the agent to start from. */
+    @Column(nullable = false)
+    private String source = "DESCRIPTION";
+
     @Column(name = "model_calls", nullable = false)
     private int modelCalls;
 
@@ -112,6 +116,8 @@ public class AgentSession {
     public String getFinalMessage() { return finalMessage; }
     public int getModelCalls() { return modelCalls; }
     public String getLanguage() { return language; }
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
 
     public void setBusinessId(UUID businessId) { this.businessId = businessId; }
     public void setPendingAnswerType(String pendingAnswerType) { this.pendingAnswerType = pendingAnswerType; }

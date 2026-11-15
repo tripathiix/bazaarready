@@ -39,6 +39,8 @@ public final class ProfileDtos {
             @Pattern(regexp = "[A-Za-z]{2,8}(-[A-Za-z0-9]{2,8})?") String ownerLanguage,
             @Pattern(regexp = "\\+?[0-9]{10,15}", message = "must be 10 to 15 digits") String whatsappNumber,
             @Size(max = 500) String deliveryNotes,
+            /** How the owner writes to customers, learned from chats; used when drafting replies. */
+            @Size(max = 600) String replyStyle,
             @Min(0) @Max(60) Integer noticeDays,
             Business.Source source,
             @Valid @Size(max = 100) List<ProductRequest> products,

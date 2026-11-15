@@ -127,6 +127,7 @@ public class ProfileService {
         }
         business.setWhatsappNumber(blankToNull(request.whatsappNumber()));
         business.setDeliveryNotes(blankToNull(request.deliveryNotes()));
+        business.setReplyStyle(blankToNull(request.replyStyle()));
         business.setNoticeDays(request.noticeDays());
     }
 

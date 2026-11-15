@@ -930,3 +930,41 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .holo { animation: none; }
 }
+
+/* WhatsApp import, inside the writing card */
+.chats {
+  margin-top: 0.8rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.chats-or {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #b9f5e3;
+}
+
+.chat-owner {
+  flex: 1 1 14rem;
+  min-width: 0;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+}
+
+label.button {
+  cursor: pointer;
+  border-color: rgba(79, 195, 161, 0.5);
+  color: #b9f5e3;
+}
+
+#chat-files:focus-visible + label,
+label.button:focus-within {
+  outline: 2px solid var(--amber);
+}

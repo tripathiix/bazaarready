@@ -107,6 +107,7 @@ final class AgentPrompts {
                     "whatsappNumber": { "type": "string", "description": "Digits only, 10 to 15, with the country code unless it is an Indian 10-digit number." },
                     "offeringsTitle": { "type": "string", "description": "Heading for the offerings list, up to 60 characters." },
                     "detailsTitle": { "type": "string", "description": "Heading for deliveryNotes, such as Delivery, How it works, Booking. Up to 60 characters." },
+                    "replyStyle": { "type": "string", "description": "Only from WhatsApp chats: how the owner writes to customers (language, tone, greetings, emoji), in one or two sentences." },
                     "deliveryNotes": { "type": "string", "description": "Delivery areas and charges, or how booking and payment work. Up to 500 characters." },
                     "noticeDays": { "type": "integer", "description": "Days of notice needed, if stated." },
                     "hours": { "type": "string", "description": "Opening hours or timings, if stated. Up to 200 characters." },
