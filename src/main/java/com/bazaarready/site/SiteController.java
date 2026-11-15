@@ -297,7 +297,18 @@ class SiteController {
     private void common(ProfileResponse shop, Model model, String page) {
         String language = shop.ownerLanguage() == null ? "en" : shop.ownerLanguage().toLowerCase();
         SiteLabels labels = labelService.labelsFor(language);
+        String layout = shop.layout() == null ? "classic" : shop.layout();
         String[] fonts = FONTS.getOrDefault(language, LATIN_FONTS);
+        if (fonts == LATIN_FONTS) {
+            // Latin-script sites get a heading face that suits the layout.
+            fonts = new String[] {switch (layout) {
+                case "split" -> "Bricolage Grotesque";
+                case "boutique" -> "Fraunces";
+                case "magazine" -> "Unbounded";
+                default -> "Baloo 2";
+            }, "Anek Latin"};
+        }
+        model.addAttribute("layout", layout);
 
         model.addAttribute("shop", shop);
         model.addAttribute("L", labels);
@@ -318,6 +329,9 @@ class SiteController {
                 + ":wght@600;800&family=" + fonts[1].replace(' ', '+') + ":wght@400;600&display=swap");
         model.addAttribute("fontVars", "--display:'" + fonts[0] + "';--body:'" + fonts[1] + "'");
         addPictures(shop, model);
+        @SuppressWarnings("unchecked")
+        Map<UUID, ImageService.Picture> pictures = (Map<UUID, ImageService.Picture>) model.getAttribute("pictures");
+        model.addAttribute("mosaic", shop.products().stream().filter(p -> pictures != null && pictures.containsKey(p.id())).limit(5).toList());
     }
 
     /** Pictures for the banner and every offering, plus the photographers to credit. */

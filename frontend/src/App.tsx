@@ -351,7 +351,10 @@ export default function App() {
         />
       </main>
 
-      <footer className="foot">BazaarReady</footer>
+      <footer className="foot">
+        <span>BazaarReady</span>
+        <span className="holo">Built with love @ Yashi Tripathi</span>
+      </footer>
     </>
   );
 }

@@ -7,7 +7,10 @@
 <main class="wrap">
     <section aria-labelledby="title">
         <h1 id="title" style="color:var(--brand)" th:text="${L.of('about_title')}">About us</h1>
-        <p class="lead" style="margin-top:1.2rem" th:text="${shop.about() ?: shop.tagline()}">About</p>
+        <div class="about-grid">
+            <p class="lead" th:text="${shop.about() ?: shop.tagline()}">About</p>
+            <img class="about-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" loading="lazy">
+        </div>
     </section>
 
     <section aria-labelledby="details" th:if="${hasDetails}">

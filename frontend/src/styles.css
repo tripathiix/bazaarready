@@ -847,6 +847,10 @@ select {
 }
 
 .foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
   text-align: center;
   font-family: var(--brand);
   font-weight: 800;
@@ -898,4 +902,31 @@ select {
   .polaroid a {
     transition: none;
   }
+}
+
+/* A small holographic credit at the very end. */
+.holo {
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(110deg, #8c9cff, #ec7a8c, #f4a83a, #4fc3a1, #8c9cff) text,
+    rgba(255, 255, 255, 0.04);
+  -webkit-background-clip: text;
+  color: transparent;
+  background-size: 300% 100%;
+  box-shadow: 0 0 18px rgba(140, 156, 255, 0.18), inset 0 0 10px rgba(236, 122, 140, 0.12);
+  animation: holo 6s linear infinite;
+}
+
+@keyframes holo {
+  to { background-position: 300% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo { animation: none; }
 }

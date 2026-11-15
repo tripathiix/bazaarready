@@ -21,6 +21,7 @@ public class Business {
 
     /** Accepted site kinds and colour themes, for request validation. */
     public static final String KIND_PATTERN = "shop|food|services|classes|transport|portfolio|events|organisation|other";
+    public static final String LAYOUT_PATTERN = "classic|split|boutique|magazine";
     public static final String THEME_PATTERN = "marigold|indigo|forest|rose|ocean|slate";
 
     @Id
@@ -39,6 +40,10 @@ public class Business {
 
     @Column(nullable = false)
     private String theme;
+
+    /** Page layout: classic, split, boutique or magazine. */
+    @Column(nullable = false)
+    private String layout;
 
     /** Currency symbol shown before prices, such as ₹, $, € or £. */
     @Column(nullable = false)
@@ -105,6 +110,7 @@ public class Business {
         this.ownerLanguage = "en";
         this.kind = "shop";
         this.theme = "marigold";
+        this.layout = "classic";
         this.currency = "₹";
         this.status = Status.DRAFT;
         this.ownerKey = UUID.randomUUID();
@@ -122,6 +128,7 @@ public class Business {
     public String getTagline() { return tagline; }
     public String getKind() { return kind; }
     public String getTheme() { return theme; }
+    public String getLayout() { return layout; }
     public String getCurrency() { return currency; }
     public String getAbout() { return about; }
     public String getHeroQuery() { return heroQuery; }
@@ -144,6 +151,7 @@ public class Business {
     public void setTagline(String tagline) { this.tagline = tagline; }
     public void setKind(String kind) { this.kind = kind; }
     public void setTheme(String theme) { this.theme = theme; }
+    public void setLayout(String layout) { this.layout = layout; }
     public void setCurrency(String currency) { this.currency = currency; }
     public void setAbout(String about) { this.about = about; }
     public void setHeroQuery(String heroQuery) { this.heroQuery = heroQuery; }

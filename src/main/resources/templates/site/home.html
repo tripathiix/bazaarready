@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
 <head th:replace="~{site/parts :: head(${shop.name()})}"></head>
-<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
-<section class="hero" th:classappend="${hero != null} ? 'has-photo'">
+<!-- Classic: the name over the banner photo. -->
+<section class="hero" th:if="${layout == 'classic'}" th:classappend="${hero != null} ? 'has-photo'">
     <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
     <div class="wrap">
         <h1 th:text="${shop.name()}">Name</h1>
@@ -22,10 +23,73 @@
     </div>
 </section>
 
+<!-- Split: words on one side, a large photo on the other. -->
+<section class="hero-split" th:if="${layout == 'split'}">
+    <div class="wrap split-grid">
+        <div class="split-text">
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Request a booking</a>
+                <a class="btn" th:if="${!booking and !shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">What we offer</a>
+                <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
+            </div>
+            <ul class="facts">
+                <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+                <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">offerings</span></li>
+            </ul>
+        </div>
+        <div class="split-photo">
+            <img th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
+            <span th:unless="${hero != null}" th:text="${#strings.substring(shop.name(), 0, 1)}">A</span>
+        </div>
+    </div>
+</section>
+
+<!-- Boutique: quiet, centred, with a wide framed photo. -->
+<section class="hero-boutique" th:if="${layout == 'boutique'}">
+    <div class="wrap">
+        <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+        <h1 th:text="${shop.name()}">Name</h1>
+        <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+        <div class="cta">
+            <a class="btn" th:if="${!shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">What we offer</a>
+            <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
+        </div>
+        <div class="boutique-photo" th:if="${hero != null}"><img th:src="${hero.url()}" alt="" fetchpriority="high"></div>
+    </div>
+</section>
+
+<!-- Magazine: a full-width photo with very large type. -->
+<section class="hero-magazine" th:if="${layout == 'magazine'}" th:classappend="${hero != null} ? 'has-photo'">
+    <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
+    <div class="wrap">
+        <h1 th:text="${shop.name()}">Name</h1>
+        <div class="magazine-foot">
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn light" th:if="${!shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">What we offer</a>
+                <a class="btn ghost" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Request a booking</a>
+                <a class="btn ghost" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="marquee" th:if="${layout == 'magazine' and shop.products().size() > 1}" aria-hidden="true">
+    <div class="marquee-track">
+        <th:block th:each="round : ${#numbers.sequence(1, 2)}">
+            <span th:each="p : ${shop.products()}" th:text="${p.name()}">Offering</span>
+        </th:block>
+    </div>
+</div>
+
 <main class="wrap">
-    <section aria-labelledby="about" th:if="${shop.about()}">
-        <h2 id="about" th:text="${L.of('about_title')}">About us</h2>
-        <p class="lead" th:text="${shop.about()}">About</p>
+    <section aria-labelledby="about" th:if="${shop.about()}" class="about-band">
+        <div>
+            <h2 id="about" th:text="${L.of('about_title')}">About us</h2>
+            <p class="lead" th:text="${shop.about()}">About</p>
+        </div>
     </section>
 
     <section aria-labelledby="offerings" th:if="${!featured.isEmpty()}">
@@ -38,6 +102,13 @@
                 <li th:replace="~{site/parts :: card(${p})}"></li>
             </th:block>
         </ul>
+    </section>
+
+    <section class="mosaic" th:if="${mosaic.size() >= 3}" aria-label="Photos">
+        <a th:each="m, it : ${mosaic}" th:href="${base + '/item/' + m.id()}" th:classappend="${it.index == 0} ? 'big'">
+            <img th:src="${pictures.get(m.id()).url()}" th:alt="${m.name()}" loading="lazy">
+            <span th:text="${m.name()}">Offering</span>
+        </a>
     </section>
 
     <section aria-labelledby="details" th:if="${hasDetails}">

@@ -26,6 +26,7 @@ public final class ProfileDtos {
             @Size(max = 160) String tagline,
             @Pattern(regexp = Business.KIND_PATTERN) String kind,
             @Pattern(regexp = Business.THEME_PATTERN) String theme,
+            @Pattern(regexp = Business.LAYOUT_PATTERN) String layout,
             @Size(max = 4) String currency,
             @Size(max = 700) String about,
             /** Stock photo search words for the banner, in English. */
@@ -73,6 +74,7 @@ public final class ProfileDtos {
             /** How the site behaves: STORE (cart and checkout), BOOKING (booking requests) or SHOWCASE. */
             String style,
             String theme,
+            String layout,
             String currency,
             String about,
             String heroImageQuery,
