@@ -36,6 +36,28 @@
         </div>
     </section>
 
+    <section aria-labelledby="collabs-title" id="collabs">
+        <h2 id="collabs-title">Is this collab real?</h2>
+        <p style="color:var(--muted)">Paste a brand-deal or collab email, or a message from Instagram or WhatsApp. We look up the sender's website and email records and check the wording for scam patterns, then tell you what we found.</p>
+        <p class="error" th:if="${param.check != null and param.check[0] == 'empty'}">Paste the message first.</p>
+        <form method="post" th:action="${'/owner/' + ownerKey + '/check'}" class="panel form" style="max-width:none">
+            <div>
+                <label for="sender">Sender's email address (if you have it)</label>
+                <input id="sender" name="sender" maxlength="200" placeholder="partnerships@brand.com">
+            </div>
+            <div>
+                <label for="message">The message</label>
+                <textarea id="message" name="message" rows="6" maxlength="6000" required></textarea>
+            </div>
+            <button class="btn">Check it</button>
+        </form>
+        <div class="panel" th:each="c : ${pastedChecks}" style="margin-top:1rem">
+            <p style="margin:0"><strong th:text="${c.sender() != null and !c.sender().isBlank() ? c.sender() : 'No sender given'}">Sender</strong></p>
+            <details><summary>The message</summary><p style="white-space:pre-wrap" th:text="${c.body()}">Body</p></details>
+            <div th:replace="~{site/parts :: verdict(${c})}"></div>
+        </div>
+    </section>
+
     <section aria-labelledby="tests-title" id="tests">
         <h2 id="tests-title">Test my site</h2>
         <p style="color:var(--muted)">Three AI customers visit your site and try to use it: Rahul is in a hurry and tries to order or book, Kiran checks whether she can trust you, and Farah uses a screen reader. A code check looks for accessibility problems. It takes a minute or two. Test orders and messages are removed afterwards.</p>
@@ -135,9 +157,22 @@
         <div class="panel" th:each="e : ${enquiries}" style="margin-bottom:1rem">
             <p style="margin:0"><strong th:text="${e.getName()}">Name</strong> · <span th:text="${e.getContact()}">Contact</span></p>
             <p style="margin:0.5rem 0 0" th:text="${e.getMessage()}">Message</p>
+            <th:block th:if="${enquiryChecks.get(e.getId()) != null}">
+                <div th:replace="~{site/parts :: verdict(${enquiryChecks.get(e.getId())})}"></div>
+            </th:block>
         </div>
     </section>
 </main>
+<script th:if="${checksRunning}">setTimeout(function () { location.reload(); }, 4000);</script>
+<script>
+document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-copy]");
+    if (!button) return;
+    var box = button.previousElementSibling;
+    var done = function () { button.textContent = "Copied"; setTimeout(function () { button.textContent = "Copy reply"; }, 1500); };
+    if (navigator.clipboard) { navigator.clipboard.writeText(box.value).then(done, function () { box.select(); }); } else { box.select(); }
+});
+</script>
 
 </body>
 </html>

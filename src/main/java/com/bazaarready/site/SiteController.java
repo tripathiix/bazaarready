@@ -68,10 +68,13 @@ class SiteController {
     private final ImageService images;
 
     private final com.bazaarready.testing.TestRunService tests;
+    private final com.bazaarready.guard.MessageCheckService checks;
 
     SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json,
-                   ImageService images, com.bazaarready.testing.TestRunService tests) {
+                   ImageService images, com.bazaarready.testing.TestRunService tests,
+                   com.bazaarready.guard.MessageCheckService checks) {
         this.tests = tests;
+        this.checks = checks;
         this.images = images;
         this.profiles = profiles;
         this.labelService = labelService;
@@ -218,7 +221,8 @@ class SiteController {
                 model.addAttribute("error", true);
                 return "site/contact";
             }
-            orders.saveEnquiry(shop.id(), clip(name, 80), clip(contact, 120), clip(message, 2000));
+            var enquiry = orders.saveEnquiry(shop.id(), clip(name, 80), clip(contact, 120), clip(message, 2000));
+            checks.checkEnquiry(shop.id(), enquiry.getId(), enquiry.getName(), enquiry.getContact(), enquiry.getMessage());
         }
         model.addAttribute("doneKind", "message");
         return "site/done";
@@ -241,6 +245,12 @@ class SiteController {
         model.addAttribute("enquiries", orders.enquiriesFor(shop.id()));
         model.addAttribute("ownerKey", ownerKey);
         model.addAttribute("run", tests.latest(shop.id()));
+        var allChecks = checks.recent(shop.id());
+        model.addAttribute("pastedChecks", allChecks.stream().filter(c -> c.enquiryId() == null).toList());
+        Map<UUID, com.bazaarready.guard.MessageCheckService.CheckView> byEnquiry = new HashMap<>();
+        allChecks.stream().filter(c -> c.enquiryId() != null).forEach(c -> byEnquiry.putIfAbsent(c.enquiryId(), c));
+        model.addAttribute("enquiryChecks", byEnquiry);
+        model.addAttribute("checksRunning", allChecks.stream().anyMatch(c -> c.running()));
         return "site/owner";
     }
 

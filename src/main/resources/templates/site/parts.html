@@ -184,6 +184,24 @@
         main.wrap { padding-top: 3rem; padding-bottom: 5rem; }
         .layout-boutique .about-band { text-align: center; }
         .layout-boutique .lead { margin-inline: auto; }
+
+        /* ---- Fake-or-real verdicts ---- */
+        .verdict { margin-top: 0.8rem; border-inline-start: 4px solid var(--line); padding-inline-start: 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .verdict p { margin: 0; }
+        .verdict-label { align-self: flex-start; font-weight: 800; border-radius: 999px; padding: 0.15rem 0.8rem; }
+        .v-LIKELY_FAKE { border-color: #c62828; }
+        .v-LIKELY_FAKE .verdict-label { background: #fde3e1; color: #9b1c1c; }
+        .v-LIKELY_REAL { border-color: #1e7a4f; }
+        .v-LIKELY_REAL .verdict-label { background: #dcf3e7; color: #155d3b; }
+        .v-UNCLEAR { border-color: #c98a00; }
+        .v-UNCLEAR .verdict-label { background: #fff1d6; color: #6b4600; }
+        .reasons { margin: 0; padding-inline-start: 1.1rem; }
+        .reasons li { margin-bottom: 0.3rem; }
+        .evidence { display: block; color: var(--muted); font-size: 0.92rem; }
+        .small-head { font-weight: 700; }
+        .small-note { font-size: 0.85rem; color: var(--muted); }
+        .reply-box { font-size: 0.95rem; }
+        .facts { white-space: pre-wrap; font-size: 0.85rem; background: var(--bg); border-radius: 10px; padding: 0.7rem; margin: 0.4rem 0 0; }
         .credits { font-size: 0.8rem; }
         .credits a { color: var(--muted); }
         footer { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 0 1rem 2.5rem; }
@@ -234,6 +252,28 @@
         </div>
     </div>
 </li>
+
+<div th:fragment="verdict(c)" class="verdict" th:classappend="${'v-' + (c.label() ?: c.status())}">
+    <p th:if="${c.running()}" class="chip">Checking…</p>
+    <p th:if="${c.status() == 'FAILED'}" class="error" th:text="${c.error()}">Error</p>
+    <th:block th:if="${c.status() == 'DONE'}">
+        <p class="verdict-label" th:text="${c.label() == 'LIKELY_FAKE'} ? 'Likely fake' : (${c.label() == 'LIKELY_REAL'} ? 'Likely real' : 'Unclear')">Unclear</p>
+        <ul class="reasons">
+            <li th:each="r : ${c.reasons()}"><strong th:text="${r.reason()}">Reason</strong><span class="evidence" th:if="${r.evidence()}" th:text="${r.evidence()}">evidence</span></li>
+        </ul>
+        <div th:if="${!c.questions().isEmpty()}">
+            <p class="small-head">Before you say yes, ask them:</p>
+            <ul class="reasons"><li th:each="q : ${c.questions()}" th:text="${q}">Question</li></ul>
+        </div>
+        <div th:if="${c.reply()}">
+            <p class="small-head">Suggested reply</p>
+            <textarea class="reply-box" readonly rows="5" th:text="${c.reply()}" aria-label="Suggested reply"></textarea>
+            <button type="button" class="btn small" data-copy>Copy reply</button>
+        </div>
+        <details th:if="${c.facts()}"><summary>What we looked up</summary><pre class="facts" th:text="${c.facts()}">facts</pre></details>
+        <p class="small-note">A judgement from public facts, not a guarantee. Never pay a fee to get a collab.</p>
+    </th:block>
+</div>
 
 <footer th:fragment="foot">
     <p><span th:text="${shop.name()}">Name</span> · Made with BazaarReady</p>
