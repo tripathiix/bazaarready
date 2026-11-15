@@ -20,7 +20,8 @@ public class Business {
     public enum Status { DRAFT, PUBLISHED }
 
     /** Accepted site kinds and colour themes, for request validation. */
-    public static final String KIND_PATTERN = "shop|food|services|classes|portfolio|events|organisation|other";
+    public static final String KIND_PATTERN = "shop|food|services|classes|transport|portfolio|events|organisation|other";
+    public static final String LAYOUT_PATTERN = "classic|split|boutique|magazine";
     public static final String THEME_PATTERN = "marigold|indigo|forest|rose|ocean|slate";
 
     @Id
@@ -40,7 +41,19 @@ public class Business {
     @Column(nullable = false)
     private String theme;
 
+    /** Page layout: classic, split, boutique or magazine. */
+    @Column(nullable = false)
+    private String layout;
+
+    /** Currency symbol shown before prices, such as ₹, $, € or £. */
+    @Column(nullable = false)
+    private String currency;
+
     private String about;
+
+    /** Stock photo search words for the site's banner. */
+    @Column(name = "hero_query")
+    private String heroQuery;
 
     private String location;
 
@@ -75,6 +88,10 @@ public class Business {
     @Column(nullable = false)
     private Status status;
 
+    /** Makes up the owner's private link to orders and messages. Never shown on the public site. */
+    @Column(name = "owner_key", nullable = false)
+    private UUID ownerKey;
+
     @Column(name = "published_at")
     private Instant publishedAt;
 
@@ -93,7 +110,10 @@ public class Business {
         this.ownerLanguage = "en";
         this.kind = "shop";
         this.theme = "marigold";
+        this.layout = "classic";
+        this.currency = "₹";
         this.status = Status.DRAFT;
+        this.ownerKey = UUID.randomUUID();
         this.createdAt = Instant.now();
     }
 
@@ -108,7 +128,10 @@ public class Business {
     public String getTagline() { return tagline; }
     public String getKind() { return kind; }
     public String getTheme() { return theme; }
+    public String getLayout() { return layout; }
+    public String getCurrency() { return currency; }
     public String getAbout() { return about; }
+    public String getHeroQuery() { return heroQuery; }
     public String getLocation() { return location; }
     public String getHours() { return hours; }
     public String getOfferingsTitle() { return offeringsTitle; }
@@ -120,6 +143,7 @@ public class Business {
     public String getReplyStyle() { return replyStyle; }
     public Source getSource() { return source; }
     public Status getStatus() { return status; }
+    public UUID getOwnerKey() { return ownerKey; }
     public Instant getPublishedAt() { return publishedAt; }
     public Instant getCreatedAt() { return createdAt; }
 
@@ -127,7 +151,10 @@ public class Business {
     public void setTagline(String tagline) { this.tagline = tagline; }
     public void setKind(String kind) { this.kind = kind; }
     public void setTheme(String theme) { this.theme = theme; }
+    public void setLayout(String layout) { this.layout = layout; }
+    public void setCurrency(String currency) { this.currency = currency; }
     public void setAbout(String about) { this.about = about; }
+    public void setHeroQuery(String heroQuery) { this.heroQuery = heroQuery; }
     public void setLocation(String location) { this.location = location; }
     public void setHours(String hours) { this.hours = hours; }
     public void setOfferingsTitle(String offeringsTitle) { this.offeringsTitle = offeringsTitle; }

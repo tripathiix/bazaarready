@@ -22,6 +22,9 @@ public class ClaudeClient {
 
     public static final String AGENT_MODEL = "claude-sonnet-5-5";
 
+    /** For simple, high-volume jobs such as translating labels. */
+    public static final String FAST_MODEL = "claude-haiku-5-5";
+
     private final RestClient http;
     private final ObjectMapper json;
     private final String apiKey;
@@ -38,6 +41,20 @@ public class ClaudeClient {
         return !apiKey.isEmpty();
     }
 
+    /** One plain question and answer, with no tools. Returns the text of the reply. */
+    public String createText(String model, int maxTokens, String system, String userText) {
+        ArrayNode messages = json.createArrayNode();
+        messages.addObject().put("role", "user").put("content", userText);
+        JsonNode response = createMessage(model, maxTokens, system, null, messages);
+        StringBuilder text = new StringBuilder();
+        for (JsonNode block : response.path("content")) {
+            if ("text".equals(block.path("type").asText())) {
+                text.append(block.path("text").asText());
+            }
+        }
+        return text.toString();
+    }
+
     /** One call to Claude with tools. The model may answer with text or ask to use exactly one tool. */
     public JsonNode createMessage(String model, int maxTokens, String system, ArrayNode tools, ArrayNode messages) {
         if (!isConfigured()) {
@@ -47,10 +64,12 @@ public class ClaudeClient {
         body.put("model", model);
         body.put("max_tokens", maxTokens);
         body.put("system", system);
-        body.set("tools", tools);
-        ObjectNode toolChoice = body.putObject("tool_choice");
-        toolChoice.put("type", "auto");
-        toolChoice.put("disable_parallel_tool_use", true);
+        if (tools != null) {
+            body.set("tools", tools);
+            ObjectNode toolChoice = body.putObject("tool_choice");
+            toolChoice.put("type", "auto");
+            toolChoice.put("disable_parallel_tool_use", true);
+        }
         body.set("messages", messages);
 
         try {

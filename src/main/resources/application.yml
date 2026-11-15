@@ -5,6 +5,10 @@ spring:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:bazaarready}
     username: ${DB_USER:bazaarready}
     password: ${DB_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 10MB
   jpa:
     hibernate:
       ddl-auto: validate
@@ -25,3 +29,5 @@ bazaarready:
   app-domain: ${APP_DOMAIN:localhost}
   anthropic:
     api-key: ${ANTHROPIC_API_KEY:}
+  pexels:
+    api-key: ${PEXELS_API_KEY:}

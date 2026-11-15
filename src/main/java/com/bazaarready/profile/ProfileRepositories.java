@@ -11,6 +11,8 @@ interface BusinessRepository extends JpaRepository<Business, UUID> {
     Optional<Business> findBySlug(String slug);
 
     boolean existsBySlug(String slug);
+
+    Optional<Business> findByOwnerKey(UUID ownerKey);
 }
 
 interface ProductRepository extends JpaRepository<Product, UUID> {

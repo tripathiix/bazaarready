@@ -1,6 +1,5 @@
 package com.bazaarready.profile;
 
-import com.bazaarready.common.Languages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -14,7 +13,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/** Request and response shapes for the profile API. Prices travel as rupees and are stored as paise. */
+/** Request and response shapes for the profile API. Prices travel in whole currency units. */
 public final class ProfileDtos {
 
     private ProfileDtos() {
@@ -27,14 +26,21 @@ public final class ProfileDtos {
             @Size(max = 160) String tagline,
             @Pattern(regexp = Business.KIND_PATTERN) String kind,
             @Pattern(regexp = Business.THEME_PATTERN) String theme,
+            @Pattern(regexp = Business.LAYOUT_PATTERN) String layout,
+            @Size(max = 4) String currency,
             @Size(max = 700) String about,
+            /** Stock photo search words for the banner, in English. */
+            @Size(max = 80) String heroImageQuery,
             @Size(max = 200) String location,
             @Size(max = 200) String hours,
             @Size(max = 60) String offeringsTitle,
             @Size(max = 60) String detailsTitle,
-            @Pattern(regexp = Languages.CODE_PATTERN) String ownerLanguage,
+            /** Any language code: en, hi, es, ar, pt-BR. Sites are not limited to the screen's languages. */
+            @Pattern(regexp = "[A-Za-z]{2,8}(-[A-Za-z0-9]{2,8})?") String ownerLanguage,
             @Pattern(regexp = "\\+?[0-9]{10,15}", message = "must be 10 to 15 digits") String whatsappNumber,
             @Size(max = 500) String deliveryNotes,
+            /** How the owner writes to customers, learned from chats; used when drafting replies. */
+            @Size(max = 600) String replyStyle,
             @Min(0) @Max(60) Integer noticeDays,
             Business.Source source,
             @Valid @Size(max = 100) List<ProductRequest> products,
@@ -44,10 +50,15 @@ public final class ProfileDtos {
     public record ProductRequest(
             @NotBlank @Size(max = 120) String name,
             @Size(max = 300) String description,
+            @Size(max = 40) String category,
             @DecimalMin("0") BigDecimal priceRupees,
             @Size(max = 40) String priceNote,
             @Size(max = 40) String unit,
-            @Size(max = 200) String note) {
+            @Size(max = 200) String note,
+            @Size(max = 80) String origin,
+            @Size(max = 80) String destination,
+            @Size(max = 120) String schedule,
+            @Size(max = 80) String imageQuery) {
     }
 
     public record FaqRequest(
@@ -62,8 +73,13 @@ public final class ProfileDtos {
             String slug,
             String tagline,
             String kind,
+            /** How the site behaves: STORE (cart and checkout), BOOKING (booking requests) or SHOWCASE. */
+            String style,
             String theme,
+            String layout,
+            String currency,
             String about,
+            String heroImageQuery,
             String location,
             String hours,
             String offeringsTitle,
@@ -76,12 +92,15 @@ public final class ProfileDtos {
             Business.Status status,
             Instant publishedAt,
             String shopPath,
+            String ownerPath,
             List<ProductResponse> products,
             List<FaqResponse> faqs) {
     }
 
-    public record ProductResponse(UUID id, String name, String description, BigDecimal priceRupees,
-                                  String priceNote, String unit, String note) {
+    public record ProductResponse(UUID id, String name, String description, String category,
+                                  BigDecimal priceRupees, String priceNote, String unit, String note,
+                                  String origin, String destination, String schedule,
+                                  String imageQuery) {
     }
 
     public record FaqResponse(UUID id, String question, String answer, int timesAsked, Faq.Source source) {

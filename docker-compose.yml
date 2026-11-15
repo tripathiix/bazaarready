@@ -26,6 +26,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       APP_DOMAIN: ${APP_DOMAIN:-localhost}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      PEXELS_API_KEY: ${PEXELS_API_KEY:-}
     ports:
       - "${APP_PORT:-8090}:8080"
 

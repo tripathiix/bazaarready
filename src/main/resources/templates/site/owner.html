@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{site/parts :: head(${'Orders · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+
+<!-- The owner's private page. It is in English for now; the public site is in the owner's language. -->
+<main class="wrap">
+    <section aria-labelledby="title">
+        <p style="margin:0"><a th:href="${base}" target="_blank" rel="noopener">Open the public site</a></p>
+        <h1 id="title" style="color:var(--brand)" th:text="${shop.name()}">Name</h1>
+        <p class="demo" role="note" style="margin-top:1rem">This page is private. Anyone with this link can see your orders, so do not share it.</p>
+    </section>
+
+    <section aria-labelledby="orders">
+        <h2 id="orders">Orders and bookings (<span th:text="${orders.size()}">0</span>)</h2>
+        <p th:if="${orders.isEmpty()}">Nothing yet. Orders and booking requests from your site will appear here.</p>
+        <div class="panel" th:each="o : ${orders}" style="margin-bottom:1rem">
+            <div class="head-row">
+                <strong><span th:text="${o.getKind().name() == 'BOOKING'} ? 'Booking' : 'Order'">Order</span> <span th:text="${o.getNumber()}">ABC12345</span></strong>
+                <span class="chip" th:text="${o.getKind().name() == 'BOOKING'} ? 'Request' : (${o.getStatus().name() == 'PAID_DEMO'} ? 'Paid (demo)' : 'Pay on delivery')">Status</span>
+            </div>
+            <p style="margin:0.5rem 0"><span th:text="${o.getCustomerName()}">Customer</span> · <span th:text="${o.getCustomerPhone()}">Phone</span></p>
+            <p style="margin:0.5rem 0" th:if="${o.getAddress()}" th:text="${o.getAddress()}">Address</p>
+            <p style="margin:0.5rem 0" th:if="${o.getBookingDate() != null}">For <strong th:text="${o.getBookingDate()}">date</strong> <span th:if="${o.getBookingTime()}" th:text="${o.getBookingTime()}">time</span></p>
+            <table>
+                <tbody>
+                <tr th:each="line : ${lines.get(o.getId())}">
+                    <td><span th:text="${line.name()}">Item</span> × <span th:text="${line.quantity()}">1</span></td>
+                    <td class="num" th:if="${line.unitPricePaise() > 0}" th:text="${money.minor(line.lineTotalPaise())}">0</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="total" th:if="${o.getTotalPaise() > 0}"><span>Total</span><span th:text="${money.minor(o.getTotalPaise())}">0</span></div>
+            <p style="margin:0.6rem 0 0;color:var(--muted)" th:if="${o.getNote()}">Note: <span th:text="${o.getNote()}">Note</span></p>
+            <p style="margin:0.6rem 0 0;color:var(--muted);font-size:0.9rem" th:text="${placed.get(o.getId())}">time</p>
+        </div>
+    </section>
+
+    <section aria-labelledby="collabs-title" id="collabs">
+        <h2 id="collabs-title">Is this collab real?</h2>
+        <p style="color:var(--muted)">Paste a brand-deal or collab email, or a message from Instagram or WhatsApp. We look up the sender's website and email records and check the wording for scam patterns, then tell you what we found.</p>
+        <p class="error" th:if="${param.check != null and param.check[0] == 'empty'}">Paste the message first.</p>
+        <form method="post" th:action="${'/owner/' + ownerKey + '/check'}" class="panel form" style="max-width:none">
+            <div>
+                <label for="sender">Sender's email address (if you have it)</label>
+                <input id="sender" name="sender" maxlength="200" placeholder="partnerships@brand.com">
+            </div>
+            <div>
+                <label for="message">The message</label>
+                <textarea id="message" name="message" rows="6" maxlength="6000" required></textarea>
+            </div>
+            <button class="btn">Check it</button>
+        </form>
+        <div class="panel" th:each="c : ${pastedChecks}" style="margin-top:1rem">
+            <p style="margin:0"><strong th:text="${c.sender() != null and !c.sender().isBlank() ? c.sender() : 'No sender given'}">Sender</strong></p>
+            <details><summary>The message</summary><p style="white-space:pre-wrap" th:text="${c.body()}">Body</p></details>
+            <div th:replace="~{site/parts :: verdict(${c})}"></div>
+        </div>
+    </section>
+
+    <section aria-labelledby="tests-title" id="tests">
+        <h2 id="tests-title">Test my site</h2>
+        <p style="color:var(--muted)">Three AI customers visit your site and try to use it: Rahul is in a hurry and tries to order or book, Kiran checks whether she can trust you, and Farah uses a screen reader. A code check looks for accessibility problems. It takes a minute or two. Test orders and messages are removed afterwards.</p>
+        <form method="post" th:action="${'/owner/' + ownerKey + '/test'}">
+            <button class="btn" th:disabled="${run != null and run.running()}" th:text="${run != null and run.running()} ? 'Testing…' : (${run == null} ? 'Test my site' : 'Test again')">Test my site</button>
+        </form>
+
+        <th:block th:if="${run != null}">
+            <div class="info" style="margin-top:1.4rem">
+                <div>
+                    <h3>Customers who reached their goal</h3>
+                    <p class="amount" th:text="${run.passed() + ' of ' + run.total()}">0 of 3</p>
+                    <p th:if="${run.running()}" style="color:var(--muted)">Still testing. This page refreshes by itself.</p>
+                </div>
+                <div>
+                    <h3>Problems found</h3>
+                    <p class="amount" th:text="${run.findings().size()}">0</p>
+                </div>
+            </div>
+
+            <div class="grid" style="margin-top:1.2rem">
+                <div class="card" th:each="c : ${run.cases()}">
+                    <div class="card-body">
+                        <h3 th:text="${c.persona()}">Rahul</h3>
+                        <span class="chip" th:text="${c.status() == 'PASSED'} ? 'Reached the goal' : (${c.status() == 'RUNNING'} ? 'Testing…' : (${c.status() == 'STUCK'} ? 'Got stuck' : 'Could not run'))">Status</span>
+                        <p th:if="${c.summary()}" th:text="${c.summary()}">Summary</p>
+                        <details th:if="${!c.steps().isEmpty()}">
+                            <summary>What they did</summary>
+                            <ol style="margin:0.4rem 0 0;padding-left:1.2rem;font-size:0.92rem">
+                                <li th:each="s : ${c.steps()}" th:text="${s}">Step</li>
+                            </ol>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:1.5rem" th:if="${!run.findings().isEmpty()}">
+                <div class="panel" th:each="f : ${run.findings()}" style="margin-bottom:0.9rem">
+                    <p style="margin:0"><span class="chip" th:text="${f.persona()}">Rahul</span> <strong th:text="${f.problem()}">Problem</strong></p>
+                    <p style="margin:0.5rem 0 0;color:var(--muted)" th:if="${f.evidence()}">What they saw: <span th:text="${f.evidence()}">Evidence</span></p>
+                    <p style="margin:0.5rem 0 0" th:if="${f.suggestion()}">Suggested fix: <span th:text="${f.suggestion()}">Suggestion</span></p>
+                    <div th:if="${f.faqQuestion()}" class="info" style="margin-top:0.7rem">
+                        <div><h3 th:text="${f.faqQuestion()}">Question</h3><p th:text="${f.faqAnswer()}">Answer</p></div>
+                    </div>
+                    <form th:if="${f.canApply()}" method="post" th:action="${'/owner/' + ownerKey + '/test/fix/' + f.id()}" style="margin-top:0.7rem">
+                        <button class="btn small">Add this answer to my site</button>
+                    </form>
+                    <p th:if="${f.fixStatus() == 'APPLIED'}" style="margin:0.6rem 0 0" class="chip">Added to your site</p>
+                </div>
+            </div>
+            <p th:if="${!run.running() and run.findings().isEmpty()}">No problems found.</p>
+        </th:block>
+        <script th:if="${run != null and run.running()}">setTimeout(function () { location.reload(); }, 4000);</script>
+    </section>
+
+    <section aria-labelledby="photos" id="photos">
+        <h2 id="photos-title">Photos</h2>
+        <p th:if="${param.photo != null and param.photo[0] == 'saved'}" class="chip">Photo saved.</p>
+        <p th:if="${param.photo != null and param.photo[0] == 'removed'}" class="chip">Your photo was removed.</p>
+        <p th:if="${param.photo != null and param.photo[0] == 'size'}" class="error">Choose a picture smaller than 3 MB.</p>
+        <p th:if="${param.photo != null and param.photo[0] == 'type'}" class="error">That file is not a JPEG, PNG or WebP picture.</p>
+        <p style="color:var(--muted)">Stock photos are chosen for you. Upload your own to replace any of them.</p>
+        <ul class="grid">
+            <li class="card">
+                <div class="tile"><img th:if="${hero != null}" th:src="${hero.url()}" alt=""><span th:unless="${hero != null}">★</span></div>
+                <div class="card-body">
+                    <h3>Banner</h3>
+                    <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/photo'}" class="form">
+                        <input type="hidden" name="item" value="">
+                        <label for="file-banner" class="unit">New photo</label>
+                        <input id="file-banner" type="file" name="file" accept="image/jpeg,image/png,image/webp">
+                        <div class="card-actions"><button class="btn small" name="action" value="upload">Upload</button>
+                        <button class="btn small outline" th:if="${hero != null and !hero.isStock()}" name="action" value="remove">Remove mine</button></div>
+                    </form>
+                </div>
+            </li>
+            <li class="card" th:each="p, it : ${shop.products()}">
+                <div class="tile"><img th:if="${thumbs.get(p.id()) != null}" th:src="${thumbs.get(p.id()).url()}" alt="">
+                    <span th:unless="${thumbs.get(p.id()) != null}" th:text="${#strings.substring(p.name(), 0, 1)}">A</span></div>
+                <div class="card-body">
+                    <h3 th:text="${p.name()}">Item</h3>
+                    <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/photo'}" class="form">
+                        <input type="hidden" name="item" th:value="${p.name()}">
+                        <label th:for="${'file-' + it.index}" class="unit">New photo</label>
+                        <input th:id="${'file-' + it.index}" type="file" name="file" accept="image/jpeg,image/png,image/webp">
+                        <div class="card-actions"><button class="btn small" name="action" value="upload">Upload</button>
+                        <button class="btn small outline" th:if="${thumbs.get(p.id()) != null and !thumbs.get(p.id()).isStock()}" name="action" value="remove">Remove mine</button></div>
+                    </form>
+                </div>
+            </li>
+        </ul>
+    </section>
+
+    <section aria-labelledby="messages">
+        <h2 id="messages">Messages (<span th:text="${enquiries.size()}">0</span>)</h2>
+        <p th:if="${enquiries.isEmpty()}">Nothing yet. Messages from your contact page will appear here.</p>
+        <div class="panel" th:each="e : ${enquiries}" style="margin-bottom:1rem">
+            <p style="margin:0"><strong th:text="${e.getName()}">Name</strong> · <span th:text="${e.getContact()}">Contact</span></p>
+            <p style="margin:0.5rem 0 0" th:text="${e.getMessage()}">Message</p>
+            <th:block th:if="${enquiryChecks.get(e.getId()) != null}">
+                <div th:replace="~{site/parts :: verdict(${enquiryChecks.get(e.getId())})}"></div>
+            </th:block>
+        </div>
+    </section>
+</main>
+<script th:if="${checksRunning}">setTimeout(function () { location.reload(); }, 4000);</script>
+<script>
+document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-copy]");
+    if (!button) return;
+    var box = button.previousElementSibling;
+    var done = function () { button.textContent = "Copied"; setTimeout(function () { button.textContent = "Copy reply"; }, 1500); };
+    if (navigator.clipboard) { navigator.clipboard.writeText(box.value).then(done, function () { box.select(); }); } else { box.select(); }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${item.name() + ' · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<main class="wrap">
+    <p style="margin:0"><a th:href="${base + '/catalogue'}">← <span th:text="${offeringsTitle}">Catalogue</span></a></p>
+    <section class="detail">
+        <div class="tile">
+            <img th:if="${pictures.get(item.id()) != null}" th:src="${pictures.get(item.id()).url()}" th:alt="${item.name()}">
+            <span th:unless="${pictures.get(item.id()) != null}" aria-hidden="true" th:text="${#strings.substring(item.name(), 0, 1)}">A</span>
+        </div>
+        <div>
+            <span class="chip" th:if="${item.category()}" th:text="${item.category()}">Category</span>
+            <h1 style="color:var(--brand);font-size:clamp(2rem,5vw,3rem);margin-top:0.4rem" th:text="${item.name()}">Item</h1>
+            <p class="route" style="font-weight:600;color:var(--brand)" th:if="${item.origin() != null and item.destination() != null}">
+                <span th:text="${item.origin()}">A</span> → <span th:text="${item.destination()}">B</span>
+            </p>
+            <p class="lead" th:if="${item.description()}" th:text="${item.description()}">Description</p>
+            <p th:if="${item.schedule()}" th:text="${item.schedule()}">Schedule</p>
+            <p th:if="${item.note()}"><span class="chip" th:text="${item.note()}">Note</span></p>
+            <div class="price" style="margin:1rem 0">
+                <span class="unit" th:if="${item.priceNote() != null and item.priceRupees() != null}" th:text="${item.priceNote()}">from</span>
+                <span class="amount" style="font-size:2.2rem" th:if="${item.priceRupees() != null}" th:text="${money.format(item.priceRupees())}">0</span>
+                <span class="unit" th:if="${item.priceRupees() == null}" th:text="${item.priceNote() ?: L.of('price_on_request')}">On request</span>
+                <span class="unit" th:if="${item.unit()}" th:text="${item.unit()}">per unit</span>
+            </div>
+            <div class="cta" style="margin-top:0">
+                <button type="button" class="btn" th:if="${store and item.priceRupees() != null}"
+                        th:attr="data-add=${item.id()},data-label=${L.of('add_to_cart')},data-added=${L.of('added')}" th:text="${L.of('add_to_cart')}">Add to cart</button>
+                <a class="btn outline" th:if="${store and item.priceRupees() != null}" th:href="${base + '/cart'}" th:text="${L.of('nav_cart')}">Cart</a>
+                <a class="btn" th:if="${booking}" th:href="${base + '/book?item=' + item.id()}" th:text="${L.of('book_title')}">Request a booking</a>
+                <a class="btn wa" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
+            </div>
+            <p th:if="${shop.noticeDays() != null and shop.noticeDays() > 0}" style="color:var(--muted)" th:text="${L.of('order_ahead', 'days', shop.noticeDays())}">Notice</p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

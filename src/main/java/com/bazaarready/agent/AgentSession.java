@@ -40,11 +40,18 @@ public class AgentSession {
     @Column(name = "pending_question")
     private String pendingQuestion;
 
+    @Column(name = "pending_answer_type")
+    private String pendingAnswerType;
+
     @Column(name = "final_message")
     private String finalMessage;
 
     /** Language code the owner picked on the start screen; see Languages. */
     private String language;
+
+    /** DESCRIPTION or WHATSAPP: what the owner gave the agent to start from. */
+    @Column(nullable = false)
+    private String source = "DESCRIPTION";
 
     @Column(name = "model_calls", nullable = false)
     private int modelCalls;
@@ -73,6 +80,7 @@ public class AgentSession {
         this.pendingToolUseId = toolUseId;
         this.pendingTool = tool;
         this.pendingQuestion = question;
+        this.pendingAnswerType = null;
     }
 
     public void resume() {
@@ -80,6 +88,7 @@ public class AgentSession {
         this.pendingToolUseId = null;
         this.pendingTool = null;
         this.pendingQuestion = null;
+        this.pendingAnswerType = null;
     }
 
     public void finish(Status status, String finalMessage) {
@@ -103,10 +112,14 @@ public class AgentSession {
     public String getPendingToolUseId() { return pendingToolUseId; }
     public String getPendingTool() { return pendingTool; }
     public String getPendingQuestion() { return pendingQuestion; }
+    public String getPendingAnswerType() { return pendingAnswerType; }
     public String getFinalMessage() { return finalMessage; }
     public int getModelCalls() { return modelCalls; }
     public String getLanguage() { return language; }
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
 
     public void setBusinessId(UUID businessId) { this.businessId = businessId; }
+    public void setPendingAnswerType(String pendingAnswerType) { this.pendingAnswerType = pendingAnswerType; }
     public void setMessages(String messages) { this.messages = messages; }
 }
