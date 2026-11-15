@@ -30,7 +30,11 @@ class TestController {
     @PostMapping("/owner/{ownerKey}/test/fix/{findingId}")
     String applyFix(@PathVariable UUID ownerKey, @PathVariable UUID findingId) {
         ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
-        tests.applyFix(shop.id(), findingId);
+        try {
+            tests.applyFix(shop.id(), findingId);
+        } catch (com.bazaarready.common.NotFoundException e) {
+            // Already applied, or not this owner's: nothing to do, just show the page again.
+        }
         return "redirect:/owner/" + ownerKey + "#tests";
     }
 }
