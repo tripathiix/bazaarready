@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
 <head th:replace="~{site/parts :: head(${L.of('contact_title') + ' · ' + shop.name()})}"></head>
-<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
 <main class="wrap">
@@ -10,22 +10,26 @@
         <p th:if="${whatsappLink}" style="margin-top:1.2rem">
             <a class="btn wa" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
         </p>
+        <p th:if="${whatsappDisplay}"><span th:text="${L.of('whatsapp_number')}">WhatsApp number</span>: <strong th:text="${whatsappDisplay}">+91</strong></p>
 
         <form class="panel form" method="post" th:action="${base + '/contact'}" style="margin-top:1.5rem">
-            <p class="error" role="alert" th:if="${error}" th:text="${L.of('fill_all')}">Please fill in your details.</p>
+            <p class="error" role="alert" th:if="${error}" th:text="${L.of('check_below')}">Please fix the highlighted fields.</p>
             <div class="two">
                 <div>
                     <label for="name" th:text="${L.of('name')}">Your name</label>
-                    <input id="name" name="name" autocomplete="name" maxlength="80" required>
+                    <input id="name" name="name" autocomplete="name" maxlength="80" required th:value="${form != null ? form.get('name') : ''}">
+                    <p class="field-error" th:if="${errors != null and errors.containsKey('name')}" th:text="${L.of(errors.get('name'))}">Error</p>
                 </div>
                 <div>
                     <label for="contact" th:text="${L.of('your_contact')}">Phone or email</label>
-                    <input id="contact" name="contact" maxlength="120" required>
+                    <input id="contact" name="contact" maxlength="120" required th:value="${form != null ? form.get('contact') : ''}">
+                    <p class="field-error" th:if="${errors != null and errors.containsKey('contact')}" th:text="${L.of(errors.get('contact'))}">Error</p>
                 </div>
             </div>
             <div>
                 <label for="message" th:text="${L.of('message')}">Your message</label>
-                <textarea id="message" name="message" rows="5" maxlength="2000" required></textarea>
+                <textarea id="message" name="message" rows="5" maxlength="2000" required th:text="${form != null ? form.get('message') : ''}"></textarea>
+                <p class="field-error" th:if="${errors != null and errors.containsKey('message')}" th:text="${L.of(errors.get('message'))}">Error</p>
             </div>
             <div class="trap" aria-hidden="true">
                 <label for="website">Website</label>

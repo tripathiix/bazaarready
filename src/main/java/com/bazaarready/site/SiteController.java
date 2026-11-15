@@ -121,27 +121,52 @@ class SiteController {
         return "site/cart";
     }
 
+    /** Someone opening the checkout address directly is sent to the cart instead of an error page. */
+    @GetMapping("/s/{slug}/checkout")
+    String checkoutPage(@PathVariable String slug) {
+        profiles.getBySlug(slug);
+        return "redirect:/s/" + slug + "/cart";
+    }
+
     @PostMapping("/s/{slug}/checkout")
     String checkout(@PathVariable String slug, @RequestParam String name, @RequestParam String phone,
                     @RequestParam String address, @RequestParam(required = false) String note,
+                    @RequestParam(required = false) String deliveryDate,
                     @RequestParam String cart, Model model) {
         ProfileResponse shop = profiles.getBySlug(slug);
-        if (isBlank(name) || !looksLikePhone(phone) || isBlank(address)) {
+        LocalDate wanted = isBlank(deliveryDate) ? null : parseDate(deliveryDate);
+        Map<String, String> errors = new HashMap<>();
+        if (isBlank(name)) {
+            errors.put("name", "err_required");
+        }
+        if (!looksLikePhone(phone)) {
+            errors.put("phone", "err_phone");
+        }
+        if (isBlank(address)) {
+            errors.put("address", "err_required");
+        }
+        if (!isBlank(deliveryDate) && (wanted == null || wanted.isBefore(LocalDate.now()))) {
+            errors.put("deliveryDate", "err_date");
+        }
+        if (!errors.isEmpty()) {
             common(slug, model, "cart");
             model.addAttribute("productsJson", productsJson(shop));
             model.addAttribute("error", true);
+            model.addAttribute("errors", errors);
+            model.addAttribute("keptCart", cart.length() > 4000 ? "{}" : cart);
             Map<String, String> form = new HashMap<>();
             form.put("name", clip(name, 80));
             form.put("phone", clip(phone, 20));
             form.put("address", clip(address, 300));
             form.put("note", clip(note, 300));
+            form.put("deliveryDate", clip(deliveryDate, 10));
             model.addAttribute("form", form);
             return "site/cart";
         }
         ShopOrder order;
         try {
             order = orders.placeOrder(shop, parseCart(cart),
-                    new Customer(clip(name, 80), clip(phone, 20), clip(address, 300), clip(note, 300)));
+                    new Customer(clip(name, 80), clip(phone, 20), clip(address, 300), clip(note, 300)), wanted);
         } catch (IllegalArgumentException e) {
             return "redirect:/s/" + slug + "/cart";
         }
@@ -191,11 +216,29 @@ class SiteController {
                         @RequestParam String phone, @RequestParam(required = false) String note, Model model) {
         ProfileResponse shop = profiles.getBySlug(slug);
         LocalDate day = parseDate(date);
-        if (isBlank(name) || !looksLikePhone(phone) || day == null) {
+        Map<String, String> errors = new HashMap<>();
+        if (day == null || day.isBefore(LocalDate.now())) {
+            errors.put("date", "err_date");
+        }
+        if (isBlank(name)) {
+            errors.put("name", "err_required");
+        }
+        if (!looksLikePhone(phone)) {
+            errors.put("phone", "err_phone");
+        }
+        if (!errors.isEmpty()) {
             common(slug, model, "book");
             model.addAttribute("selected", item);
             model.addAttribute("today", LocalDate.now().toString());
             model.addAttribute("error", true);
+            model.addAttribute("errors", errors);
+            Map<String, String> form = new HashMap<>();
+            form.put("date", clip(date, 10));
+            form.put("time", clip(time, 10));
+            form.put("name", clip(name, 80));
+            form.put("phone", clip(phone, 20));
+            form.put("note", clip(note, 300));
+            model.addAttribute("form", form);
             return "site/book";
         }
         ShopOrder booking = orders.placeBooking(shop, item, day, clip(time, 40),
@@ -218,7 +261,23 @@ class SiteController {
         // "website" is a hidden field people never see; only automated form-fillers complete it.
         if (isBlank(website)) {
             if (isBlank(name) || isBlank(contact) || isBlank(message)) {
+                Map<String, String> errors = new HashMap<>();
+                if (isBlank(name)) {
+                    errors.put("name", "err_required");
+                }
+                if (isBlank(contact)) {
+                    errors.put("contact", "err_required");
+                }
+                if (isBlank(message)) {
+                    errors.put("message", "err_required");
+                }
+                Map<String, String> form = new HashMap<>();
+                form.put("name", clip(name, 80));
+                form.put("contact", clip(contact, 120));
+                form.put("message", clip(message, 2000));
                 model.addAttribute("error", true);
+                model.addAttribute("errors", errors);
+                model.addAttribute("form", form);
                 return "site/contact";
             }
             var enquiry = orders.saveEnquiry(shop.id(), clip(name, 80), clip(contact, 120), clip(message, 2000));
@@ -315,10 +374,17 @@ class SiteController {
                 case "split" -> "Bricolage Grotesque";
                 case "boutique" -> "Fraunces";
                 case "magazine" -> "Unbounded";
+                case "bento" -> "Manrope";
+                case "noir" -> "DM Serif Display";
+                case "mart" -> "Figtree";
                 default -> "Baloo 2";
             }, "Anek Latin"};
         }
         model.addAttribute("layout", layout);
+        model.addAttribute("categories", shop.products().stream()
+                .map(ProductResponse::category).filter(Objects::nonNull).distinct().toList());
+        String digits = shop.whatsappNumber() == null ? null : shop.whatsappNumber().replaceAll("[^0-9]", "");
+        model.addAttribute("whatsappDisplay", digits == null ? null : "+" + (digits.length() == 10 ? "91" + digits : digits));
 
         model.addAttribute("shop", shop);
         model.addAttribute("L", labels);

@@ -47,7 +47,7 @@ public class OrderService {
      * the saved profile, never from the browser, so a customer cannot change a price.
      */
     @Transactional
-    public ShopOrder placeOrder(ProfileResponse shop, Map<UUID, Integer> cart, Customer customer) {
+    public ShopOrder placeOrder(ProfileResponse shop, Map<UUID, Integer> cart, Customer customer, LocalDate deliveryDate) {
         List<OrderLine> lines = new ArrayList<>();
         for (ProductResponse product : shop.products()) {
             Integer quantity = cart.get(product.id());
@@ -64,6 +64,7 @@ public class OrderService {
         ShopOrder order = new ShopOrder(shop.id(), ShopOrder.Kind.ORDER, customer.name(), customer.phone(), write(lines), total);
         order.setAddress(customer.address());
         order.setNote(customer.note());
+        order.setBookingDate(deliveryDate);
         return orders.save(order);
     }
 

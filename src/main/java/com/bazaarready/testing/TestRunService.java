@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * AI test customers. Three people, each played by Claude with a goal, visit a site through
+ * AI test customers. Six people in eight scenarios, each played by Claude with a goal, visit a site through
  * {@link SiteBrowser} and report where they got stuck. A plain code check looks for accessibility
  * faults. Problems that a missing FAQ entry would fix can be applied by the owner in one click.
  */
@@ -65,7 +65,7 @@ public class TestRunService {
     private final SiteBrowser browser;
     private final ObjectMapper json;
     private final ArrayNode tools;
-    private final ExecutorService pool = Executors.newFixedThreadPool(3, r -> {
+    private final ExecutorService pool = Executors.newFixedThreadPool(4, r -> {
         Thread t = new Thread(r, "test-customer");
         t.setDaemon(true);
         return t;
@@ -358,30 +358,87 @@ public class TestRunService {
 
     // ---- People and instructions ----
 
+    /**
+     * The test customers and their scenarios. Each pair runs as its own test, so one run covers the
+     * main task, mistakes, trust, accessibility, language, arithmetic and special requests.
+     */
     private static List<Persona> personasFor(ProfileResponse shop) {
         String base = "/s/" + shop.slug();
-        String transaction = switch (shop.style()) {
-            case "STORE" -> "You want to buy something. Pick an item with a price, add it to your cart with add_to_cart, "
-                    + "fill in and submit the checkout form at " + base + "/checkout, then on the payment page submit the "
-                    + "form with method=demo. You have succeeded only when you see an order confirmation with a reference number.";
-            case "BOOKING" -> "You want to book one of the offerings. Find out what it costs and when it runs, then submit "
-                    + "the booking form at " + base + "/book for a date about a week from today. You have succeeded only "
-                    + "when you see a booking confirmation with a reference number.";
-            default -> "You want to ask the business a question. Find out what they offer, then send a message through the "
-                    + "contact form at " + base + "/contact. You have succeeded only when you see that the message was sent.";
-        };
-        return List.of(
-                new Persona("Rahul", "28, in a hurry, on his phone. He wants to finish in as few steps as possible and loses "
-                        + "patience with unclear prices or buttons.", transaction),
-                new Persona("Kiran", "40, careful with money and wary of online scams. Before paying anyone she checks who "
-                        + "they are, where they are, how to reach them, prices, delivery or timing details and terms.",
-                        "Decide whether you would trust this business enough to order. Look at the home, about, catalogue and "
-                                + "contact pages. Do not place an order. You have succeeded if you would trust them; report "
-                                + "every piece of information a careful customer would look for and not find."),
-                new Persona("Farah", "35, blind, uses a screen reader. She hears only text: page titles, headings, link text, "
-                        + "image descriptions and form labels. Anything without words is invisible to her.",
-                        "Find out what this business offers and how much one offering costs, then send a short question "
-                                + "through the contact form at " + base + "/contact. You have succeeded when the message is sent."));
+        String rahul = "28, in a hurry, on his phone. He wants to finish in as few steps as possible and loses patience "
+                + "with unclear prices or buttons.";
+        String kiran = "40, careful with money and wary of online scams. Before paying anyone she checks who they are, "
+                + "where they are, how to reach them, prices, delivery or timing details and terms.";
+        String farah = "35, blind, uses a screen reader. She hears only text: page titles, headings, link text, image "
+                + "descriptions and form labels. Anything without words is invisible to her.";
+        String meena = "62, new to the internet. She reads only the website's own language, slowly, and gets lost when "
+                + "words are in English or use technical terms like checkout or FAQ.";
+        String dev = "33, an accountant who checks every number. He adds things up himself and notices when a total, "
+                + "quantity or unit does not match.";
+        String aisha = "29, buying for someone else. She needs it on a particular date, sometimes for a group, and "
+                + "wants to add a personal note.";
+        String contact = "send a message through the contact form at " + base + "/contact";
+
+        List<Persona> people = new ArrayList<>();
+        switch (shop.style()) {
+            case "STORE" -> {
+                people.add(new Persona("Rahul · quick order", rahul, "Pick an item with a price, add it to your cart with "
+                        + "add_to_cart, fill in and submit the checkout form at " + base + "/checkout, then submit the payment "
+                        + "page form with method=demo. You have succeeded only when you see an order confirmation with a "
+                        + "reference number."));
+                people.add(new Persona("Rahul · makes a mistake", rahul, "Add one item to your cart, then submit the "
+                        + "checkout form at " + base + "/checkout with the phone number 12 and an empty address. Check that "
+                        + "the site clearly says what is wrong and keeps what you typed. Then correct both and finish the "
+                        + "order with method=demo. You have succeeded if the error was clear and the order went through."));
+                people.add(new Persona("Dev · checks the maths", dev, "Add two different items, one of them with quantity 3, "
+                        + "and check out at " + base + "/checkout. On the payment page, check that every line and the total "
+                        + "match the prices shown on the site, then pay with method=demo and check the confirmation shows "
+                        + "the same total. You have succeeded if every number matched."));
+                people.add(new Persona("Aisha · gift order", aisha, "You want to send an item as a gift to arrive on a "
+                        + "specific day next week, with a short message for the person. Find out whether the site lets you "
+                        + "say when it should arrive and add a note, and how delivery works. Place the order with method=demo "
+                        + "if you can. You have succeeded if you could order the gift with the date and note."));
+            }
+            case "BOOKING" -> {
+                people.add(new Persona("Rahul · quick booking", rahul, "Find what one offering costs and when it runs, then "
+                        + "submit the booking form at " + base + "/book for a date about a week from today. You have "
+                        + "succeeded only when you see a booking confirmation with a reference number."));
+                people.add(new Persona("Rahul · makes a mistake", rahul, "Submit the booking form at " + base + "/book with "
+                        + "a date in the past and no phone number. Check that the site refuses and clearly says what is "
+                        + "wrong. Then book properly for next week. You have succeeded if the mistake was refused clearly "
+                        + "and the real booking went through."));
+                people.add(new Persona("Dev · checks the details", dev, "Compare every offering: price, what the price is "
+                        + "per (person, hour, month), and when it runs. Then book the best value one at " + base + "/book. "
+                        + "You have succeeded if prices and units were clear enough to compare and the booking went through."));
+                people.add(new Persona("Aisha · group booking", aisha, "You want to book for a group of four people on one "
+                        + "day next week. Find out whether the site lets you say how many people, what the total would be, "
+                        + "and then book at " + base + "/book. You have succeeded if you could book for four and knew the cost."));
+            }
+            default -> {
+                people.add(new Persona("Rahul · quick question", rahul, "Find out what is offered, then " + contact
+                        + ". You have succeeded only when you see that the message was sent."));
+                people.add(new Persona("Rahul · makes a mistake", rahul, "Submit the contact form at " + base + "/contact "
+                        + "with an empty message. Check that the site clearly says what is wrong. Then send a proper "
+                        + "message. You have succeeded if the error was clear and the message was sent."));
+                people.add(new Persona("Dev · checks the details", dev, "Work out what each offering costs or how to get a "
+                        + "price, and what is and isn't included. You have succeeded if you could tell what you would pay."));
+                people.add(new Persona("Aisha · special request", aisha, "You need something for a specific date next week. "
+                        + "Find out if that is possible, then " + contact + " asking about it. You have succeeded if you "
+                        + "knew enough to ask and the message was sent."));
+            }
+        }
+        people.add(new Persona("Kiran · can I trust them?", kiran, "Decide whether you would trust this business enough to "
+                + "pay. Look at the home, about, catalogue and contact pages. Do not order. You have succeeded if you would "
+                + "trust them; report every piece of information a careful customer would look for and not find."));
+        people.add(new Persona("Kiran · policies", kiran, "Before paying, find the rules: delivery or travel costs and times, "
+                + "cancellation, refunds or returns, and how payment works. Do not order. You have succeeded if you found "
+                + "all of these."));
+        people.add(new Persona("Farah · screen reader", farah, "Find out what this business offers and how much one "
+                + "offering costs, then " + contact + ". You have succeeded when the message is sent."));
+        people.add(new Persona("Meena · first time online", meena, "Using only the website's own language, find the "
+                + "cheapest offering and how to order or book it. Do not submit anything. Report every word or step that "
+                + "would confuse someone new to the internet, especially English or technical words left on a page in "
+                + "another language. You have succeeded if you understood how to order."));
+        return people;
     }
 
     private static String clip(String value, int max) {

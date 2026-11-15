@@ -34,9 +34,11 @@ final class AgentPrompts {
               * kind: the type of site. theme: a colour that suits it (marigold for food and festive, \
             forest for farm and natural products, rose for beauty and fashion, ocean for services and \
             health, indigo for classes and professional work, slate for portfolios and technical work).
-              * layout: the page design. boutique for food, handmade goods, fashion and beauty; split for \
-            services, classes, transport and health; magazine for creators, portfolios, events and \
-            anything visual; classic for general shops, farms and everything else.
+              * layout: the page design. mart for shops with many products or groceries; boutique for \
+            food, handmade goods and fashion; noir for premium or evening businesses (beauty salons, \
+            fine dining, jewellery, wedding photography); bento for freelancers, agencies, coaches and \
+            modern services; split for services, classes, transport and health; magazine for creators, \
+            artists and events; classic for farms, general shops and everything else.
               * about: two or three warm sentences on what this business is and who it is for, using \
             only what the owner said.
               * offeringsTitle: a short heading for the list of offerings that fits the kind, such as \
@@ -99,7 +101,7 @@ final class AgentPrompts {
                     "heroImageQuery": { "type": "string", "description": "2 to 4 English words for a stock photo that suits the whole business." },
                     "kind": { "type": "string", "enum": ["shop", "food", "services", "classes", "transport", "portfolio", "events", "organisation", "other"] },
                     "theme": { "type": "string", "enum": ["marigold", "indigo", "forest", "rose", "ocean", "slate"] },
-                    "layout": { "type": "string", "enum": ["classic", "split", "boutique", "magazine"] },
+                    "layout": { "type": "string", "enum": ["classic", "split", "boutique", "magazine", "bento", "noir", "mart"] },
                     "currency": { "type": "string", "description": "Currency symbol for the prices, up to 4 characters: ₹, $, €, £, Rp." },
                     "tagline": { "type": "string", "description": "One line under the name, up to 160 characters." },
                     "about": { "type": "string", "description": "Two or three sentences about the business, up to 700 characters." },

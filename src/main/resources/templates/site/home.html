@@ -4,6 +4,64 @@
 <body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
+<!-- Bento: a grid of tiles with the name, the photo, facts and two offerings. -->
+<section class="hero-bento" th:if="${layout == 'bento'}">
+    <div class="wrap bento">
+        <div class="b-main">
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn light" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn light" th:unless="${booking}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Offerings</a>
+                <a class="btn ghost" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+            </div>
+        </div>
+        <div class="b-photo">
+            <img th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
+            <span th:unless="${hero != null}" th:text="${#strings.substring(shop.name(), 0, 1)}">A</span>
+        </div>
+        <div class="b-stat"><strong th:text="${shop.products().size()}">3</strong><span th:text="${offeringsTitle}">offerings</span></div>
+        <div class="b-stat" th:if="${shop.hours()}"><span th:text="${L.of('hours')}">Timings</span><strong style="font-size:1.05rem" th:text="${shop.hours()}">Hours</strong></div>
+        <a class="b-item" th:each="m, it : ${mosaic}" th:if="${it.index < 2}" th:href="${base + '/item/' + m.id()}">
+            <img th:src="${pictures.get(m.id()).url()}" th:alt="${m.name()}" loading="lazy"><span th:text="${m.name()}">Item</span>
+        </a>
+    </div>
+</section>
+
+<!-- Noir: dark and quiet, a dimmed photo behind a centred serif name. -->
+<section class="hero-noir" th:if="${layout == 'noir'}">
+    <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
+    <div class="wrap">
+        <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+        <h1 th:text="${shop.name()}">Name</h1>
+        <div class="rule"></div>
+        <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+        <div class="cta">
+            <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+            <a class="btn" th:unless="${booking}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Offerings</a>
+            <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+        </div>
+    </div>
+</section>
+
+<!-- Mart: search first, then every product, like a busy online store. -->
+<section class="hero-mart" th:if="${layout == 'mart'}">
+    <div class="wrap">
+        <h1 th:text="${shop.name()}">Name</h1>
+        <form class="mart-search" th:action="${base + '/catalogue'}" method="get" role="search">
+            <label for="mart-q" style="position:absolute;left:-9999px" th:text="${L.of('search')}">Search</label>
+            <input id="mart-q" name="q" type="search" th:placeholder="${L.of('search_placeholder')}">
+            <button class="btn" th:text="${L.of('search')}">Search</button>
+        </form>
+        <div class="mart-strip">
+            <span th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</span>
+            <span th:if="${shop.noticeDays() != null and shop.noticeDays() > 0}" th:text="${L.of('order_ahead', 'days', shop.noticeDays())}">Notice</span>
+            <span th:if="${shop.location()}" th:text="${shop.location()}">Location</span>
+        </div>
+    </div>
+</section>
+
 <!-- Classic: the name over the banner photo. -->
 <section class="hero" th:if="${layout == 'classic'}" th:classappend="${hero != null} ? 'has-photo'">
     <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
@@ -92,7 +150,20 @@
         </div>
     </section>
 
-    <section aria-labelledby="offerings" th:if="${!featured.isEmpty()}">
+    <section aria-labelledby="all-items" th:if="${layout == 'mart' and !shop.products().isEmpty()}">
+        <h2 id="all-items" th:text="${offeringsTitle}">Everything</h2>
+        <div class="cats" th:if="${categories.size() > 1}" style="margin-bottom:1.2rem">
+            <button type="button" class="cat" data-category-button="" aria-pressed="true" th:text="${L.of('all')}">All</button>
+            <button type="button" class="cat" th:each="c : ${categories}" th:attr="data-category-button=${c}" aria-pressed="false" th:text="${c}">Category</button>
+        </div>
+        <ul class="grid" data-grid>
+            <th:block th:each="p : ${shop.products()}">
+                <li th:replace="~{site/parts :: card(${p})}"></li>
+            </th:block>
+        </ul>
+    </section>
+
+    <section aria-labelledby="offerings" th:if="${layout != 'mart' and !featured.isEmpty()}">
         <div class="head-row">
             <h2 id="offerings" th:text="${offeringsTitle}">What we offer</h2>
             <a class="btn outline small" th:if="${shop.products().size() > featured.size()}" th:href="${base + '/catalogue'}" th:text="${L.of('view_all')}">See everything</a>

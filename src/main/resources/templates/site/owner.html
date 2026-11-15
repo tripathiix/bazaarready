@@ -60,7 +60,7 @@
 
     <section aria-labelledby="tests-title" id="tests">
         <h2 id="tests-title">Test my site</h2>
-        <p style="color:var(--muted)">Three AI customers visit your site and try to use it: Rahul is in a hurry and tries to order or book, Kiran checks whether she can trust you, and Farah uses a screen reader. A code check looks for accessibility problems. It takes a minute or two. Test orders and messages are removed afterwards.</p>
+        <p style="color:var(--muted)">Six AI customers test your site in eight situations: a quick order or booking, a customer who makes mistakes in forms, one who checks every number, a gift or group buyer, a careful customer who checks whether to trust you and your policies, a screen-reader user, and someone new to the internet who reads only your language. A code check looks for accessibility problems. It takes one or two minutes. Test orders and messages are removed afterwards.</p>
         <form method="post" th:action="${'/owner/' + ownerKey + '/test'}">
             <button class="btn" th:disabled="${run != null and run.running()}" th:text="${run != null and run.running()} ? 'Testing…' : (${run == null} ? 'Test my site' : 'Test again')">Test my site</button>
         </form>
@@ -68,7 +68,7 @@
         <th:block th:if="${run != null}">
             <div class="info" style="margin-top:1.4rem">
                 <div>
-                    <h3>Customers who reached their goal</h3>
+                    <h3>Tests passed</h3>
                     <p class="amount" th:text="${run.passed() + ' of ' + run.total()}">0 of 3</p>
                     <p th:if="${run.running()}" style="color:var(--muted)">Still testing. This page refreshes by itself.</p>
                 </div>
