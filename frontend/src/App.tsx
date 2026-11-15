@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ActionView, SessionView, sendApproval, sendReply, startSession } from "./api";
-import { Bunting, Gallery, OpenSign, Petals, PhotoCredits, Shutters } from "./Decor";
+import { Gallery, OpenSign, Petals, PhotoCredits, Shutters, StringLights } from "./Decor";
 import { countries, defaultCountry } from "./countries";
 import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
@@ -111,7 +111,7 @@ export default function App() {
       <Petals trigger={celebrations} />
 
       <header className="signboard">
-        <Bunting />
+        <StringLights />
         <div className="wrap hero">
           <div className="hero-text">
             <p className="kicker">{t.eyebrow}</p>
@@ -120,7 +120,13 @@ export default function App() {
             </h1>
             <p className="headline">{extra.headline}</p>
             <svg className="scribble" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M4 14 C 60 4, 120 18, 180 9 S 260 6, 296 12" fill="none" stroke="var(--rani)" strokeWidth="4" strokeLinecap="round" />
+              <defs>
+                <linearGradient id="ink-glow" x1="0" x2="1">
+                  <stop offset="0" stopColor="#f4a83a" />
+                  <stop offset="1" stopColor="#ec7a8c" />
+                </linearGradient>
+              </defs>
+              <path d="M4 14 C 60 4, 120 18, 180 9 S 260 6, 296 12" fill="none" stroke="url(#ink-glow)" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </div>
           <OpenSign />

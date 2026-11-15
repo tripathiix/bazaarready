@@ -4,56 +4,44 @@ import { Photo, RecentSite } from "./showcase";
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** A string of festive flags across the top of the page, as hung for a shop's opening day. */
-export function Bunting() {
-  const colors = ["var(--rani)", "var(--leaf)", "var(--ink)", "var(--paper)", "var(--marigold)"];
-  const swags = 4;
-  const perSwag = 7;
-  const flags = [];
+/** A string of warm lights across the top of the page, like a market street after dark. */
+export function StringLights() {
+  const swags = 3;
+  const perSwag = 13;
+  const bulbs = [];
   for (let s = 0; s < swags; s++) {
-    for (let i = 0; i < perSwag; i++) {
-      const t = (i + 0.5) / perSwag;
-      const x = ((s + t) / swags) * 1000;
-      const y = 6 + 22 * Math.sin(Math.PI * t);
-      flags.push({ x, y, n: s * perSwag + i });
+    for (let i = 1; i < perSwag; i++) {
+      const t = i / perSwag;
+      bulbs.push({ x: ((s + t) / swags) * 1000, y: 4 + 26 * Math.sin(Math.PI * t), n: s * perSwag + i });
     }
   }
-  const rope = Array.from({ length: swags }, (_, s) => {
+  const wire = Array.from({ length: swags }, (_, s) => {
     const x0 = (s / swags) * 1000;
     const x1 = ((s + 1) / swags) * 1000;
-    return `M${x0} 6 Q${(x0 + x1) / 2} 50 ${x1} 6`;
+    return `M${x0} 4 Q${(x0 + x1) / 2} 56 ${x1} 4`;
   }).join(" ");
   return (
-    <svg className="bunting" viewBox="0 0 1000 70" preserveAspectRatio="none" aria-hidden="true">
-      <path d={rope} fill="none" stroke="var(--ink)" strokeWidth={2} />
-      {flags.map((f) => (
-        <path
-          key={f.n}
-          d={`M${f.x - 13} ${f.y} L${f.x + 13} ${f.y} L${f.x} ${f.y + 32} Z`}
-          fill={colors[f.n % colors.length]}
-          stroke="var(--ink)"
-          strokeWidth={1.5}
-        />
+    <svg className="lights" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+      <path d={wire} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={1.2} />
+      {bulbs.map((b) => (
+        <circle key={b.n} className="bulb" cx={b.x} cy={b.y + 4} r={3.4} style={{ animationDelay: `${(b.n % 7) * 0.45}s` }} />
       ))}
     </svg>
   );
 }
 
-/** A hanging shop sign that flips through "We're open" in every supported language. */
+/** A neon sign that flips through "We're open" in languages from around the world. */
 export function OpenSign() {
   const [index, setIndex] = useState(0);
   useEffect(() => {
     if (reducedMotion()) return;
-    const timer = window.setInterval(() => setIndex((i) => (i + 1) % OPEN_SIGN.length), 2200);
+    const timer = window.setInterval(() => setIndex((i) => (i + 1) % OPEN_SIGN.length), 2400);
     return () => window.clearInterval(timer);
   }, []);
   const phrase = OPEN_SIGN[index];
   return (
     <div className="open-sign" aria-hidden="true">
-      <svg className="strings" viewBox="0 0 100 44" aria-hidden="true">
-        <path d="M50 4 L14 44 M50 4 L86 44" stroke="var(--ink)" strokeWidth={2.5} fill="none" />
-        <circle cx={50} cy={5} r={4.5} fill="var(--ink)" />
-      </svg>
+      <span className="neon-dot" />
       <span className="board" key={index} lang={phrase.lang}>
         {phrase.text}
       </span>
@@ -174,7 +162,7 @@ export function Petals({ trigger }: { trigger: number }) {
 
     const width = (el.width = window.innerWidth);
     const height = (el.height = window.innerHeight);
-    const colors = ["#f28c0f", "#ffc531", "#d81b60", "#ffdf7e"];
+    const colors = ["#f4a83a", "#ec7a8c", "#f6efe4", "#ffd27a"];
     const petals = Array.from({ length: 90 }, () => ({
       x: Math.random() * width,
       y: -20 - Math.random() * height * 0.5,
