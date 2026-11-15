@@ -67,8 +67,11 @@ class SiteController {
     private final ObjectMapper json;
     private final ImageService images;
 
+    private final com.bazaarready.testing.TestRunService tests;
+
     SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json,
-                   ImageService images) {
+                   ImageService images, com.bazaarready.testing.TestRunService tests) {
+        this.tests = tests;
         this.images = images;
         this.profiles = profiles;
         this.labelService = labelService;
@@ -237,6 +240,7 @@ class SiteController {
         model.addAttribute("placed", placed);
         model.addAttribute("enquiries", orders.enquiriesFor(shop.id()));
         model.addAttribute("ownerKey", ownerKey);
+        model.addAttribute("run", tests.latest(shop.id()));
         return "site/owner";
     }
 

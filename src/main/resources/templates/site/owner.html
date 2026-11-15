@@ -36,6 +36,61 @@
         </div>
     </section>
 
+    <section aria-labelledby="tests-title" id="tests">
+        <h2 id="tests-title">Test my site</h2>
+        <p style="color:var(--muted)">Three AI customers visit your site and try to use it: Rahul is in a hurry and tries to order or book, Kiran checks whether she can trust you, and Farah uses a screen reader. A code check looks for accessibility problems. It takes a minute or two. Test orders and messages are removed afterwards.</p>
+        <form method="post" th:action="${'/owner/' + ownerKey + '/test'}">
+            <button class="btn" th:disabled="${run != null and run.running()}" th:text="${run != null and run.running()} ? 'Testing…' : (${run == null} ? 'Test my site' : 'Test again')">Test my site</button>
+        </form>
+
+        <th:block th:if="${run != null}">
+            <div class="info" style="margin-top:1.4rem">
+                <div>
+                    <h3>Customers who reached their goal</h3>
+                    <p class="amount" th:text="${run.passed() + ' of ' + run.total()}">0 of 3</p>
+                    <p th:if="${run.running()}" style="color:var(--muted)">Still testing. This page refreshes by itself.</p>
+                </div>
+                <div>
+                    <h3>Problems found</h3>
+                    <p class="amount" th:text="${run.findings().size()}">0</p>
+                </div>
+            </div>
+
+            <div class="grid" style="margin-top:1.2rem">
+                <div class="card" th:each="c : ${run.cases()}">
+                    <div class="card-body">
+                        <h3 th:text="${c.persona()}">Rahul</h3>
+                        <span class="chip" th:text="${c.status() == 'PASSED'} ? 'Reached the goal' : (${c.status() == 'RUNNING'} ? 'Testing…' : (${c.status() == 'STUCK'} ? 'Got stuck' : 'Could not run'))">Status</span>
+                        <p th:if="${c.summary()}" th:text="${c.summary()}">Summary</p>
+                        <details th:if="${!c.steps().isEmpty()}">
+                            <summary>What they did</summary>
+                            <ol style="margin:0.4rem 0 0;padding-left:1.2rem;font-size:0.92rem">
+                                <li th:each="s : ${c.steps()}" th:text="${s}">Step</li>
+                            </ol>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:1.5rem" th:if="${!run.findings().isEmpty()}">
+                <div class="panel" th:each="f : ${run.findings()}" style="margin-bottom:0.9rem">
+                    <p style="margin:0"><span class="chip" th:text="${f.persona()}">Rahul</span> <strong th:text="${f.problem()}">Problem</strong></p>
+                    <p style="margin:0.5rem 0 0;color:var(--muted)" th:if="${f.evidence()}">What they saw: <span th:text="${f.evidence()}">Evidence</span></p>
+                    <p style="margin:0.5rem 0 0" th:if="${f.suggestion()}">Suggested fix: <span th:text="${f.suggestion()}">Suggestion</span></p>
+                    <div th:if="${f.faqQuestion()}" class="info" style="margin-top:0.7rem">
+                        <div><h3 th:text="${f.faqQuestion()}">Question</h3><p th:text="${f.faqAnswer()}">Answer</p></div>
+                    </div>
+                    <form th:if="${f.canApply()}" method="post" th:action="${'/owner/' + ownerKey + '/test/fix/' + f.id()}" style="margin-top:0.7rem">
+                        <button class="btn small">Add this answer to my site</button>
+                    </form>
+                    <p th:if="${f.fixStatus() == 'APPLIED'}" style="margin:0.6rem 0 0" class="chip">Added to your site</p>
+                </div>
+            </div>
+            <p th:if="${!run.running() and run.findings().isEmpty()}">No problems found.</p>
+        </th:block>
+        <script th:if="${run != null and run.running()}">setTimeout(function () { location.reload(); }, 4000);</script>
+    </section>
+
     <section aria-labelledby="photos" id="photos">
         <h2 id="photos-title">Photos</h2>
         <p th:if="${param.photo != null and param.photo[0] == 'saved'}" class="chip">Photo saved.</p>

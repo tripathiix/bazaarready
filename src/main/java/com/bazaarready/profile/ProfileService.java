@@ -57,6 +57,14 @@ public class ProfileService {
         return toResponse(business);
     }
 
+    /** Adds one FAQ entry, for example after a test customer could not find an answer. */
+    @Transactional
+    public void addFaq(UUID id, String question, String answer) {
+        find(id);
+        int position = faqs.findByBusinessIdOrderBySortOrder(id).size();
+        faqs.save(new Faq(id, question.trim(), answer.trim(), 0, Faq.Source.FIX, position));
+    }
+
     @Transactional
     public ProfileResponse publish(UUID id) {
         Business business = find(id);
