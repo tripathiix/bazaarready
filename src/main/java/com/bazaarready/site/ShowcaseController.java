@@ -20,7 +20,7 @@ class ShowcaseController {
     record Photo(String url, String credit, String creditUrl, String licence, String source) {
     }
 
-    record RecentSite(String name, String tagline, String path, Photo photo) {
+    record RecentSite(String name, String tagline, String path, Photo photo, String location, java.time.Instant publishedAt) {
     }
 
     record Showcase(List<Photo> examples, List<RecentSite> recent) {
@@ -45,7 +45,7 @@ class ShowcaseController {
         List<RecentSite> recent = new ArrayList<>();
         List<String> missing = new ArrayList<>();
         List<Map<String, Object>> rows = jdbc.queryForList("""
-                select b.id, b.name, b.slug, b.tagline, b.hero_query,
+                select b.id, b.name, b.slug, b.tagline, b.hero_query, b.location, b.published_at,
                        (select p.name from product p where p.business_id = b.id order by p.sort_order limit 1) as first_name,
                        (select p.image_query from product p where p.business_id = b.id order by p.sort_order limit 1) as first_query
                 from business b where b.status = 'PUBLISHED' order by b.published_at desc limit 24
@@ -66,7 +66,8 @@ class ShowcaseController {
             boolean sameName = recent.stream().anyMatch(r -> r.name().equals(row.get("name")));
             if (picture.isPresent() && !sameName) {
                 recent.add(new RecentSite((String) row.get("name"), (String) row.get("tagline"), "/s/" + row.get("slug"),
-                        photo(picture.get())));
+                        photo(picture.get()), (String) row.get("location"),
+                        row.get("published_at") instanceof java.sql.Timestamp t ? t.toInstant() : null));
             }
             if (recent.size() == 6) {
                 break;

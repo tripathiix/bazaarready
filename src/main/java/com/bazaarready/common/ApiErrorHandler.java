@@ -18,6 +18,11 @@ class ApiErrorHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(OffTopicException.class)
+    ProblemDetail offTopic(OffTopicException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ProblemDetail invalid(MethodArgumentNotValidException e) {
         Map<String, String> fields = new LinkedHashMap<>();

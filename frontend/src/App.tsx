@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ActionView, SessionView, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
 import { Coach } from "./Coach";
+import { SideDecor } from "./SideDecor";
 import { UX } from "./ux";
 import { Gallery, OpenSign, Petals, PhotoCredits, Shutters, StringLights } from "./Decor";
 import { countries, defaultCountry } from "./countries";
@@ -209,6 +210,7 @@ export default function App() {
   return (
     <>
       <Petals trigger={celebrations} />
+      <SideDecor sites={showcase?.recent ?? []} language={language} />
 
       <header className="signboard">
         <StringLights />

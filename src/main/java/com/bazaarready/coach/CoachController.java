@@ -39,14 +39,18 @@ class CoachController {
 
     private final ClaudeClient claude;
     private final ObjectMapper json;
+    private final com.bazaarready.claude.ScopeGuard scope;
 
-    CoachController(ClaudeClient claude, ObjectMapper json) {
+    CoachController(ClaudeClient claude, ObjectMapper json, com.bazaarready.claude.ScopeGuard scope) {
+        this.scope = scope;
         this.claude = claude;
         this.json = json;
     }
 
     @PostMapping
     CoachReply chat(@Valid @RequestBody CoachRequest request) {
+        List<Turn> turns = request.messages();
+        scope.check(turns.get(turns.size() - 1).content(), request.language());
         return new CoachReply(ask(COACH, request, 700));
     }
 
@@ -102,6 +106,8 @@ class CoachController {
             You are the idea coach inside BazaarReady, a tool that helps small businesses, home sellers, \
             creators and freelancers launch online. Someone is telling you about a business idea or an \
             existing small business.
+
+            Only talk about their business or business idea. If they ask for anything else, such as code, \n            algorithms, homework, essays or general knowledge, say in one sentence that you can only help \n            with their business, and ask about their idea. Never write code.
 
             Help them think it through, like a kind, honest mentor who has run small businesses:
             - Say plainly what looks promising and what looks risky. Do not flatter, and do not crush. \

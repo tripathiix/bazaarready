@@ -52,8 +52,11 @@ public class AgentService {
     private final Validator validator;
     private final ArrayNode tools;
 
-    AgentService(ClaudeClient claude, ProfileService profiles, SiteLabelService siteLabels, ImageService images, AgentSessionRepository sessions,
+    private final com.bazaarready.claude.ScopeGuard scope;
+
+    AgentService(com.bazaarready.claude.ScopeGuard scope, ClaudeClient claude, ProfileService profiles, SiteLabelService siteLabels, ImageService images, AgentSessionRepository sessions,
                  AgentActionRepository actions, ObjectMapper json, Validator validator) throws JsonProcessingException {
+        this.scope = scope;
         this.claude = claude;
         this.profiles = profiles;
         this.siteLabels = siteLabels;
@@ -103,6 +106,7 @@ public class AgentService {
             throw new ClaudeException("The Claude API key is not set. Add ANTHROPIC_API_KEY to the .env file and restart.");
         }
         ProfileResponse current = profiles.getByOwnerKey(ownerKey);
+        scope.check(feedback, language);
         String details;
         try {
             details = json.writeValueAsString(current);
@@ -125,6 +129,7 @@ public class AgentService {
         if (!claude.isConfigured()) {
             throw new ClaudeException("The Claude API key is not set. Add ANTHROPIC_API_KEY to the .env file and restart.");
         }
+        scope.check(description, language);
         ArrayNode messages = json.createArrayNode();
         messages.addObject().put("role", "user").put("content", description.trim());
         AgentSession session = sessions.save(new AgentSession(messages.toString(), Languages.of(language).code()));
@@ -135,6 +140,7 @@ public class AgentService {
     public SessionView reply(UUID sessionId, String answer) {
         AgentSession session = find(sessionId);
         requireStatus(session, AgentSession.Status.WAITING_OWNER);
+        scope.check(answer, session.getLanguage());
         ArrayNode messages = readMessages(session);
         addToolResult(messages, session.getPendingToolUseId(), "The owner answered: " + answer.trim(), false);
         ObjectNode asked = json.createObjectNode();
