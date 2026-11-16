@@ -32,12 +32,41 @@ export interface SessionView {
   actions: ActionView[];
 }
 
+/** The CSRF token the server put in a cookie; sent back on every change so other sites can't act as you. */
+export function csrfToken(): string {
+  const m = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : "";
+}
+
+/** When the server says "sign in first", go to the sign-in page. */
+export function signInIfNeeded(response: Response) {
+  if (response.status === 401) {
+    window.location.href = "/login";
+    throw new Error("Please sign in first.");
+  }
+}
+
+export interface Me {
+  signedIn: boolean;
+  name: string | null;
+}
+
+export async function getMe(): Promise<Me> {
+  try {
+    const response = await fetch("/api/me");
+    return response.ok ? ((await response.json()) as Me) : { signedIn: false, name: null };
+  } catch {
+    return { signedIn: false, name: null };
+  }
+}
+
 async function post<T>(url: string, body: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-XSRF-TOKEN": csrfToken() },
     body: JSON.stringify(body),
   });
+  signInIfNeeded(response);
   if (!response.ok) {
     let detail = `The server answered with an error (${response.status}).`;
     try {
@@ -59,7 +88,8 @@ export async function startFromChats(files: File[], language: string, ownerName:
   files.forEach((file) => form.append("files", file));
   form.append("language", language);
   form.append("ownerName", ownerName);
-  const response = await fetch("/api/agent/sessions/whatsapp", { method: "POST", body: form });
+  const response = await fetch("/api/agent/sessions/whatsapp", { method: "POST", body: form, headers: { "X-XSRF-TOKEN": csrfToken() } });
+  signInIfNeeded(response);
   if (!response.ok) {
     let detail = `The server answered with an error (${response.status}).`;
     try {
@@ -78,6 +108,7 @@ export const startUpdate = (ownerKey: string, feedback: string, language: string
 
 export async function getSession(id: string): Promise<SessionView> {
   const response = await fetch(`/api/agent/sessions/${id}`);
+  signInIfNeeded(response);
   if (!response.ok) throw new Error(`Could not load that session (${response.status}).`);
   return response.json() as Promise<SessionView>;
 }

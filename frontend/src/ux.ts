@@ -23,6 +23,10 @@ export interface UxStrings {
   howItWorks: string;
   dashboard: string;
   dashboardHint: string;
+  signIn: string;
+  mySites: string;
+  signOut: string;
+  signInToBuild: string;
 }
 
 export const UX: Record<LanguageCode, UxStrings> = {
@@ -54,6 +58,10 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "How it works",
     dashboard: "Your private dashboard",
     dashboardHint: "Orders, messages, AI tests, collab checks, photos and changes, all in one place. Save this link and keep it private.",
+    signIn: "Sign in",
+    mySites: "My sites",
+    signOut: "Sign out",
+    signInToBuild: "Sign in or create a free account to build your website.",
   },
   hi: {
     guideTitle: "सबसे अच्छी वेबसाइट के लिए बताइए:",
@@ -83,6 +91,10 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "यह कैसे काम करता है",
     dashboard: "आपका निजी डैशबोर्ड",
     dashboardHint: "ऑर्डर, मैसेज, AI टेस्ट, कोलैब जाँच, फ़ोटो और बदलाव, सब एक जगह। यह लिंक सेव करें और किसी से साझा न करें।",
+    signIn: "साइन इन",
+    mySites: "मेरी साइटें",
+    signOut: "साइन आउट",
+    signInToBuild: "अपनी वेबसाइट बनाने के लिए साइन इन करें या मुफ़्त खाता बनाएँ।",
   },
   kn: {
     guideTitle: "ಉತ್ತಮ ವೆಬ್‌ಸೈಟ್‌ಗಾಗಿ ತಿಳಿಸಿ:",
@@ -112,6 +124,10 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
     dashboard: "ನಿಮ್ಮ ಖಾಸಗಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     dashboardHint: "ಆರ್ಡರ್‌ಗಳು, ಸಂದೇಶಗಳು, AI ಪರೀಕ್ಷೆ, ಕೊಲ್ಯಾಬ್ ಪರಿಶೀಲನೆ, ಫೋಟೋಗಳು ಮತ್ತು ಬದಲಾವಣೆಗಳು, ಎಲ್ಲವೂ ಒಂದೇ ಕಡೆ. ಈ ಲಿಂಕ್ ಉಳಿಸಿ, ಯಾರಿಗೂ ಹಂಚಬೇಡಿ.",
+    signIn: "ಸೈನ್ ಇನ್",
+    mySites: "ನನ್ನ ಸೈಟ್‌ಗಳು",
+    signOut: "ಸೈನ್ ಔಟ್",
+    signInToBuild: "ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಮಾಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ ಅಥವಾ ಉಚಿತ ಖಾತೆ ತೆರೆಯಿರಿ.",
   },
   ta: {
     guideTitle: "சிறந்த இணையதளத்துக்கு இவற்றைச் சொல்லுங்கள்:",
@@ -141,6 +157,10 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "இது எப்படி வேலை செய்கிறது",
     dashboard: "உங்கள் தனிப்பட்ட டாஷ்போர்டு",
     dashboardHint: "ஆர்டர்கள், செய்திகள், AI சோதனை, கொலாப் சரிபார்ப்பு, புகைப்படங்கள், மாற்றங்கள் எல்லாம் ஒரே இடத்தில். இந்த இணைப்பைச் சேமித்து யாரிடமும் பகிர வேண்டாம்.",
+    signIn: "உள்நுழை",
+    mySites: "என் தளங்கள்",
+    signOut: "வெளியேறு",
+    signInToBuild: "உங்கள் இணையதளத்தை உருவாக்க உள்நுழையுங்கள் அல்லது இலவச கணக்கு தொடங்குங்கள்.",
   },
   te: {
     guideTitle: "మంచి వెబ్‌సైట్ కోసం ఇవి చెప్పండి:",
@@ -170,6 +190,10 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "ఇది ఎలా పనిచేస్తుంది",
     dashboard: "మీ ప్రైవేట్ డాష్‌బోర్డ్",
     dashboardHint: "ఆర్డర్లు, సందేశాలు, AI పరీక్షలు, కొలాబ్ తనిఖీ, ఫోటోలు, మార్పులు అన్నీ ఒకేచోట. ఈ లింక్ సేవ్ చేసుకోండి, ఎవరితోనూ పంచుకోకండి.",
+    signIn: "సైన్ ఇన్",
+    mySites: "నా సైట్లు",
+    signOut: "సైన్ అవుట్",
+    signInToBuild: "మీ వెబ్‌సైట్ తయారు చేయడానికి సైన్ ఇన్ చేయండి లేదా ఉచిత ఖాతా తెరవండి.",
   },
   mr: {
     guideTitle: "सर्वोत्तम वेबसाइटसाठी सांगा:",
@@ -199,6 +223,10 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "हे कसे काम करते",
     dashboard: "तुमचा खाजगी डॅशबोर्ड",
     dashboardHint: "ऑर्डर, मेसेज, AI चाचणी, कोलॅब तपासणी, फोटो आणि बदल, सगळे एका ठिकाणी. ही लिंक सेव्ह करा आणि कोणाला देऊ नका.",
+    signIn: "साइन इन",
+    mySites: "माझ्या साइट्स",
+    signOut: "साइन आउट",
+    signInToBuild: "तुमची वेबसाइट बनवण्यासाठी साइन इन करा किंवा मोफत खाते उघडा.",
   },
   bn: {
     guideTitle: "সেরা ওয়েবসাইটের জন্য জানান:",
@@ -228,6 +256,10 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "এটা কীভাবে কাজ করে",
     dashboard: "আপনার ব্যক্তিগত ড্যাশবোর্ড",
     dashboardHint: "অর্ডার, মেসেজ, AI পরীক্ষা, কোলাব যাচাই, ছবি আর পরিবর্তন, সব এক জায়গায়। এই লিংকটি সেভ করুন, কাউকে দেবেন না।",
+    signIn: "সাইন ইন",
+    mySites: "আমার সাইট",
+    signOut: "সাইন আউট",
+    signInToBuild: "ওয়েবসাইট বানাতে সাইন ইন করুন বা বিনামূল্যে অ্যাকাউন্ট খুলুন।",
   },
   gu: {
     guideTitle: "શ્રેષ્ઠ વેબસાઇટ માટે જણાવો:",
@@ -257,5 +289,9 @@ export const UX: Record<LanguageCode, UxStrings> = {
     howItWorks: "આ કેવી રીતે કામ કરે છે",
     dashboard: "તમારું ખાનગી ડેશબોર્ડ",
     dashboardHint: "ઓર્ડર, મેસેજ, AI ટેસ્ટ, કોલેબ તપાસ, ફોટા અને ફેરફારો, બધું એક જગ્યાએ. આ લિંક સેવ કરો અને કોઈને ન આપો.",
+    signIn: "સાઇન ઇન",
+    mySites: "મારી સાઇટ્સ",
+    signOut: "સાઇન આઉટ",
+    signInToBuild: "તમારી વેબસાઇટ બનાવવા સાઇન ઇન કરો અથવા મફત ખાતું ખોલો.",
   },
 };

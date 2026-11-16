@@ -6,7 +6,11 @@
 <!-- The owner's private page. It is in English for now; the public site is in the owner's language. -->
 <main class="wrap">
     <section aria-labelledby="title">
-        <p style="margin:0"><a th:href="${base}" target="_blank" rel="noopener">Open the public site</a></p>
+        <p style="margin:0;display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
+            <a th:href="${base}" target="_blank" rel="noopener">Open the public site</a>
+            <a href="/account">My sites</a>
+            <form method="post" th:action="@{/logout}" style="display:inline"><button class="btn small outline">Sign out</button></form>
+        </p>
         <h1 id="title" style="color:var(--brand)" th:text="${shop.name()}">Name</h1>
         <p class="demo" role="note" style="margin-top:1rem">This page is private. Anyone with this link can see your orders, so do not share it.</p>
         <nav class="owner-tabs" aria-label="Owner tools">
@@ -157,7 +161,7 @@
             </details>
             <p th:if="${!run.running() and run.findings().isEmpty()}">No problems found.</p>
         </th:block>
-        <script th:if="${run != null and run.running()}">setTimeout(function () { location.reload(); }, 4000);</script>
+        <script th:if="${run != null and run.running()}" th:attr="nonce=${cspNonce}">setTimeout(function () { location.reload(); }, 4000);</script>
     </section>
 
     <section aria-labelledby="photos-title" id="photos">
@@ -226,7 +230,7 @@
                         <div class="card-actions">
                             <button class="btn small" name="action" value="save">Save</button>
                             <button class="btn small outline" name="action" value="remove" formnovalidate
-                                    onclick="return confirm('Remove this product from your website?')">Remove</button>
+                                    data-confirm="Remove this product from your website?">Remove</button>
                         </div>
                     </form>
                     <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/photo'}" class="form" style="margin-top:0.6rem">
@@ -253,8 +257,12 @@
         </div>
     </section>
 </main>
-<script th:if="${checksRunning}">setTimeout(function () { location.reload(); }, 4000);</script>
-<script>
+<script th:if="${checksRunning}" th:attr="nonce=${cspNonce}">setTimeout(function () { location.reload(); }, 4000);</script>
+<script th:attr="nonce=${cspNonce}">
+document.addEventListener("submit", function (event) {
+    var button = event.submitter;
+    if (button && button.dataset.confirm && !window.confirm(button.dataset.confirm)) event.preventDefault();
+});
 document.addEventListener("click", function (event) {
     var button = event.target.closest("[data-copy]");
     if (!button) return;

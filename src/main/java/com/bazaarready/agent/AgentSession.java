@@ -57,6 +57,10 @@ public class AgentSession {
     @Column(nullable = false)
     private String source = "DESCRIPTION";
 
+    /** The account that started this conversation. */
+    @Column(name = "account_id")
+    private UUID accountId;
+
     @Column(name = "model_calls", nullable = false)
     private int modelCalls;
 
@@ -126,6 +130,8 @@ public class AgentSession {
     public void setSource(String source) { this.source = source; }
 
     public void setBusinessId(UUID businessId) { this.businessId = businessId; }
+    public UUID getAccountId() { return accountId; }
+    public void setAccountId(UUID accountId) { this.accountId = accountId; }
     public void setPendingAnswerType(String pendingAnswerType) { this.pendingAnswerType = pendingAnswerType; }
     public String getPendingFields() { return pendingFields; }
     public void setPendingFields(String pendingFields) { this.pendingFields = pendingFields; }

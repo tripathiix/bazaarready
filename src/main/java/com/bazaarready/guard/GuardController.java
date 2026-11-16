@@ -13,17 +13,17 @@ import java.util.UUID;
 @Controller
 class GuardController {
 
-    private final ProfileService profiles;
+    private final com.bazaarready.account.OwnerAccess profiles;
     private final MessageCheckService checks;
 
-    GuardController(ProfileService profiles, MessageCheckService checks) {
+    GuardController(com.bazaarready.account.OwnerAccess profiles, MessageCheckService checks) {
         this.profiles = profiles;
         this.checks = checks;
     }
 
     @PostMapping("/owner/{ownerKey}/check")
     String check(@PathVariable UUID ownerKey, @RequestParam(defaultValue = "") String sender, @RequestParam String message) {
-        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileResponse shop = profiles.open(ownerKey);
         String body = message.trim();
         if (body.isEmpty()) {
             return "redirect:/owner/" + ownerKey + "?check=empty#collabs";

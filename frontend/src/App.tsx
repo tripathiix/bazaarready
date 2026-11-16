@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ActionView, SessionView, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
+import { ActionView, Me, SessionView, csrfToken, getMe, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
 import { Coach } from "./Coach";
 import { SideDecor } from "./SideDecor";
 import { UX } from "./ux";
@@ -66,6 +66,10 @@ export default function App() {
     return key && /^[0-9a-f-]{36}$/.test(key) ? key : null;
   });
   const [changeText, setChangeText] = useState("");
+  const [me, setMe] = useState<Me | null>(null);
+  useEffect(() => {
+    void getMe().then(setMe);
+  }, []);
   const [formAnswers, setFormAnswers] = useState<Record<number, string>>({});
   const [formOther, setFormOther] = useState<Record<number, string>>({});
 
@@ -172,6 +176,10 @@ export default function App() {
 
   function onStart(event: FormEvent) {
     event.preventDefault();
+    if (me && !me.signedIn) {
+      window.location.href = "/login";
+      return;
+    }
     if (speech.listening) speech.stop();
     void run(() => startSession(description, language));
   }
@@ -234,9 +242,28 @@ export default function App() {
             </svg>
           </div>
           <div className="hero-side">
-            <a className="how-link" href="/guide">
-              {u.howItWorks} →
-            </a>
+            <div className="account-links">
+              <a className="how-link" href="/guide">
+                {u.howItWorks} →
+              </a>
+              {me?.signedIn ? (
+                <>
+                  <a className="how-link" href="/account">
+                    {u.mySites}
+                  </a>
+                  <form method="post" action="/logout">
+                    <input type="hidden" name="_csrf" value={csrfToken()} />
+                    <button type="submit" className="how-link as-button">
+                      {u.signOut}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <a className="how-link signin" href="/login">
+                  {u.signIn}
+                </a>
+              )}
+            </div>
             <OpenSign />
           </div>
         </div>
@@ -279,6 +306,11 @@ export default function App() {
                 ))}
               </ol>
             </div>
+            {me && !me.signedIn && (
+              <p className="signin-note">
+                {u.signInToBuild} <a href="/login">{u.signIn} →</a>
+              </p>
+            )}
             <textarea
               id="description"
               rows={6}
@@ -521,6 +553,7 @@ export default function App() {
                 )}
                 {session.ownerPath && (
                   <form className="test-first" method="post" action={`${session.ownerPath}/test`} target="_blank">
+                    <input type="hidden" name="_csrf" value={csrfToken()} />
                     <p className="hint">{TEST_LINE}</p>
                     <button type="submit" className="button">
                       {u.testNow}
@@ -622,7 +655,9 @@ export default function App() {
               </form>
             )}
         {session?.ownerPath && (
-          <form id="test-after" method="post" action={`${session.ownerPath}/test`} target="_blank" hidden />
+          <form id="test-after" method="post" action={`${session.ownerPath}/test`} target="_blank" hidden>
+            <input type="hidden" name="_csrf" value={csrfToken()} />
+          </form>
         )}
       </main>
 

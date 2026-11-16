@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { UxStrings } from "./ux";
+import { csrfToken, signInIfNeeded } from "./api";
 
 interface Turn {
   role: "user" | "assistant";
@@ -7,7 +8,12 @@ interface Turn {
 }
 
 async function post(path: string, body: unknown): Promise<string> {
-  const response = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const response = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-XSRF-TOKEN": csrfToken() },
+    body: JSON.stringify(body),
+  });
+  signInIfNeeded(response);
   if (!response.ok) {
     let detail = `The server answered with an error (${response.status}).`;
     try {

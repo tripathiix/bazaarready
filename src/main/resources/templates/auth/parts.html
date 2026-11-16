@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:fragment="head(title)">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title + ' · BazaarReady'}">BazaarReady</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;600&family=Kalam:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #100e24; --panel: #1a1838; --ink: #f6eedd; --muted: #b9b2c9; --line: rgba(255,255,255,.14);
+            --amber: #f4a83a; --rose: #ec7a8c; --mint: #8fd9c4; --red: #ff9b9b; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at top, #241f4d 0%, var(--bg) 60%) fixed; color: var(--ink);
+            font: 1.02rem/1.6 "Instrument Sans", system-ui, sans-serif; }
+        a { color: var(--amber); }
+        .wrap { max-width: 30rem; margin: 0 auto; padding: 2.5rem 16px 3rem; }
+        .wrap.wide { max-width: 52rem; }
+        .brand { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1.6rem; text-decoration: none; color: var(--ink); }
+        .brand span { background: linear-gradient(100deg, var(--amber), var(--rose)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: 2rem; margin: 1.6rem 0 .3rem; line-height: 1.15; }
+        .lead { color: var(--muted); margin: 0 0 1.4rem; }
+        .hand { font-family: Kalam, cursive; color: #ffd9a0; }
+        .card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 1.5rem; box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+        form { display: grid; gap: 1rem; }
+        label { display: grid; gap: .35rem; font-weight: 600; font-size: .95rem; }
+        input { font: inherit; color: inherit; background: rgba(0,0,0,.28); border: 1px solid var(--line); border-radius: 12px; padding: .75rem .9rem; }
+        input:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+        .hint { font-weight: 400; color: var(--muted); font-size: .85rem; }
+        .btn { font: inherit; font-weight: 700; cursor: pointer; border: 0; border-radius: 999px; padding: .85rem 1.3rem; color: #22140a;
+            background: linear-gradient(100deg, var(--amber), #f7c065 50%, var(--rose)); text-decoration: none; text-align: center; display: inline-block; }
+        .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-weight: 600; }
+        .error { color: var(--red); background: rgba(255,120,120,.08); border: 1px solid rgba(255,120,120,.3); border-radius: 12px; padding: .7rem .9rem; margin: 0; }
+        .ok { color: var(--mint); margin: 0; }
+        .switch { text-align: center; color: var(--muted); margin: 1.2rem 0 0; }
+        .safe { color: var(--muted); font-size: .85rem; margin-top: 1.4rem; text-align: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: .7rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+        th { color: var(--muted); font-weight: 600; font-size: .9rem; }
+        .pill { font-size: .78rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--line); }
+        .pill.live { color: #7be0a4; border-color: rgba(123,224,164,.4); }
+        .top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .links { display: flex; gap: .6rem; flex-wrap: wrap; }
+        @media (max-width: 560px) { thead { display: none; } td { display: block; border: 0; padding: .2rem 0; } tr { display: block; border-bottom: 1px solid var(--line); padding: .7rem 0; } }
+    </style>
+</head>
+<body></body>
+</html>

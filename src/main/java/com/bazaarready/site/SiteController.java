@@ -69,6 +69,8 @@ class SiteController {
 
     private final com.bazaarready.testing.TestRunService tests;
     private final com.bazaarready.guard.MessageCheckService checks;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.bazaarready.account.OwnerAccess owners;
 
     SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json,
                    ImageService images, com.bazaarready.testing.TestRunService tests,
@@ -291,7 +293,7 @@ class SiteController {
 
     @GetMapping("/owner/{ownerKey}")
     String owner(@PathVariable UUID ownerKey, Model model) {
-        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileResponse shop = owners.open(ownerKey);
         common(shop, model, "owner");
         List<ShopOrder> all = orders.ordersFor(shop.id());
         Map<UUID, List<OrderService.OrderLine>> lines = new HashMap<>();
@@ -318,7 +320,7 @@ class SiteController {
     String uploadPhoto(@PathVariable UUID ownerKey, @RequestParam(defaultValue = "") String item,
                        @RequestParam(required = false) MultipartFile file,
                        @RequestParam(defaultValue = "upload") String action) throws java.io.IOException {
-        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileResponse shop = owners.open(ownerKey);
         boolean known = item.isEmpty() || shop.products().stream().anyMatch(p -> p.name().equals(item));
         if (!known) {
             return "redirect:/owner/" + ownerKey + "?photo=unknown";
@@ -348,7 +350,7 @@ class SiteController {
                       @RequestParam(defaultValue = "") String price, @RequestParam(defaultValue = "") String unit,
                       @RequestParam(defaultValue = "") String description,
                       @RequestParam(required = false) MultipartFile file) throws java.io.IOException {
-        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileResponse shop = owners.open(ownerKey);
         ProfileService.ProductEdit edit = productEdit(name, price, unit, description);
         if (edit == null) {
             return "redirect:/owner/" + ownerKey + "?product=invalid#photos";
@@ -369,7 +371,7 @@ class SiteController {
                        @RequestParam(defaultValue = "save") String action, @RequestParam(defaultValue = "") String name,
                        @RequestParam(defaultValue = "") String price, @RequestParam(defaultValue = "") String unit,
                        @RequestParam(defaultValue = "") String description) {
-        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileResponse shop = owners.open(ownerKey);
         try {
             if ("remove".equals(action)) {
                 String removed = profiles.removeProduct(shop.id(), productId);

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{auth/parts :: head('Create your account')}"></head>
+<body>
+<main class="wrap">
+    <a class="brand" href="/">Bazaar<span>Ready</span></a>
+    <h1>Create your free account</h1>
+    <p class="lead">One account keeps all your websites, orders and messages in one place.</p>
+    <div class="card">
+        <form method="post" th:action="@{/signup}">
+            <p class="error" th:if="${error}" th:text="${error}" role="alert">Error</p>
+            <label>Your name
+                <input name="name" autocomplete="name" required maxlength="80" th:value="${name}" autofocus>
+            </label>
+            <label>Email
+                <input type="email" name="email" autocomplete="email" required maxlength="200" th:value="${email}">
+            </label>
+            <label>Password <span class="hint">At least 8 characters</span>
+                <input type="password" name="password" autocomplete="new-password" required minlength="8" maxlength="72">
+            </label>
+            <label>Password again
+                <input type="password" name="confirm" autocomplete="new-password" required minlength="8" maxlength="72">
+            </label>
+            <button class="btn" type="submit">Create account</button>
+        </form>
+    </div>
+    <p class="switch">Already have an account? <a th:href="@{/login}">Sign in</a></p>
+    <p class="safe">🔒 Passwords are stored only in scrambled (hashed) form. We never see them.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{auth/parts :: head('Sign in')}"></head>
+<body>
+<main class="wrap">
+    <a class="brand" href="/">Bazaar<span>Ready</span></a>
+    <h1>Welcome back</h1>
+    <p class="lead">Sign in to build your website and open your dashboard.</p>
+    <div class="card">
+        <form method="post" th:action="@{/login}">
+            <p class="error" th:if="${param.error != null}" role="alert">That email and password don't match. Try again.</p>
+            <p class="ok" th:if="${param.logout != null}">You're signed out.</p>
+            <label>Email
+                <input type="email" name="email" autocomplete="email" required maxlength="200" autofocus>
+            </label>
+            <label>Password
+                <input type="password" name="password" autocomplete="current-password" required maxlength="72">
+            </label>
+            <button class="btn" type="submit">Sign in</button>
+        </form>
+    </div>
+    <p class="switch">New to BazaarReady? <a th:href="@{/signup}">Create a free account</a></p>
+    <p class="safe">🔒 Passwords are stored only in scrambled (hashed) form. We never see them.</p>
+</main>
+</body>
+</html>

@@ -28,13 +28,43 @@ public class ClaudeClient {
     private final RestClient http;
     private final ObjectMapper json;
     private final String apiKey;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final int dailyCap;
+    private final int perAccountCap;
 
-    ClaudeClient(@Value("${bazaarready.anthropic.api-key:}") String apiKey, RestClient.Builder builder, ObjectMapper json) {
+    ClaudeClient(@Value("${bazaarready.anthropic.api-key:}") String apiKey, RestClient.Builder builder, ObjectMapper json,
+                 org.springframework.jdbc.core.JdbcTemplate jdbc,
+                 @Value("${bazaarready.claude.daily-cap:3000}") int dailyCap,
+                 @Value("${bazaarready.claude.per-account-daily-cap:400}") int perAccountCap) {
+        this.jdbc = jdbc;
+        this.dailyCap = dailyCap;
+        this.perAccountCap = perAccountCap;
         JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory();
         factory.setReadTimeout(Duration.ofSeconds(120));
         this.http = builder.baseUrl("https://api.anthropic.com").requestFactory(factory).build();
         this.json = json;
         this.apiKey = apiKey == null ? "" : apiKey.trim();
+    }
+
+    /**
+     * Counts this call against today's caps: one for the whole service and one per signed-in account.
+     * Work with no signed-in person (photo checks, AI test customers) counts only towards the total.
+     */
+    private void countAndCheckCap() {
+        String account = com.bazaarready.account.AccountService.currentEmail();
+        String key = account == null ? "" : account;
+        Integer mine = jdbc.queryForObject("""
+                insert into claude_usage (day, account, calls) values (current_date, ?, 1)
+                on conflict (day, account) do update set calls = claude_usage.calls + 1
+                returning calls
+                """, Integer.class, key);
+        Integer total = jdbc.queryForObject("select coalesce(sum(calls), 0) from claude_usage where day = current_date", Integer.class);
+        if (total != null && total > dailyCap) {
+            throw new ClaudeException("BazaarReady has reached today's limit for AI requests. Please try again tomorrow.");
+        }
+        if (account != null && mine != null && mine > perAccountCap) {
+            throw new ClaudeException("Your account has reached today's limit for AI requests. It resets tomorrow.");
+        }
     }
 
     public boolean isConfigured() {
@@ -60,6 +90,7 @@ public class ClaudeClient {
         if (!isConfigured()) {
             throw new ClaudeException("The Claude API key is not set. Add ANTHROPIC_API_KEY to the .env file and restart.");
         }
+        countAndCheckCap();
         ObjectNode body = json.createObjectNode();
         body.put("model", model);
         body.put("max_tokens", maxTokens);

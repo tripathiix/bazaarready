@@ -1371,3 +1371,39 @@ h1 span {
   .drift { display: none; }
   .ticker-card { animation: none; }
 }
+
+/* Account links in the header */
+.account-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.account-links form {
+  margin: 0;
+}
+
+.how-link.as-button {
+  font: inherit;
+  cursor: pointer;
+  color: var(--ink, #f6eedd);
+}
+
+.how-link.signin {
+  color: #22140a;
+  border-color: transparent;
+  background: linear-gradient(100deg, var(--amber), #f7c065 50%, var(--rose));
+}
+
+.signin-note {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+
+.signin-note a {
+  font-weight: 700;
+}

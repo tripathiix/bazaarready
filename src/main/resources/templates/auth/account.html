@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{auth/parts :: head('My sites')}"></head>
+<body>
+<main class="wrap wide">
+    <div class="top">
+        <a class="brand" href="/">Bazaar<span>Ready</span></a>
+        <form method="post" th:action="@{/logout}" style="display:block">
+            <button class="btn ghost" type="submit">Sign out</button>
+        </form>
+    </div>
+    <h1 th:text="${'Hi ' + me.name()}">Hi</h1>
+    <p class="lead">Your websites. Open the dashboard to see orders and messages, test with AI customers, check collabs and make changes.</p>
+    <div class="card">
+        <p th:if="${sites.isEmpty()}" style="margin:0">No websites yet. <a href="/">Build your first one</a>.</p>
+        <table th:unless="${sites.isEmpty()}">
+            <thead><tr><th>Website</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="s : ${sites}">
+                <td><strong th:text="${s.name}">Name</strong></td>
+                <td><span class="pill" th:classappend="${s.status == 'PUBLISHED'} ? 'live'" th:text="${s.status == 'PUBLISHED'} ? 'Live' : 'Draft'">Live</span></td>
+                <td>
+                    <div class="links">
+                        <a class="btn ghost" th:href="${'/s/' + s.slug}" target="_blank" rel="noopener">View site</a>
+                        <a class="btn" th:href="${'/owner/' + s.owner_key}">Dashboard</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="switch"><a href="/">+ Build another website</a></p>
+</main>
+</body>
+</html>
