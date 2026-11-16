@@ -455,6 +455,7 @@ class SiteController {
     private ProfileResponse common(String slug, Model model, String page) {
         ProfileResponse shop = profiles.getBySlug(slug);
         common(shop, model, page);
+        model.addAttribute("today", LocalDate.now().toString());
         return shop;
     }
 

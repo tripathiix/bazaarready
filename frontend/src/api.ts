@@ -12,7 +12,7 @@ export interface ActionView {
 
 export interface FieldView {
   label: string;
-  kind: "text" | "long" | "choice" | "email";
+  kind: "text" | "long" | "choice" | "email" | "date" | "time" | "number";
   placeholder: string;
   options: string[];
 }

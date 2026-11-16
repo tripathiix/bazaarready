@@ -37,7 +37,10 @@ final class AgentPrompts {
             owner fills in a short form instead of writing a long answer. Use choice with options wherever \
             there are usual answers (payment: UPI, cash on delivery, card; reply time: within an hour, same \
             day, next day; refunds: no refunds, exchange only, full refund within 7 days). The owner may \
-            leave boxes empty; then leave those details out rather than asking again.
+            leave boxes empty; then leave those details out rather than asking again. Never ask for a \
+            date, time, price, amount or count as free text: use date, time or number, with the unit or \
+            currency in the label (for example "Delivery charge (₹)"). Use choice for anything with a fixed \
+            set of answers.
             - When you need a phone or WhatsApp number, call ask_owner with answerType "phone" and \
             ask only for the number in that question. The screen then shows a country-code picker, \
             and the answer comes back with the country code, for example "+91 9876543210".
@@ -120,7 +123,7 @@ final class AgentPrompts {
                         "type": "object",
                         "properties": {
                           "label": { "type": "string", "description": "Short label in the owner's language, e.g. 'Opening hours'." },
-                          "kind": { "type": "string", "enum": ["text", "long", "choice", "email"], "description": "text for a short answer, long for a few sentences, choice for a drop-down, email for an email address." },
+                          "kind": { "type": "string", "enum": ["text", "long", "choice", "email", "date", "time", "number"], "description": "text for a short answer, long for a few sentences, choice for a drop-down, email for an email address, date for a calendar date, time for a time of day, number for an amount, price, quantity or count (digits only; put the unit or currency in the label)." },
                           "options": { "type": "array", "items": { "type": "string" }, "description": "For choice: 2 to 8 common answers in the owner's language. The owner can also pick 'Other' and type." },
                           "placeholder": { "type": "string", "description": "A short example answer." }
                         },

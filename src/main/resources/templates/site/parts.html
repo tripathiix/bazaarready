@@ -267,6 +267,12 @@
         .credits { font-size: 0.8rem; }
         .credits a { color: var(--muted); }
         footer { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 0 1rem 2.5rem; }
+        /* Practical details (how to order, rules, contact) sit at the end in smaller type. */
+        .fine-print { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem 1.6rem;
+            margin-top: 2.5rem; padding-top: 1.6rem; border-top: 1px solid var(--line, rgba(127,127,127,.25)); font-size: 0.9rem; }
+        .fine-block h3 { font-size: 0.98rem; margin: 0 0 0.35rem; color: var(--brand); }
+        .fine-block p, .fine-block ul { margin: 0; color: var(--muted); line-height: 1.55; }
+        .fine-block ul { padding-left: 1.1rem; }
         @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .card, .btn { transition: none; } .tick { animation: none; } }
 
         /* ---- Motion (switched off for visitors who ask for less motion) ---- */

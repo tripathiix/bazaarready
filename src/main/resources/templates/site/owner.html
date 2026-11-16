@@ -176,12 +176,18 @@
         <p th:if="${param.photo != null and param.photo[0] == 'size'}" class="error">Choose a picture smaller than 3 MB.</p>
         <p th:if="${param.photo != null and param.photo[0] == 'type'}" class="error">That file is not a JPEG, PNG or WebP picture.</p>
 
+        <datalist id="unit-options">
+            <option value="each"></option><option value="1 kg"></option><option value="500 g"></option>
+            <option value="per piece"></option><option value="per dozen"></option><option value="per box"></option>
+            <option value="per person"></option><option value="per hour"></option><option value="per class"></option>
+            <option value="per month"></option><option value="per day"></option><option value="per session"></option>
+        </datalist>
         <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/products'}" class="panel form add-product">
             <h3 style="margin:0">➕ Add a product or service</h3>
             <div class="add-grid">
                 <div><label for="new-name">Name</label><input id="new-name" name="name" maxlength="80" required placeholder="Mango cake"></div>
-                <div><label for="new-price" th:text="${'Price (' + shop.currency() + ')'}">Price</label><input id="new-price" name="price" inputmode="decimal" maxlength="12" placeholder="900"></div>
-                <div><label for="new-unit">Per (optional)</label><input id="new-unit" name="unit" maxlength="30" placeholder="1 kg, each, per class"></div>
+                <div><label for="new-price" th:text="${'Price (' + shop.currency() + ')'}">Price</label><input id="new-price" name="price" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="900"></div>
+                <div><label for="new-unit">Per (optional)</label><input id="new-unit" name="unit" maxlength="30" list="unit-options" placeholder="Choose or type"></div>
             </div>
             <div><label for="new-desc">Short description (optional)</label><textarea id="new-desc" name="description" rows="2" maxlength="600" placeholder="Fresh Alphonso mango cream, eggless on request"></textarea></div>
             <div><label for="new-photo">Photo (optional)</label><input id="new-photo" type="file" name="file" accept="image/jpeg,image/png,image/webp"></div>
@@ -211,9 +217,9 @@
                             <input th:id="${'name-' + it.index}" name="name" maxlength="80" required th:value="${p.name()}"></div>
                         <div class="two">
                             <div><label th:for="${'price-' + it.index}" th:text="${'Price (' + shop.currency() + ')'}">Price</label>
-                                <input th:id="${'price-' + it.index}" name="price" inputmode="decimal" maxlength="12" th:value="${p.priceRupees()}"></div>
+                                <input th:id="${'price-' + it.index}" name="price" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" th:value="${p.priceRupees()}"></div>
                             <div><label th:for="${'unit-' + it.index}">Per</label>
-                                <input th:id="${'unit-' + it.index}" name="unit" maxlength="30" th:value="${p.unit()}"></div>
+                                <input th:id="${'unit-' + it.index}" name="unit" maxlength="30" list="unit-options" th:value="${p.unit()}"></div>
                         </div>
                         <div><label th:for="${'desc-' + it.index}">Description</label>
                             <textarea th:id="${'desc-' + it.index}" name="description" rows="2" maxlength="600" th:text="${p.description()}"></textarea></div>

@@ -382,7 +382,7 @@ public class AgentService {
             if (label.isEmpty() || clean.size() == 8) {
                 continue;
             }
-            if (!java.util.Set.of("text", "long", "choice", "email").contains(kind)) {
+            if (!java.util.Set.of("text", "long", "choice", "email", "date", "time", "number").contains(kind)) {
                 kind = "text";
             }
             com.fasterxml.jackson.databind.node.ObjectNode out = clean.addObject();

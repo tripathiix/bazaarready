@@ -424,7 +424,10 @@ export default function App() {
                         ) : (
                           <input
                             id={`qf-${i}`}
-                            type={f.kind === "email" ? "email" : "text"}
+                            type={f.kind === "email" || f.kind === "date" || f.kind === "time" || f.kind === "number" ? f.kind : "text"}
+                            min={f.kind === "number" ? 0 : f.kind === "date" ? new Date().toISOString().slice(0, 10) : undefined}
+                            step={f.kind === "number" ? "any" : undefined}
+                            inputMode={f.kind === "number" ? "decimal" : undefined}
                             value={formAnswers[i] ?? ""}
                             placeholder={f.placeholder}
                             onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}
