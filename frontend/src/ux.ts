@@ -19,6 +19,7 @@ export interface UxStrings {
   coachThinking: string;
   coachUse: string;
   coachClose: string;
+  collabCheck: string;
 }
 
 export const UX: Record<LanguageCode, UxStrings> = {
@@ -46,6 +47,7 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "Thinking…",
     coachUse: "Build my website from this",
     coachClose: "Close",
+    collabCheck: "Is this collab real?",
   },
   hi: {
     guideTitle: "सबसे अच्छी वेबसाइट के लिए बताइए:",
@@ -71,6 +73,7 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "सोच रहा हूँ…",
     coachUse: "इसी से मेरी वेबसाइट बनाइए",
     coachClose: "बंद करें",
+    collabCheck: "क्या यह कोलैब असली है?",
   },
   kn: {
     guideTitle: "ಉತ್ತಮ ವೆಬ್‌ಸೈಟ್‌ಗಾಗಿ ತಿಳಿಸಿ:",
@@ -96,6 +99,7 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "ಯೋಚಿಸುತ್ತಿದ್ದೇನೆ…",
     coachUse: "ಇದರಿಂದ ನನ್ನ ವೆಬ್‌ಸೈಟ್ ಮಾಡಿ",
     coachClose: "ಮುಚ್ಚಿ",
+    collabCheck: "ಈ ಕೊಲ್ಯಾಬ್ ನಿಜವೇ?",
   },
   ta: {
     guideTitle: "சிறந்த இணையதளத்துக்கு இவற்றைச் சொல்லுங்கள்:",
@@ -121,6 +125,7 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "யோசிக்கிறேன்…",
     coachUse: "இதிலிருந்து என் இணையதளத்தை உருவாக்கு",
     coachClose: "மூடு",
+    collabCheck: "இந்த கொலாப் உண்மையா?",
   },
   te: {
     guideTitle: "మంచి వెబ్‌సైట్ కోసం ఇవి చెప్పండి:",
@@ -146,6 +151,7 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "ఆలోచిస్తున్నాను…",
     coachUse: "దీనితో నా వెబ్‌సైట్ తయారు చేయండి",
     coachClose: "మూసివేయండి",
+    collabCheck: "ఈ కొలాబ్ నిజమేనా?",
   },
   mr: {
     guideTitle: "सर्वोत्तम वेबसाइटसाठी सांगा:",
@@ -171,6 +177,7 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "विचार करत आहे…",
     coachUse: "यावरून माझी वेबसाइट बनवा",
     coachClose: "बंद करा",
+    collabCheck: "हे कोलॅब खरे आहे का?",
   },
   bn: {
     guideTitle: "সেরা ওয়েবসাইটের জন্য জানান:",
@@ -196,6 +203,7 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "ভাবছি…",
     coachUse: "এটা থেকে আমার ওয়েবসাইট বানান",
     coachClose: "বন্ধ করুন",
+    collabCheck: "এই কোলাব কি আসল?",
   },
   gu: {
     guideTitle: "શ્રેષ્ઠ વેબસાઇટ માટે જણાવો:",
@@ -221,5 +229,6 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachThinking: "વિચારું છું…",
     coachUse: "આના પરથી મારી વેબસાઇટ બનાવો",
     coachClose: "બંધ કરો",
+    collabCheck: "શું આ કોલેબ સાચું છે?",
   },
 };

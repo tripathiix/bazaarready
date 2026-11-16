@@ -1,6 +1,10 @@
 package com.bazaarready.site;
 
+import com.bazaarready.claude.ClaudeClient;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,9 +68,14 @@ public class ImageService {
     private final RestClient pexels;
     private final RestClient commons;
     private final String pexelsKey;
+    private final ClaudeClient claude;
+    private final ObjectMapper json;
 
-    ImageService(JdbcTemplate jdbc, RestClient.Builder builder, @Value("${bazaarready.pexels.api-key:}") String pexelsKey) {
+    ImageService(JdbcTemplate jdbc, RestClient.Builder builder, @Value("${bazaarready.pexels.api-key:}") String pexelsKey,
+                 ClaudeClient claude, ObjectMapper json) {
         this.jdbc = jdbc;
+        this.claude = claude;
+        this.json = json;
         JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory();
         factory.setReadTimeout(Duration.ofSeconds(10));
         this.pexels = builder.clone().baseUrl("https://api.pexels.com").requestFactory(factory).build();
@@ -158,8 +167,7 @@ public class ImageService {
             return Optional.empty();
         }
         List<String> wanted = java.util.Arrays.stream(query.split(" ")).filter(w -> w.length() > 2).toList();
-        JsonNode best = null;
-        double bestScore = -1;
+        List<Map.Entry<Double, JsonNode>> candidates = new ArrayList<>();
         for (JsonNode page : (Iterable<JsonNode>) pages::elements) {
             JsonNode info = page.path("imageinfo").path(0);
             JsonNode meta = info.path("extmetadata");
@@ -181,11 +189,14 @@ public class ImageService {
             double score = 20 + (hits - 1) * 5.0
                     + (width >= height ? 2 : 0)
                     + Math.max(0, 25 - page.path("index").asInt(25)) / 10.0;
-            if (score > bestScore) {
-                bestScore = score;
-                best = page;
-            }
+            candidates.add(Map.entry(score, page));
         }
+        candidates.sort(Comparator.comparing((Map.Entry<Double, JsonNode> e) -> e.getKey()).reversed());
+        List<JsonNode> top = candidates.stream().limit(6).map(Map.Entry::getValue).toList();
+        if (top.isEmpty()) {
+            return Optional.empty();
+        }
+        JsonNode best = pickByEye(query, top);
         if (best == null) {
             return Optional.empty();
         }
@@ -196,6 +207,111 @@ public class ImageService {
         return Optional.of(new Found(url, url, artist.isEmpty() ? "Unknown author" : artist, null,
                 info.path("descriptionurl").asText(), "Wikimedia Commons",
                 meta.path("LicenseShortName").path("value").asText(""), meta.path("LicenseUrl").path("value").asText(null)));
+    }
+
+    private static final String PICK_SYSTEM = """
+            You choose photos for a small business's website. You are shown numbered photos and told what
+            the photo should show. Score each photo from 0 to 10 for how well it would work on the website:
+            10 = the thing is clearly the main subject in a good, clear photo; 6 = recognisably the thing, fine
+            to use; 3 = the thing is there but small, odd, or antique/museum-like when an everyday product
+            is meant; 0 = a different thing, a drawing, a document, or unsuitable for a shop.
+            Reply with only JSON: {"scores": [<one number per photo, in order>]}
+            """;
+
+
+    /**
+     * Shows the candidate photos to Claude and keeps only one that really shows the thing. Returns
+     * null when none is good enough. If Claude can't be reached, the best-ranked photo is used.
+     */
+    private JsonNode pickByEye(String query, List<JsonNode> top) {
+        if (!claude.isConfigured()) {
+            return top.get(0);
+        }
+        try {
+            ArrayNode messages = json.createArrayNode();
+            ObjectNode user = messages.addObject();
+            user.put("role", "user");
+            ArrayNode content = user.putArray("content");
+            List<JsonNode> shown = new ArrayList<>();
+            for (JsonNode page : top) {
+                byte[] bytes = smallCopy(page.path("imageinfo").path(0).path("thumburl").asText(""));
+                if (bytes == null) {
+                    continue;
+                }
+                shown.add(page);
+                content.addObject().put("type", "text").put("text", "Photo " + shown.size() + ":");
+                ObjectNode image = content.addObject();
+                image.put("type", "image");
+                image.putObject("source").put("type", "base64").put("media_type", isPng(bytes) ? "image/png" : "image/jpeg")
+                        .put("data", java.util.Base64.getEncoder().encodeToString(bytes));
+            }
+            if (shown.isEmpty()) {
+                return null;
+            }
+            content.addObject().put("type", "text").put("text", "The photo must show: " + query);
+            JsonNode response = claude.createMessage(ClaudeClient.FAST_MODEL, 2000, PICK_SYSTEM, null, messages);
+            StringBuilder reply = new StringBuilder();
+            for (JsonNode block : response.path("content")) {
+                reply.append(block.path("text").asText(""));
+            }
+            String text = reply.toString();
+            if (text.isBlank()) {
+                log.warn("Photo check for '{}' got no answer: {}", query,
+                        response.toString().substring(0, Math.min(400, response.toString().length())));
+            }
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\[([0-9 ,.]*)]").matcher(text);
+            int pick = 0;
+            int bestScore = 0;
+            if (m.find()) {
+                String[] parts = m.group(1).split(",");
+                for (int i = 0; i < parts.length && i < shown.size(); i++) {
+                    try {
+                        int score = (int) Math.round(Double.parseDouble(parts[i].trim()));
+                        if (score > bestScore) {
+                            bestScore = score;
+                            pick = i + 1;
+                        }
+                    } catch (NumberFormatException ignored) {
+                        // skip a malformed score
+                    }
+                }
+            }
+            if (bestScore < 6) {
+                pick = 0;
+            }
+            log.info("Photo check for '{}': {} (scores {})", query, pick == 0 ? "none good enough" : "picked " + pick, text.trim());
+            return pick >= 1 && pick <= shown.size() ? shown.get(pick - 1) : null;
+        } catch (Exception e) {
+            log.warn("Photo check for '{}' failed, using the best-ranked photo: {}", query, e.getMessage());
+            return top.get(0);
+        }
+    }
+
+    private static boolean isJpeg(byte[] b) {
+        return b.length > 2 && (b[0] & 0xff) == 0xff && (b[1] & 0xff) == 0xd8;
+    }
+
+    private static boolean isPng(byte[] b) {
+        return b.length > 4 && (b[0] & 0xff) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G';
+    }
+
+    /** Downloads a small version of a Commons photo for checking. */
+    private byte[] smallCopy(String thumbUrl) {
+        if (thumbUrl.isEmpty()) {
+            return null;
+        }
+        String small = thumbUrl.replaceFirst("/\\d+px-", "/500px-");
+        for (String url : List.of(small, thumbUrl)) {
+            try {
+                byte[] bytes = commons.get().uri(java.net.URI.create(url)).retrieve().body(byte[].class);
+                if (bytes != null && bytes.length > 0 && bytes.length < 4_000_000 && (isJpeg(bytes) || isPng(bytes))) {
+                    return bytes;
+                }
+            } catch (Exception e) {
+                // try the next size
+            }
+        }
+        return null;
     }
 
     private final java.util.Map<String, Long> recentlyTried = new java.util.concurrent.ConcurrentHashMap<>();

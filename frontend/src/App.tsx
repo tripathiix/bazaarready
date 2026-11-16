@@ -450,6 +450,11 @@ export default function App() {
                       {u.testNow}
                     </button>
                   )}
+                  {session.ownerPath && session.published && (
+                    <a className="button" href={`${session.ownerPath}#collabs`} target="_blank" rel="noreferrer">
+                      {u.collabCheck}
+                    </a>
+                  )}
                   <button type="button" className="button" onClick={startOver}>
                     {t.startAnother}
                   </button>

@@ -9,9 +9,25 @@
         <p style="margin:0"><a th:href="${base}" target="_blank" rel="noopener">Open the public site</a></p>
         <h1 id="title" style="color:var(--brand)" th:text="${shop.name()}">Name</h1>
         <p class="demo" role="note" style="margin-top:1rem">This page is private. Anyone with this link can see your orders, so do not share it.</p>
+        <nav class="owner-tabs" aria-label="Owner tools">
+            <a href="#tests">🤖 Test with AI customers</a>
+            <a href="#collabs">🛡️ Is this collab real?</a>
+            <a href="#change">✏️ Change my website</a>
+            <a href="#photos">📷 Photos</a>
+            <a href="#orders-section">📦 Orders</a>
+            <a href="#messages-section">💬 Messages</a>
+        </nav>
     </section>
+    <style>
+        .owner-tabs { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem;
+            padding: .6rem 0; background: var(--bg); }
+        .owner-tabs a { padding: .55rem .95rem; border-radius: 999px; border: 1px solid var(--line, rgba(127,127,127,.35));
+            text-decoration: none; color: var(--ink); font-weight: 600; font-size: .95rem; }
+        .owner-tabs a:hover, .owner-tabs a:focus-visible { background: var(--brand); color: var(--on-brand, #fff); }
+        section[id] { scroll-margin-top: 4.5rem; }
+    </style>
 
-    <section aria-labelledby="orders">
+    <section aria-labelledby="orders" id="orders-section">
         <h2 id="orders">Orders and bookings (<span th:text="${orders.size()}">0</span>)</h2>
         <p th:if="${orders.isEmpty()}">Nothing yet. Orders and booking requests from your site will appear here.</p>
         <div class="panel" th:each="o : ${orders}" style="margin-bottom:1rem">
@@ -157,7 +173,7 @@
         </ul>
     </section>
 
-    <section aria-labelledby="messages">
+    <section aria-labelledby="messages" id="messages-section">
         <h2 id="messages">Messages (<span th:text="${enquiries.size()}">0</span>)</h2>
         <p th:if="${enquiries.isEmpty()}">Nothing yet. Messages from your contact page will appear here.</p>
         <div class="panel" th:each="e : ${enquiries}" style="margin-bottom:1rem">
