@@ -49,14 +49,15 @@ export function signInIfNeeded(response: Response) {
 export interface Me {
   signedIn: boolean;
   name: string | null;
+  authForBuilding: boolean;
 }
 
 export async function getMe(): Promise<Me> {
   try {
     const response = await fetch("/api/me");
-    return response.ok ? ((await response.json()) as Me) : { signedIn: false, name: null };
+    return response.ok ? ((await response.json()) as Me) : { signedIn: false, name: null, authForBuilding: false };
   } catch {
-    return { signedIn: false, name: null };
+    return { signedIn: false, name: null, authForBuilding: false };
   }
 }
 

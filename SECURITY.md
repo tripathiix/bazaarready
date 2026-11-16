@@ -7,8 +7,9 @@ BazaarReady handles small businesses' orders, customer messages and an AI budget
 | Area | Who | How it's enforced |
 |---|---|---|
 | Home page, guide, every generated customer site (`/s/...`) | Anyone | Public by design: customers never need an account. |
-| Building a site, the Idea coach, changing a site | Signed-in owners | `SecurityConfig` requires sign-in for `/api/agent/**`, `/api/coach/**`, `/api/businesses/**`. |
-| Owner dashboard (orders, messages, AI tests, collab checks, products, photos) | The site's owner only | `OwnerAccess` checks every owner page and action against the signed-in account. Anyone else gets "not found", so nothing leaks. |
+| Building a site and the Idea coach | Anyone (sign-in available behind a flag) | Off for the hackathon demo so judges can try it with no sign-up. `AUTH_FOR_BUILDING=true` makes `SecurityConfig` require sign-in for `/api/agent/**` and `/api/coach/**`. Rate limits, the daily spending cap and the scope guardrail apply either way. |
+| Changing a site from the builder screen | Whoever has the private link, until an owner claims the site; then only that owner | `OwnerAccess.openForChange`. |
+| Owner dashboard (orders, messages, AI tests, collab checks, products, photos), My sites, `/api/businesses/**` | The site's owner only, always signed in | `OwnerAccess` checks every owner page and action against the signed-in account. Anyone else gets "not found", so nothing leaks. |
 | An agent conversation | The account that started it | `AgentService.find` refuses other accounts. |
 
 Sites made before accounts existed are claimed by the first signed-in person who opens their private owner link, because only the owner was given that link.

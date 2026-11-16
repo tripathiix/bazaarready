@@ -26,8 +26,12 @@ public class AccountService implements UserDetailsService {
     private static final Set<String> COMMON = Set.of("password", "password1", "password123", "12345678", "123456789",
             "1234567890", "qwerty123", "qwertyuiop", "iloveyou", "11111111", "00000000", "abcd1234", "bazaarready");
 
-    public record Me(boolean signedIn, String name, String email) {
+    /** authForBuilding tells the home page whether to ask for sign-in before building. */
+    public record Me(boolean signedIn, String name, String email, boolean authForBuilding) {
     }
+
+    @org.springframework.beans.factory.annotation.Value("${bazaarready.auth.for-building:false}")
+    private boolean authForBuilding;
 
     public static class SignUpException extends RuntimeException {
         public SignUpException(String message) {
@@ -131,9 +135,9 @@ public class AccountService implements UserDetailsService {
     public Me me() {
         String email = currentEmail();
         if (email == null) {
-            return new Me(false, null, null);
+            return new Me(false, null, null, authForBuilding);
         }
         List<String> names = jdbc.queryForList("select name from account where email = ?", String.class, email);
-        return names.isEmpty() ? new Me(false, null, null) : new Me(true, names.get(0), email);
+        return names.isEmpty() ? new Me(false, null, null, authForBuilding) : new Me(true, names.get(0), email, authForBuilding);
     }
 }

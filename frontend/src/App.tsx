@@ -176,7 +176,7 @@ export default function App() {
 
   function onStart(event: FormEvent) {
     event.preventDefault();
-    if (me && !me.signedIn) {
+    if (me && me.authForBuilding && !me.signedIn) {
       window.location.href = "/login";
       return;
     }
@@ -259,9 +259,11 @@ export default function App() {
                   </form>
                 </>
               ) : (
-                <a className="how-link signin" href="/login">
-                  {u.signIn}
-                </a>
+                me?.authForBuilding && (
+                  <a className="how-link signin" href="/login">
+                    {u.signIn}
+                  </a>
+                )
               )}
             </div>
             <OpenSign />
@@ -306,7 +308,7 @@ export default function App() {
                 ))}
               </ol>
             </div>
-            {me && !me.signedIn && (
+            {me && me.authForBuilding && !me.signedIn && (
               <p className="signin-note">
                 {u.signInToBuild} <a href="/login">{u.signIn} →</a>
               </p>

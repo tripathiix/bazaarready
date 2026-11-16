@@ -48,6 +48,7 @@ class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, SecurityContextRepository contexts,
                                     com.bazaarready.account.AccountService accounts,
+                                    @org.springframework.beans.factory.annotation.Value("${bazaarready.auth.for-building:false}") boolean authForBuilding,
                                     @org.springframework.beans.factory.annotation.Value("${bazaarready.google.client-id:}") String googleId,
                                     @org.springframework.beans.factory.annotation.Value("${bazaarready.google.client-secret:}") String googleSecret)
             throws Exception {
@@ -62,8 +63,13 @@ class SecurityConfig {
                 .csrf(c -> c.csrfTokenRepository(csrfTokens).csrfTokenRequestHandler(csrfHandler)
                         .ignoringRequestMatchers("/s/**"))
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers("/owner/**", "/api/owner/**", "/account", "/api/agent/**", "/api/coach/**",
-                                "/api/businesses/**").authenticated()
+                        // The owner dashboard and everything on it: always signed in.
+                        .requestMatchers("/owner/**", "/api/owner/**", "/account", "/api/businesses/**").authenticated()
+                        // Building and the idea coach: only when the flag is on (off for the hackathon demo).
+                        .requestMatchers("/api/agent/**", "/api/coach/**").access((auth, ctx) ->
+                                new org.springframework.security.authorization.AuthorizationDecision(!authForBuilding
+                                        || (auth.get() != null && auth.get().isAuthenticated()
+                                        && !(auth.get() instanceof org.springframework.security.authentication.AnonymousAuthenticationToken))))
                         .anyRequest().permitAll())
                 .formLogin(f -> f.loginPage("/login").loginProcessingUrl("/login")
                         .usernameParameter("email").passwordParameter("password")

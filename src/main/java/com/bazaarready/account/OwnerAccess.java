@@ -36,6 +36,27 @@ public class OwnerAccess {
         return shop;
     }
 
+    /** Gives a new site to the signed-in person, if anyone is signed in. Visitors building without an account skip this. */
+    public void claimIfSignedIn(UUID businessId) {
+        if (accounts.currentId().isPresent()) {
+            check(businessId);
+        }
+    }
+
+    /**
+     * For changing a site from the builder screen. A site nobody has claimed yet can be changed by
+     * whoever has its private link, as before accounts existed. Once an owner has claimed it on the
+     * dashboard, only that owner, signed in, can change it.
+     */
+    public ProfileResponse openForChange(UUID ownerKey) {
+        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        List<UUID> owner = jdbc.query("select account_id from business where id = ?", (rs, n) -> rs.getObject(1, UUID.class), shop.id());
+        if (!owner.isEmpty() && owner.get(0) != null) {
+            check(shop.id());
+        }
+        return shop;
+    }
+
     /** Throws NotFoundException (shown as "not found", so nothing leaks) unless the signed-in account owns the site. */
     public void check(UUID businessId) {
         UUID me = accounts.requireCurrentId();

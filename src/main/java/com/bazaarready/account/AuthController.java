@@ -72,6 +72,17 @@ class AuthController {
             request.changeSessionId();
         }
         contexts.saveContext(context, request, response);
+        // Back to where they were going (usually their dashboard), but only ever to a page on this site.
+        var cache = new org.springframework.security.web.savedrequest.HttpSessionRequestCache();
+        var saved = cache.getRequest(request, response);
+        if (saved != null) {
+            cache.removeRequest(request, response);
+            java.net.URI target = java.net.URI.create(saved.getRedirectUrl());
+            String path = target.getRawPath() + (target.getRawQuery() == null ? "" : "?" + target.getRawQuery());
+            if (path.startsWith("/") && !path.startsWith("//")) {
+                return "redirect:" + path;
+            }
+        }
         return "redirect:/?welcome";
     }
 
