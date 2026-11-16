@@ -27,6 +27,14 @@ class TestController {
         return "redirect:/owner/" + ownerKey + "#tests";
     }
 
+    /** The changes the AI customers' results suggest, for the "Change my website" box. */
+    @org.springframework.web.bind.annotation.GetMapping("/api/owner/{ownerKey}/test-fix")
+    @org.springframework.web.bind.annotation.ResponseBody
+    java.util.Map<String, String> fixRequest(@PathVariable UUID ownerKey) {
+        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        return java.util.Map.of("text", tests.fixRequest(shop.id()));
+    }
+
     @PostMapping("/owner/{ownerKey}/test/fix/{findingId}")
     String applyFix(@PathVariable UUID ownerKey, @PathVariable UUID findingId) {
         ProfileResponse shop = profiles.getByOwnerKey(ownerKey);

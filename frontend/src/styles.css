@@ -1185,3 +1185,38 @@ h1 span {
     transition: none;
   }
 }
+
+/* "How it works" link and the dashboard note */
+.hero-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.9rem;
+}
+
+.how-link {
+  color: var(--ink, #f6eedd);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.how-link:hover,
+.how-link:focus-visible {
+  border-color: var(--amber);
+  background: rgba(244, 168, 58, 0.12);
+}
+
+.dashboard-note a {
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .hero-side {
+    align-items: flex-start;
+  }
+}

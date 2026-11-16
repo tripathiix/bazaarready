@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>How BazaarReady works</title>
+    <meta name="description" content="A short guide to everything BazaarReady does for small businesses and creators.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;600&family=Kalam:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #100e24; --panel: #1a1838; --ink: #f6eedd; --muted: #b9b2c9; --line: rgba(255,255,255,.12);
+            --amber: #f4a83a; --rose: #ec7a8c; --mint: #8fd9c4; }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { margin: 0; background: radial-gradient(ellipse at top, #241f4d 0%, var(--bg) 55%) fixed; color: var(--ink);
+            font: 1.05rem/1.65 "Instrument Sans", system-ui, sans-serif; }
+        a { color: var(--amber); }
+        .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+        header { padding: 2.2rem 0 1rem; }
+        .back { font-weight: 600; text-decoration: none; }
+        h1, h2, h3 { font-family: "Bricolage Grotesque", sans-serif; line-height: 1.15; }
+        h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); margin: 1rem 0 .4rem; }
+        h1 span { background: linear-gradient(100deg, var(--amber), var(--rose)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .lead { color: var(--muted); font-size: 1.15rem; max-width: 40rem; }
+        .hand { font-family: Kalam, cursive; color: #ffd9a0; }
+        nav.toc { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.4rem 0 0; }
+        nav.toc a { padding: .45rem .9rem; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; color: var(--ink); font-size: .95rem; }
+        nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--amber); }
+        section { margin: 2.6rem 0; scroll-margin-top: 1rem; }
+        h2 { font-size: 1.7rem; margin: 0 0 1rem; }
+        .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: .9rem; counter-reset: step; }
+        .steps li { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.1rem 1rem 3.6rem; }
+        .steps li::before { counter-increment: step; content: counter(step); position: absolute; left: 1rem; top: 1rem; width: 1.9rem; height: 1.9rem;
+            border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #22140a; background: linear-gradient(135deg, var(--amber), var(--rose)); }
+        .steps strong { display: block; font-size: 1.08rem; }
+        .steps p { margin: .2rem 0 0; color: var(--muted); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .9rem; }
+        .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1.1rem; }
+        .card h3 { margin: .3rem 0 .4rem; font-size: 1.15rem; }
+        .card p { margin: 0; color: var(--muted); font-size: .98rem; }
+        .icon { font-size: 1.5rem; }
+        .where { display: inline-block; margin-top: .6rem; font-size: .85rem; color: var(--mint); }
+        details { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: .8rem 1rem; margin-bottom: .6rem; }
+        summary { cursor: pointer; font-weight: 600; }
+        details p { color: var(--muted); margin: .5rem 0 .2rem; }
+        .cta { display: inline-block; margin: .5rem 0 3rem; padding: .85rem 1.4rem; border-radius: 999px; text-decoration: none; font-weight: 700;
+            color: #22140a; background: linear-gradient(100deg, var(--amber), #f7c065 50%, var(--rose)); }
+        @media (prefers-reduced-motion: no-preference) {
+            section, .steps li, .card { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+            @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <a class="back" href="/">← Back to BazaarReady</a>
+        <h1>How <span>BazaarReady</span> works</h1>
+        <p class="lead">BazaarReady is a launch agent for small businesses and creators. You describe your business in your own words, and it builds a real website, tests it with AI customers, keeps you safe from fake collabs, and keeps improving it when you ask.</p>
+        <p class="hand">No forms to fill, no design skills needed. Just talk.</p>
+        <nav class="toc" aria-label="On this page">
+            <a href="#start">Getting started</a>
+            <a href="#features">Everything it can do</a>
+            <a href="#dashboard">Your private dashboard</a>
+            <a href="#tips">Tips for the best site</a>
+            <a href="#faq">Questions</a>
+        </nav>
+    </header>
+
+    <main>
+        <section id="start" aria-labelledby="start-title">
+            <h2 id="start-title">Getting started, in six steps</h2>
+            <ol class="steps">
+                <li><strong>Pick your language</strong><p>Eight languages: English, Hindi, Kannada, Tamil, Telugu, Marathi, Bengali and Gujarati. Your website can be in any language.</p></li>
+                <li><strong>Describe your business</strong><p>Type it, press "Speak instead" and say it, or upload exported WhatsApp chats with your customers. Not sure about your idea yet? Open the Idea coach first.</p></li>
+                <li><strong>Answer a few questions</strong><p>If something important is missing, like prices or your area, the agent asks. Usually two to four short questions.</p></li>
+                <li><strong>Look at the preview and test it</strong><p>Open the preview, and press "Test with AI customers" to see where real people might get stuck.</p></li>
+                <li><strong>Publish</strong><p>Say yes and your website is live with its own link to share on WhatsApp, Instagram or anywhere.</p></li>
+                <li><strong>Run it from your private dashboard</strong><p>See orders and messages, check collab offers, change your website and add your own photos. Save that link.</p></li>
+            </ol>
+        </section>
+
+        <section id="features" aria-labelledby="features-title">
+            <h2 id="features-title">Everything it can do</h2>
+            <div class="grid">
+                <div class="card"><span class="icon" aria-hidden="true">💬</span><h3>Build by talking</h3><p>Describe your business by typing or speaking, in your language. You get a multi-page website: home, everything on offer, a page per item, about and contact.</p><span class="where">Home page</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">📲</span><h3>Build from WhatsApp chats</h3><p>Already selling on WhatsApp? Upload exported chats. The agent picks out your products, prices and common questions. Customers' names and numbers are removed first.</p><span class="where">Home page, below the writing box</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">✦</span><h3>Idea coach</h3><p>Talk through your idea with an honest coach: what could work, the risks, and what to add. Then turn the chat into your website with one tap.</p><span class="where">Button at the bottom right of the home page</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">🛒</span><h3>A real shop or booking site</h3><p>Customers can add to cart and order, or book a date, or send you a message, depending on your business. Payments are a demo for now.</p><span class="where">Your public website</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">🤖</span><h3>AI test customers</h3><p>Eight AI customers try your site in ten situations, from a quick order to a blind visitor and someone new to the internet. You get a short summary of what to fix, and can fix it in one step.</p><span class="where">Before publishing, and on your dashboard</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">🛡️</span><h3>Is this collab real?</h3><p>Paste a brand-deal or collab message. We check the sender's website age and email records and look for scam signs, like asking you to pay a fee, then give a verdict and a suggested reply.</p><span class="where">Your dashboard</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">✏️</span><h3>Change it by saying so</h3><p>"Add mango cake for ₹900." "Add a Diwali offer." "Make it darker." The agent changes only what you asked and leaves the rest alone.</p><span class="where">After publishing, and on your dashboard</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">📷</span><h3>Photos that fit</h3><p>Free stock photos are chosen and checked by AI to make sure they really show your product. Upload your own photos at any time to replace them.</p><span class="where">Your dashboard → Photos</span></div>
+                <div class="card"><span class="icon" aria-hidden="true">📦</span><h3>Orders and messages</h3><p>Every order, booking and message lands on your dashboard. Each message also gets a real-or-fake check, so you can spot scams quickly.</p><span class="where">Your dashboard</span></div>
+            </div>
+        </section>
+
+        <section id="dashboard" aria-labelledby="dashboard-title">
+            <h2 id="dashboard-title">Your private dashboard</h2>
+            <p>When your website is ready, you get two links:</p>
+            <div class="grid">
+                <div class="card"><h3>Your website</h3><p>The public link. Share it with customers anywhere.</p></div>
+                <div class="card"><h3>Your dashboard ("Orders and messages")</h3><p>Private. It has tabs for AI tests, collab checks, changing your website, photos, orders and messages. <strong>Bookmark it and don't share it</strong>: anyone with this link can see your orders.</p></div>
+            </div>
+        </section>
+
+        <section id="tips" aria-labelledby="tips-title">
+            <h2 id="tips-title">Tips for the best website</h2>
+            <ol class="steps">
+                <li><strong>List everything you sell or offer, with a price for each</strong><p>"Chocolate cake ₹900 for 1 kg" works far better than "I make cakes".</p></li>
+                <li><strong>Say what your business is about and who it's for</strong><p>"Home bakery for birthdays and small parties in Pune."</p></li>
+                <li><strong>Say where you work or deliver, and your timings</strong><p>Customers decide quickly when they know you can reach them.</p></li>
+                <li><strong>Add your rules</strong><p>Delivery charges, how far ahead to order, cancellations and refunds. The AI customers will tell you if anything is missing.</p></li>
+                <li><strong>Upload your own photos</strong><p>Your real products always beat stock photos.</p></li>
+            </ol>
+        </section>
+
+        <section id="faq" aria-labelledby="faq-title">
+            <h2 id="faq-title">Questions</h2>
+            <details><summary>Do I need to know anything about websites?</summary><p>No. You only talk or type about your business. BazaarReady does the rest.</p></details>
+            <details><summary>Can I change my website later?</summary><p>Yes, at any time. Open your dashboard, choose "Change my website" and say what you want changed.</p></details>
+            <details><summary>What happens to my WhatsApp chats?</summary><p>They are read once to understand your business. Customers' names and phone numbers are removed before anything is saved, and the files themselves are not kept.</p></details>
+            <details><summary>Are the AI customers' orders real?</summary><p>No. They are clearly marked tests and are removed automatically when testing ends, so you only see real orders.</p></details>
+            <details><summary>Is the collab check a guarantee?</summary><p>No. It is a judgement from public facts, like how old the sender's website is and whether their email is properly set up. One rule always holds: never pay a fee to get a collab.</p></details>
+            <details><summary>I lost my dashboard link. What now?</summary><p>Keep it safe and bookmarked. For now, a lost link can't be recovered on your own, so save it as soon as your site is ready.</p></details>
+        </section>
+
+        <a class="cta" href="/">Build my website →</a>
+    </main>
+</div>
+</body>
+</html>

@@ -25,6 +25,8 @@
             text-decoration: none; color: var(--ink); font-weight: 600; font-size: .95rem; }
         .owner-tabs a:hover, .owner-tabs a:focus-visible { background: var(--brand); color: var(--on-brand, #fff); }
         section[id] { scroll-margin-top: 4.5rem; }
+        .key-points { margin: 0.6rem 0 1rem; padding-left: 1.3rem; display: grid; gap: 0.7rem; }
+        .test-summary { border-left: 4px solid var(--brand); }
     </style>
 
     <section aria-labelledby="orders" id="orders-section">
@@ -82,12 +84,28 @@
 
     <section aria-labelledby="tests-title" id="tests">
         <h2 id="tests-title">Test my site</h2>
-        <p style="color:var(--muted)">Six AI customers test your site in eight situations: a quick order or booking, a customer who makes mistakes in forms, one who checks every number, a gift or group buyer, a careful customer who checks whether to trust you and your policies, a screen-reader user, and someone new to the internet who reads only your language. A code check looks for accessibility problems. It takes one or two minutes. Test orders and messages are removed afterwards.</p>
+        <p style="color:var(--muted)">Eight AI customers try your site in ten situations: a quick order or booking, someone who makes mistakes, someone who checks every number, a gift or group buyer, a careful buyer who checks whether to trust you and your rules, a student working out the full cost, someone who wants to reach a person, a blind visitor using a screen reader, and someone new to the internet who reads only your language. It takes two or three minutes. Their test orders and messages are removed afterwards.</p>
         <form method="post" th:action="${'/owner/' + ownerKey + '/test'}">
             <button class="btn" th:disabled="${run != null and run.running()}" th:text="${run != null and run.running()} ? 'Testing…' : (${run == null} ? 'Test my site' : 'Test again')">Test my site</button>
         </form>
 
         <th:block th:if="${run != null}">
+            <div class="panel test-summary" th:if="${run.summary() != null}" style="margin-top:1.4rem">
+                <h3 style="margin-top:0">In short</h3>
+                <p style="font-size:1.08rem" th:text="${run.summary().headline()}">Headline</p>
+                <ol class="key-points" th:if="${!run.summary().points().isEmpty()}">
+                    <li th:each="p : ${run.summary().points()}">
+                        <strong th:text="${p.title()}">Title</strong>
+                        <span class="chip" th:if="${p.needs() == 'you'}">Needs your details</span>
+                        <br><span th:text="${p.detail()}">Detail</span>
+                    </li>
+                </ol>
+                <p th:if="${run.summary().fixRequest() != null and !run.summary().fixRequest().isBlank()}" style="margin-bottom:0">
+                    <a class="btn" th:href="${'/?change=' + ownerKey + '&fix=tests'}">✨ Fix my website from these results</a>
+                    <br><span style="color:var(--muted);font-size:0.92rem">You'll see the changes written out first, and can edit them before anything changes. For things only you know, like delivery charges, the agent will ask you.</span>
+                </p>
+            </div>
+            <p th:if="${run.running()}" class="chip" style="margin-top:1rem">The summary appears here when every test has finished.</p>
             <div class="info" style="margin-top:1.4rem">
                 <div>
                     <h3>Tests passed</h3>
@@ -107,7 +125,7 @@
                         <span class="chip" th:text="${c.status() == 'PASSED'} ? 'Reached the goal' : (${c.status() == 'RUNNING'} ? 'Testing…' : (${c.status() == 'STUCK'} ? 'Got stuck' : 'Could not run'))">Status</span>
                         <p th:if="${c.summary()}" th:text="${c.summary()}">Summary</p>
                         <details th:if="${!c.steps().isEmpty()}">
-                            <summary>What they did</summary>
+                            <summary>What they did, step by step</summary>
                             <ol style="margin:0.4rem 0 0;padding-left:1.2rem;font-size:0.92rem">
                                 <li th:each="s : ${c.steps()}" th:text="${s}">Step</li>
                             </ol>
@@ -116,10 +134,12 @@
                 </div>
             </div>
 
-            <div style="margin-top:1.5rem" th:if="${!run.findings().isEmpty()}">
+            <details style="margin-top:1.5rem" th:if="${!run.findings().isEmpty()}">
+            <summary><strong th:text="${'Every problem in detail (' + run.findings().size() + ')'}">Every problem</strong></summary>
+            <div style="margin-top:1rem">
                 <div class="panel" th:each="f : ${run.findings()}" style="margin-bottom:0.9rem">
                     <p style="margin:0"><span class="chip" th:text="${f.persona()}">Rahul</span> <strong th:text="${f.problem()}">Problem</strong></p>
-                    <p style="margin:0.5rem 0 0;color:var(--muted)" th:if="${f.evidence()}">What they saw: <span th:text="${f.evidence()}">Evidence</span></p>
+                    <p style="margin:0.5rem 0 0;color:var(--muted)" th:if="${f.evidence() != null and f.persona() != 'Code check'}">What they saw: <span th:text="${f.evidence()}">Evidence</span></p>
                     <p style="margin:0.5rem 0 0" th:if="${f.suggestion()}">Suggested fix: <span th:text="${f.suggestion()}">Suggestion</span></p>
                     <div th:if="${f.faqQuestion()}" class="info" style="margin-top:0.7rem">
                         <div><h3 th:text="${f.faqQuestion()}">Question</h3><p th:text="${f.faqAnswer()}">Answer</p></div>
@@ -130,6 +150,7 @@
                     <p th:if="${f.fixStatus() == 'APPLIED'}" style="margin:0.6rem 0 0" class="chip">Added to your site</p>
                 </div>
             </div>
+            </details>
             <p th:if="${!run.running() and run.findings().isEmpty()}">No problems found.</p>
         </th:block>
         <script th:if="${run != null and run.running()}">setTimeout(function () { location.reload(); }, 4000);</script>

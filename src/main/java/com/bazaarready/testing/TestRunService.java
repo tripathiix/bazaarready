@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -50,7 +51,16 @@ public class TestRunService {
         }
     }
 
-    public record RunView(UUID id, String status, int passed, int total, List<CaseView> cases, List<FindingView> findings) {
+    /** One key point of the summary. needs is "you" when only the owner can supply the missing information. */
+    public record Point(String title, String detail, String needs) {
+    }
+
+    /** The plain-language summary of a run, and the request to send to the website agent to fix it. */
+    public record Summary(String headline, List<Point> points, String fixRequest) {
+    }
+
+    public record RunView(UUID id, String status, int passed, int total, List<CaseView> cases, List<FindingView> findings,
+                          Summary summary) {
         public boolean running() {
             return "RUNNING".equals(status);
         }
@@ -116,6 +126,11 @@ public class TestRunService {
                 log.warn("Code checks failed for run {}: {}", runId, e.getMessage());
             }
             cleanUpTestData(businessId);
+            try {
+                summarise(runId, shop);
+            } catch (Exception e) {
+                log.warn("Summary failed for run {}: {}", runId, e.getMessage());
+            }
             jdbc.update("update test_run set status = 'DONE', finished_at = now() where id = ?", runId);
         });
         return runId;
@@ -321,6 +336,120 @@ public class TestRunService {
         jdbc.update("delete from enquiry where business_id = ? and name like ?", businessId, TEST_NAME_PREFIX + "%");
     }
 
+    // ---- A short summary for the owner ----
+
+    private static final String SUMMARY_SYSTEM = """
+            You turn the results of AI customer tests of a small business's website into a short summary for the
+            owner, who is not technical. Use plain everyday words: no web addresses, code or jargon (say "picture
+            description" not "alt text", "the order page" not "checkout flow", "a box to fill in" not "form field").
+            Merge problems that are really the same. Put the most important first: anything that stops people
+            buying, booking or trusting the business, then missing information, then small things.
+            Reply with only JSON:
+            {"headline": "<one sentence: how the site did overall>",
+             "points": [ {"title": "<a few words>", "detail": "<one or two sentences: what is missing or wrong and what to add or change>",
+                          "needs": "you" if only the owner can supply it (a policy, delivery charges, timings, a phone number) else "us"} ],
+             "fix_request": "<the changes to make, written as the owner talking to their website builder in the first person,
+                              e.g. 'Please add ... and change ...'. For things only the owner knows, say 'ask me for ...'.
+                              Include only changes to the website's content: wording, products and prices, offers,
+                              sections, questions and answers, contact details, photos and the look. Leave out changes
+                              to how ordering, booking or payment pages work, which the owner cannot change.
+                              Empty if nothing needs changing.>"}
+            At most 6 points. If every test passed and nothing is missing, points may be empty.
+            """;
+
+    private void summarise(UUID runId, ProfileResponse shop) throws JsonProcessingException {
+        StringBuilder report = new StringBuilder("Website of \"" + shop.name() + "\" (" + shop.kind() + "). Today is "
+                + LocalDate.now() + ".\n\nTests:\n");
+        jdbc.query("select persona, goal, status, summary from test_case where run_id = ? order by position", rs -> {
+            report.append("- ").append(rs.getString(1)).append(" [").append(rs.getString(3)).append("]: ")
+                    .append(Objects.toString(rs.getString(4), "")).append('\n');
+        }, runId);
+        report.append("\nProblems found:\n");
+        jdbc.query("select persona, problem, suggestion from test_finding where run_id = ?", rs -> {
+            report.append("- (").append(rs.getString(1)).append(") ").append(rs.getString(2))
+                    .append(rs.getString(3) == null ? "" : " Suggestion: " + rs.getString(3)).append('\n');
+        }, runId);
+        String reply = claude.createText(ClaudeClient.AGENT_MODEL, 3000, SUMMARY_SYSTEM, report.toString());
+        int start = reply.indexOf('{');
+        int end = reply.lastIndexOf('}');
+        if (start < 0 || end <= start) {
+            return;
+        }
+        JsonNode parsed = json.readTree(reply.substring(start, end + 1));
+        jdbc.update("update test_run set summary = ? where id = ?", json.writeValueAsString(parsed), runId);
+    }
+
+    private Summary readSummary(String stored) {
+        if (stored == null || stored.isBlank()) {
+            return null;
+        }
+        try {
+            JsonNode node = json.readTree(stored);
+            List<Point> points = new ArrayList<>();
+            for (JsonNode p : node.path("points")) {
+                points.add(new Point(p.path("title").asText(""), p.path("detail").asText(""), p.path("needs").asText("us")));
+            }
+            return new Summary(node.path("headline").asText(""), points, node.path("fix_request").asText(""));
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+    }
+
+    /** What to ask the website agent to change, from the latest finished run. */
+    public String fixRequest(UUID businessId) {
+        RunView run = latest(businessId);
+        return run == null || run.summary() == null ? "" : run.summary().fixRequest();
+    }
+
+    // ---- Steps in plain words ----
+
+    private static final java.util.regex.Pattern OPENED = java.util.regex.Pattern.compile("^Opened (\\S+)$");
+    private static final java.util.regex.Pattern SUBMITTED =
+            java.util.regex.Pattern.compile("^Submitted the form at (\\S+) and landed on (\\S+)$");
+
+    /** Turns "Opened /s/shop/item/123" into "Opened the page for Tea mugs", and so on. */
+    private static String plainStep(String step, String base, Map<String, String> names) {
+        java.util.regex.Matcher opened = OPENED.matcher(step);
+        if (opened.matches()) {
+            return "Opened " + pageName(opened.group(1), base, names);
+        }
+        java.util.regex.Matcher submitted = SUBMITTED.matcher(step);
+        if (submitted.matches()) {
+            String from = pageName(submitted.group(1), base, names);
+            String to = pageName(submitted.group(2), base, names);
+            return from.equals(to)
+                    ? "Filled in the form on " + from + ". The same page came back, usually with a message about what to fix"
+                    : "Filled in the form on " + from + " and moved on to " + to;
+        }
+        return step;
+    }
+
+    private static String pageName(String path, String base, Map<String, String> names) {
+        String rel = path.startsWith(base) ? path.substring(base.length()) : path;
+        if (rel.isEmpty() || rel.equals("/")) {
+            return "the home page";
+        }
+        if (rel.startsWith("/item/")) {
+            String name = names.get(rel.substring(6));
+            return name == null ? "an item's page" : "the page for " + name;
+        }
+        if (rel.startsWith("/pay/")) {
+            return "the payment page";
+        }
+        if (rel.startsWith("/order/")) {
+            return "the order confirmation";
+        }
+        return switch (rel) {
+            case "/catalogue" -> "the list of everything on offer";
+            case "/about" -> "the About page";
+            case "/contact" -> "the Contact page";
+            case "/cart" -> "the cart";
+            case "/checkout" -> "the order page";
+            case "/book" -> "the booking page";
+            default -> rel.startsWith("/booking") ? "the booking confirmation" : "another page of the site";
+        };
+    }
+
     // ---- Reading results and applying fixes ----
 
     public RunView latest(UUID businessId) {
@@ -330,17 +459,26 @@ public class TestRunService {
             return null;
         }
         UUID runId = ids.get(0);
-        String status = jdbc.queryForObject("select status from test_run where id = ?", String.class, runId);
+        Map<String, Object> runRow = jdbc.queryForMap(
+                "select r.status, r.summary, b.slug from test_run r join business b on b.id = r.business_id where r.id = ?", runId);
+        String status = (String) runRow.get("status");
+        String base = "/s/" + runRow.get("slug");
+        Map<String, String> names = new HashMap<>();
+        jdbc.query("select id::text, name from product where business_id = ?", rs -> {
+            names.put(rs.getString(1), rs.getString(2));
+        }, businessId);
         List<CaseView> cases = jdbc.query("select persona, goal, status, summary, steps from test_case where run_id = ? order by position",
                 (rs, n) -> new CaseView(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),
-                        rs.getString(5).isBlank() ? List.of() : List.of(rs.getString(5).split("\n"))), runId);
+                        rs.getString(5) == null || rs.getString(5).isBlank() ? List.of()
+                                : java.util.Arrays.stream(rs.getString(5).split("\n")).map(s -> plainStep(s, base, names)).toList()),
+                runId);
         List<FindingView> findings = jdbc.query("""
                 select id, persona, problem, evidence, suggestion, faq_question, faq_answer, fix_status
                 from test_finding where run_id = ? order by persona = 'Code check', persona
                 """, (rs, n) -> new FindingView(rs.getObject(1, UUID.class), rs.getString(2), rs.getString(3), rs.getString(4),
                 rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8)), runId);
         int passed = (int) cases.stream().filter(c -> "PASSED".equals(c.status())).count();
-        return new RunView(runId, status, passed, cases.size(), cases, findings);
+        return new RunView(runId, status, passed, cases.size(), cases, findings, readSummary((String) runRow.get("summary")));
     }
 
     /** Adds the proposed FAQ entry to the owner's profile. The site updates at once. */
@@ -432,6 +570,17 @@ public class TestRunService {
         people.add(new Persona("Kiran · policies", kiran, "Before paying, find the rules: delivery or travel costs and times, "
                 + "cancellation, refunds or returns, and how payment works. Do not order. You have succeeded if you found "
                 + "all of these."));
+        String neha = "26, a student on a tight budget. Before deciding she wants the full amount: extra charges, "
+                + "delivery or travel fees, minimum orders, and whether any offer is still valid.";
+        String arjun = "45, likes to talk to a person before buying. He looks for a phone or WhatsApp number, when "
+                + "they answer, and where the business is or which areas it serves.";
+        people.add(new Persona("Neha · full cost", neha, "Find the cheapest way to get one thing from this business and "
+                + "work out the full amount you would pay, including any delivery, travel or extra charges and any offer. "
+                + "Do not order. You have succeeded if you could tell the full amount."));
+        people.add(new Persona("Arjun · reaching a person", arjun, "Find how to contact this business directly (phone, "
+                + "WhatsApp or email), when they answer, and where they are or which areas they serve, then " + contact
+                + " asking a simple question. You have succeeded if you found a direct way to reach them and the "
+                + "message was sent."));
         people.add(new Persona("Farah · screen reader", farah, "Find out what this business offers and how much one "
                 + "offering costs, then " + contact + ". You have succeeded when the message is sent."));
         people.add(new Persona("Meena · first time online", meena, "Using only the website's own language, find the "

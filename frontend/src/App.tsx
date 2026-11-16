@@ -97,6 +97,21 @@ export default function App() {
   const TEST_LINE = `${u.testFirst}. ${u.testHint}`;
 
   useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (changeKeyFromUrl && query.get("fix") === "tests") {
+      fetch(`/api/owner/${changeKeyFromUrl}/test-fix`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((body: { text?: string } | null) => {
+          if (body?.text) {
+            setChangeText(body.text);
+            window.setTimeout(() => document.getElementById("change-text")?.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+          }
+        })
+        .catch(() => undefined);
+    }
+  }, [changeKeyFromUrl]);
+
+  useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("session");
     if (id && /^[0-9a-f-]{36}$/.test(id)) {
       getSession(id).then(setSession).catch(() => undefined);
@@ -188,7 +203,12 @@ export default function App() {
               <path d="M4 14 C 60 4, 120 18, 180 9 S 260 6, 296 12" fill="none" stroke="url(#ink-glow)" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </div>
-          <OpenSign />
+          <div className="hero-side">
+            <a className="how-link" href="/guide">
+              {u.howItWorks} →
+            </a>
+            <OpenSign />
+          </div>
         </div>
 
         <div className="wrap">
@@ -407,6 +427,15 @@ export default function App() {
                   </p>
                 )}
                 {session.ownerPath && (
+                  <p className="dashboard-note">
+                    <a href={session.ownerPath} target="_blank" rel="noreferrer">
+                      {u.dashboard} →
+                    </a>
+                    <br />
+                    <span className="hint">{u.dashboardHint}</span>
+                  </p>
+                )}
+                {session.ownerPath && (
                   <form className="test-first" method="post" action={`${session.ownerPath}/test`} target="_blank">
                     <p className="hint">{TEST_LINE}</p>
                     <button type="submit" className="button">
@@ -459,6 +488,7 @@ export default function App() {
                     {t.startAnother}
                   </button>
                 </div>
+                {session.ownerPath && session.published && <p className="hint dashboard-note">{u.dashboardHint}</p>}
               </section>
             )}
           </>
