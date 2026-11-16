@@ -64,7 +64,22 @@ export function Shutters({
   photos: (Photo | null)[];
 }) {
   const [open, setOpen] = useState<boolean[]>([false, false, false]);
-  const toggle = (i: number) => setOpen((current) => current.map((value, k) => (k === i ? !value : value)));
+  // On first visit the shutters lift a little, one after another, to show they can be opened.
+  const [peek, setPeek] = useState(-1);
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    if (reducedMotion() || touched) return;
+    const timers = [0, 1, 2].flatMap((i) => [
+      window.setTimeout(() => setPeek(i), 1400 + i * 650),
+      window.setTimeout(() => setPeek((current) => (current === i ? -1 : current)), 2000 + i * 650),
+    ]);
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [touched]);
+  const toggle = (i: number) => {
+    setTouched(true);
+    setPeek(-1);
+    setOpen((current) => current.map((value, k) => (k === i ? !value : value)));
+  };
   return (
     <section className="shutters" aria-label={hint}>
       <div className="shutter-row">
@@ -74,7 +89,7 @@ export function Shutters({
             <button
               key={i}
               type="button"
-              className={`shopfront front-${SHUTTER_THEMES[i]} ${isOpen ? "is-open" : ""}`}
+              className={`shopfront front-${SHUTTER_THEMES[i]} ${isOpen ? "is-open" : ""} ${peek === i && !isOpen ? "peek" : ""}`}
               aria-pressed={isOpen}
               onClick={() => toggle(i)}
             >
@@ -118,7 +133,7 @@ export function Gallery({ sites, title, hint }: { sites: RecentSite[]; title: st
       <p className="hint">{hint}</p>
       <ul className="gallery-row">
         {sites.map((site, i) => (
-          <li key={site.path} className="polaroid" style={{ ["--tilt" as string]: `${[-3, 2, -1.5, 3, -2.5, 1.5][i % 6]}deg` }}>
+          <li key={site.path} className="polaroid" data-reveal style={{ ["--tilt" as string]: `${[-3, 2, -1.5, 3, -2.5, 1.5][i % 6]}deg` }}>
             <a href={site.path} target="_blank" rel="noreferrer">
               <img src={site.photo.url} alt="" loading="lazy" />
               <span className="polaroid-name hand">{site.name}</span>

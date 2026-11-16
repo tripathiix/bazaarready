@@ -61,6 +61,31 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [celebrations, setCelebrations] = useState(0);
   const showcase = useShowcase(celebrations);
+
+  // Fade sections and gallery cards in as they scroll into view.
+  useEffect(() => {
+    const items = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]:not(.in)"));
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still || !("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in");
+            io.unobserve(entry.target);
+          }
+        }),
+      { threshold: 0.12 }
+    );
+    items.forEach((el, i) => {
+      el.style.setProperty("--d", `${Math.min(i, 6) * 80}ms`);
+      io.observe(el);
+    });
+    return () => io.disconnect();
+  }, [showcase, session]);
   const [country, setCountry] = useState(defaultCountry);
   const countryList = useMemo(() => countries(language), [language]);
 
@@ -150,7 +175,9 @@ export default function App() {
             <h1>
               Bazaar<span>Ready</span>
             </h1>
-            <p className="headline">{extra.headline}</p>
+            <p className="headline" key={language}>
+              {extra.headline}
+            </p>
             <svg className="scribble" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
               <defs>
                 <linearGradient id="ink-glow" x1="0" x2="1">
@@ -188,7 +215,7 @@ export default function App() {
 
       <main className="wrap workspace">
         {!session && (
-          <form className="ledger" onSubmit={onStart}>
+          <form className="ledger" data-reveal onSubmit={onStart}>
             <label htmlFor="description" className="label">
               {t.tellUs}
             </label>
