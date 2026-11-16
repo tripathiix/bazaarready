@@ -554,7 +554,12 @@ export default function App() {
 
       <footer className="foot">
         <span>BazaarReady</span>
-        <span className="holo">Built with love @ Yashi Tripathi</span>
+        <span className="credit">
+          <span className="holo">
+            Crafted with <span aria-label="love">♥</span> by Yashi Tripathi
+          </span>
+          <span className="credit-year">© 2026 BazaarReady</span>
+        </span>
       </footer>
     </>
   );

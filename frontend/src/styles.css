@@ -1220,3 +1220,25 @@ h1 span {
     align-items: flex-start;
   }
 }
+
+/* Footer credit on two lines */
+.credit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  text-align: right;
+}
+
+.credit-year {
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .credit {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
