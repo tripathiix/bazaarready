@@ -27,6 +27,14 @@ class AuthController {
     private final SecurityContextRepository contexts;
     private final JdbcTemplate jdbc;
 
+    @org.springframework.beans.factory.annotation.Value("${bazaarready.google.client-id:}")
+    private String googleId;
+
+    @org.springframework.web.bind.annotation.ModelAttribute("googleEnabled")
+    boolean googleEnabled() {
+        return googleId != null && !googleId.isBlank();
+    }
+
     AuthController(AccountService accounts, SecurityContextRepository contexts, JdbcTemplate jdbc) {
         this.accounts = accounts;
         this.contexts = contexts;

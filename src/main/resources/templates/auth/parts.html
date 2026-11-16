@@ -30,6 +30,11 @@
         .btn { font: inherit; font-weight: 700; cursor: pointer; border: 0; border-radius: 999px; padding: .85rem 1.3rem; color: #22140a;
             background: linear-gradient(100deg, var(--amber), #f7c065 50%, var(--rose)); text-decoration: none; text-align: center; display: inline-block; }
         .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-weight: 600; }
+        .btn.google { display: flex; align-items: center; justify-content: center; gap: .6rem; width: 100%;
+            background: #fff; color: #1f1f1f; font-weight: 600; }
+        .btn.google:hover { background: #f1f1f1; }
+        .or { display: flex; align-items: center; gap: .8rem; color: var(--muted); font-size: .85rem; margin: 1rem 0; }
+        .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
         .error { color: var(--red); background: rgba(255,120,120,.08); border: 1px solid rgba(255,120,120,.3); border-radius: 12px; padding: .7rem .9rem; margin: 0; }
         .ok { color: var(--mint); margin: 0; }
         .switch { text-align: center; color: var(--muted); margin: 1.2rem 0 0; }

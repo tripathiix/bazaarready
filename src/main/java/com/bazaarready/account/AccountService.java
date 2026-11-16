@@ -78,6 +78,25 @@ public class AccountService implements UserDetailsService {
         return id;
     }
 
+    /**
+     * The account for someone who signed in with Google, created on their first visit. Google has
+     * verified the email; such accounts get a random password nobody knows, so they sign in through Google.
+     */
+    public void ensureGoogleAccount(String email, String name) {
+        String e = normaliseEmail(email);
+        Integer exists = jdbc.queryForObject("select count(*) from account where email = ?", Integer.class, e);
+        if (exists != null && exists > 0) {
+            return;
+        }
+        String n = name == null || name.isBlank() ? e.substring(0, e.indexOf('@')) : name.trim();
+        try {
+            jdbc.update("insert into account (id, email, name, password_hash) values (?, ?, ?, ?)", UUID.randomUUID(), e,
+                    n.length() > 80 ? n.substring(0, 80) : n, encoder.encode(UUID.randomUUID() + "-" + UUID.randomUUID()));
+        } catch (DuplicateKeyException ignored) {
+            // created at the same moment by another request
+        }
+    }
+
     @Override
     public UserDetails loadUserByUsername(String email) {
         List<String> hash = jdbc.queryForList("select password_hash from account where email = ?", String.class, normaliseEmail(email));
@@ -106,7 +125,7 @@ public class AccountService implements UserDetailsService {
         if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
             return null;
         }
-        return auth.getName();
+        return normaliseEmail(auth.getName());
     }
 
     public Me me() {

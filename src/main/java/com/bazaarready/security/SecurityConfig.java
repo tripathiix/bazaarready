@@ -46,7 +46,11 @@ class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, SecurityContextRepository contexts) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, SecurityContextRepository contexts,
+                                    com.bazaarready.account.AccountService accounts,
+                                    @org.springframework.beans.factory.annotation.Value("${bazaarready.google.client-id:}") String googleId,
+                                    @org.springframework.beans.factory.annotation.Value("${bazaarready.google.client-secret:}") String googleSecret)
+            throws Exception {
         CookieCsrfTokenRepository csrfTokens = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfTokens.setCookieCustomizer(cookie -> cookie.sameSite("Lax"));
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
@@ -64,6 +68,21 @@ class SecurityConfig {
                 .formLogin(f -> f.loginPage("/login").loginProcessingUrl("/login")
                         .usernameParameter("email").passwordParameter("password")
                         .defaultSuccessUrl("/", false).failureUrl("/login?error").permitAll())
+                .oauth2Login(o -> {
+                    if (googleId.isBlank() || googleSecret.isBlank()) {
+                        o.disable();
+                        return;
+                    }
+                    o.loginPage("/login")
+                            .clientRegistrationRepository(new org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository(
+                                    org.springframework.security.config.oauth2.client.CommonOAuth2Provider.GOOGLE.getBuilder("google")
+                                            .clientId(googleId.trim()).clientSecret(googleSecret.trim())
+                                            .scope("openid", "email", "profile")
+                                            .userNameAttributeName("email").build()))
+                            .userInfoEndpoint(u -> u.oidcUserService(googleUsers(accounts)))
+                            .defaultSuccessUrl("/", false)
+                            .failureUrl("/login?google");
+                })
                 .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/?signedout").deleteCookies("JSESSIONID"))
                 .exceptionHandling(e -> e.defaultAuthenticationEntryPointFor(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), request -> request.getRequestURI().startsWith("/api/")))
@@ -74,5 +93,21 @@ class SecurityConfig {
                 .addFilterBefore(new RateLimitFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new SecurityHeadersFilter(), RateLimitFilter.class);
         return http.build();
+    }
+
+    /** Signs in with Google only when Google has verified the email, and makes the account on first use. */
+    private static org.springframework.security.oauth2.client.userinfo.OAuth2UserService<
+            org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest,
+            org.springframework.security.oauth2.core.oidc.user.OidcUser> googleUsers(com.bazaarready.account.AccountService accounts) {
+        var delegate = new org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService();
+        return request -> {
+            var user = delegate.loadUser(request);
+            if (user.getEmail() == null || !Boolean.TRUE.equals(user.getEmailVerified())) {
+                throw new org.springframework.security.oauth2.core.OAuth2AuthenticationException(
+                        new org.springframework.security.oauth2.core.OAuth2Error("unverified_email"), "Google account email is not verified");
+            }
+            accounts.ensureGoogleAccount(user.getEmail(), user.getFullName());
+            return user;
+        };
     }
 }
