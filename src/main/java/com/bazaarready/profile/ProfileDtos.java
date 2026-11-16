@@ -29,6 +29,7 @@ public final class ProfileDtos {
             @Pattern(regexp = Business.LAYOUT_PATTERN) String layout,
             @Size(max = 4) String currency,
             @Size(max = 700) String about,
+            @Valid @Size(max = 12) List<SectionRequest> sections,
             /** Stock photo search words for the banner, in English. */
             @Size(max = 80) String heroImageQuery,
             @Size(max = 200) String location,
@@ -61,6 +62,20 @@ public final class ProfileDtos {
             @Size(max = 80) String imageQuery) {
     }
 
+    /** An extra block on the site. style: text (a paragraph), list (one point per line) or highlight (an offer or notice). */
+    public record SectionRequest(
+            @NotBlank @Size(max = 80) String title,
+            @NotBlank @Size(max = 1500) String body,
+            @Pattern(regexp = "text|list|highlight") String style) {
+    }
+
+    public record SectionResponse(String title, String body, String style) {
+        public java.util.List<String> lines() {
+            return java.util.Arrays.stream(body.split("\\n")).map(String::trim).filter(l -> !l.isEmpty())
+                    .map(l -> l.replaceFirst("^[-*•]\\s*", "")).toList();
+        }
+    }
+
     public record FaqRequest(
             @NotBlank @Size(max = 300) String question,
             @NotBlank @Size(max = 600) String answer,
@@ -79,6 +94,7 @@ public final class ProfileDtos {
             String layout,
             String currency,
             String about,
+            List<SectionResponse> sections,
             String heroImageQuery,
             String location,
             String hours,

@@ -52,7 +52,7 @@
         </div>
         <div th:classappend="${errors != null and errors.containsKey('deliveryDate')} ? 'has-error'">
             <label for="deliveryDate" th:text="${L.of('delivery_date')}">Preferred delivery date</label>
-            <input id="deliveryDate" name="deliveryDate" type="date" th:value="${form != null ? form.get('deliveryDate') : ''}">
+            <input id="deliveryDate" name="deliveryDate" type="date" th:min="${today}" th:value="${form != null ? form.get('deliveryDate') : ''}">
             <p class="field-error" th:if="${errors != null and errors.containsKey('deliveryDate')}" th:text="${L.of(errors.get('deliveryDate'))}">Error</p>
         </div>
         <div>

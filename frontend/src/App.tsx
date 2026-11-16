@@ -1,5 +1,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ActionView, SessionView, sendApproval, sendReply, startFromChats, startSession } from "./api";
+import { ActionView, Me, SessionView, csrfToken, getMe, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
+import { Coach } from "./Coach";
+import { SideDecor } from "./SideDecor";
+import { UX } from "./ux";
 import { Gallery, OpenSign, Petals, PhotoCredits, Shutters, StringLights } from "./Decor";
 import { countries, defaultCountry } from "./countries";
 import { applyFonts } from "./fonts";
@@ -37,6 +40,18 @@ function actionText(action: ActionView, t: Strings, readChats: string): string {
   }
 }
 
+const OTHER = "__other__";
+const OTHER_LABEL: Record<LanguageCode, string> = {
+  en: "Other…",
+  hi: "अन्य…",
+  kn: "ಇತರೆ…",
+  ta: "மற்றவை…",
+  te: "ఇతర…",
+  mr: "इतर…",
+  bn: "অন্য…",
+  gu: "અન્ય…",
+};
+
 export default function App() {
   const [language, setLanguage] = useState<LanguageCode>(initialLanguage);
   const t = STRINGS[language];
@@ -44,6 +59,19 @@ export default function App() {
   const notes = NOTES[language];
   const chatWords = CHATS[language];
   const [ownerName, setOwnerName] = useState("");
+  const u = UX[language];
+  const params = new URLSearchParams(window.location.search);
+  const [changeKeyFromUrl] = useState(() => {
+    const key = params.get("change");
+    return key && /^[0-9a-f-]{36}$/.test(key) ? key : null;
+  });
+  const [changeText, setChangeText] = useState("");
+  const [me, setMe] = useState<Me | null>(null);
+  useEffect(() => {
+    void getMe().then(setMe);
+  }, []);
+  const [formAnswers, setFormAnswers] = useState<Record<number, string>>({});
+  const [formOther, setFormOther] = useState<Record<number, string>>({});
 
   const [description, setDescription] = useState("");
   const [session, setSession] = useState<SessionView | null>(null);
@@ -52,12 +80,71 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [celebrations, setCelebrations] = useState(0);
   const showcase = useShowcase(celebrations);
+
+  // Fade sections and gallery cards in as they scroll into view.
+  useEffect(() => {
+    const items = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]:not(.in)"));
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still || !("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in");
+            io.unobserve(entry.target);
+          }
+        }),
+      { threshold: 0.12 }
+    );
+    items.forEach((el, i) => {
+      el.style.setProperty("--d", `${Math.min(i, 6) * 80}ms`);
+      io.observe(el);
+    });
+    return () => io.disconnect();
+  }, [showcase, session]);
   const [country, setCountry] = useState(defaultCountry);
   const countryList = useMemo(() => countries(language), [language]);
 
   const speech = useSpeech((text) => setDescription((current) => (current ? current + " " + text : text)));
   const answerSpeech = useSpeech((text) => setAnswer((current) => (current ? current + " " + text : text)));
   const live = session?.status === "DONE" && session.published;
+  const changeSpeech = useSpeech((text) => setChangeText((current) => (current ? current + " " + text : text)));
+  const changeKey = changeKeyFromUrl ?? (session?.ownerPath && session.published ? session.ownerPath.split("/").pop() ?? null : null);
+  const TEST_LINE = `${u.testFirst}. ${u.testHint}`;
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (changeKeyFromUrl && query.get("fix") === "tests") {
+      fetch(`/api/owner/${changeKeyFromUrl}/test-fix`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((body: { text?: string } | null) => {
+          if (body?.text) {
+            setChangeText(body.text);
+            window.setTimeout(() => document.getElementById("change-text")?.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+          }
+        })
+        .catch(() => undefined);
+    }
+  }, [changeKeyFromUrl]);
+
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("session");
+    if (id && /^[0-9a-f-]{36}$/.test(id)) {
+      getSession(id).then(setSession).catch(() => undefined);
+    }
+  }, []);
+
+  function onChange(event: FormEvent) {
+    event.preventDefault();
+    if (!changeKey || !changeText.trim()) return;
+    if (changeSpeech.listening) changeSpeech.stop();
+    const text = changeText;
+    setChangeText("");
+    void run(() => startUpdate(changeKey, text, language));
+  }
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -89,6 +176,10 @@ export default function App() {
 
   function onStart(event: FormEvent) {
     event.preventDefault();
+    if (me && me.authForBuilding && !me.signedIn) {
+      window.location.href = "/login";
+      return;
+    }
     if (speech.listening) speech.stop();
     void run(() => startSession(description, language));
   }
@@ -96,6 +187,20 @@ export default function App() {
   function onReply(event: FormEvent) {
     event.preventDefault();
     if (!session) return;
+    if (session.fields?.length) {
+      const lines = session.fields
+        .map((f, i) => {
+          const raw = formAnswers[i] ?? "";
+          const value = raw === OTHER ? (formOther[i] ?? "").trim() : raw.trim();
+          return value ? `${f.label}: ${value}` : null;
+        })
+        .filter((l): l is string => l !== null);
+      const text = lines.length ? lines.join("\n") : "(left these empty)";
+      setFormAnswers({});
+      setFormOther({});
+      void run(() => sendReply(session.id, text));
+      return;
+    }
     if (answerSpeech.listening) answerSpeech.stop();
     const dial = countryList.find((c) => c.iso === country)?.dial ?? "";
     const text = session.questionType === "phone" ? `+${dial} ${answer.replace(/[^0-9]/g, "")}` : answer;
@@ -113,6 +218,7 @@ export default function App() {
   return (
     <>
       <Petals trigger={celebrations} />
+      <SideDecor sites={showcase?.recent ?? []} language={language} />
 
       <header className="signboard">
         <StringLights />
@@ -122,7 +228,9 @@ export default function App() {
             <h1>
               Bazaar<span>Ready</span>
             </h1>
-            <p className="headline">{extra.headline}</p>
+            <p className="headline" key={language}>
+              {extra.headline}
+            </p>
             <svg className="scribble" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
               <defs>
                 <linearGradient id="ink-glow" x1="0" x2="1">
@@ -133,7 +241,33 @@ export default function App() {
               <path d="M4 14 C 60 4, 120 18, 180 9 S 260 6, 296 12" fill="none" stroke="url(#ink-glow)" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </div>
-          <OpenSign />
+          <div className="hero-side">
+            <div className="account-links">
+              <a className="how-link" href="/guide">
+                {u.howItWorks} →
+              </a>
+              {me?.signedIn ? (
+                <>
+                  <a className="how-link" href="/account">
+                    {u.mySites}
+                  </a>
+                  <form method="post" action="/logout">
+                    <input type="hidden" name="_csrf" value={csrfToken()} />
+                    <button type="submit" className="how-link as-button">
+                      {u.signOut}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                me?.authForBuilding && (
+                  <a className="how-link signin" href="/login">
+                    {u.signIn}
+                  </a>
+                )
+              )}
+            </div>
+            <OpenSign />
+          </div>
         </div>
 
         <div className="wrap">
@@ -160,12 +294,25 @@ export default function App() {
 
       <main className="wrap workspace">
         {!session && (
-          <form className="ledger" onSubmit={onStart}>
+          <form className="ledger" data-reveal onSubmit={onStart}>
             <label htmlFor="description" className="label">
               {t.tellUs}
             </label>
             <p className="hint">{t.hint}</p>
             <p className="hand talk-note">{notes.talk}</p>
+            <div className="guide">
+              <p className="guide-title">{u.guideTitle}</p>
+              <ol>
+                {u.guide.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ol>
+            </div>
+            {me && me.authForBuilding && !me.signedIn && (
+              <p className="signin-note">
+                {u.signInToBuild} <a href="/login">{u.signIn} →</a>
+              </p>
+            )}
             <textarea
               id="description"
               rows={6}
@@ -269,10 +416,64 @@ export default function App() {
 
             {session.status === "WAITING_OWNER" && !busy && (
               <form className="panel ask" onSubmit={onReply}>
-                <label htmlFor="answer" className="label">
-                  {session.question}
-                </label>
-                {session.questionType === "phone" ? (
+                {session.fields?.length ? (
+                  <h2 className="label">{session.question}</h2>
+                ) : (
+                  <label htmlFor="answer" className="label">
+                    {session.question}
+                  </label>
+                )}
+                {session.fields?.length ? (
+                  <div className="qform">
+                    {session.fields.map((f, i) => (
+                      <div key={`${f.label}-${i}`} className={`qfield ${f.kind === "long" ? "wide" : ""}`}>
+                        <label htmlFor={`qf-${i}`}>{f.label}</label>
+                        {f.kind === "choice" ? (
+                          <>
+                            <select id={`qf-${i}`} value={formAnswers[i] ?? ""} onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}>
+                              <option value="">—</option>
+                              {f.options.map((o) => (
+                                <option key={o} value={o}>
+                                  {o}
+                                </option>
+                              ))}
+                              <option value={OTHER}>{OTHER_LABEL[language]}</option>
+                            </select>
+                            {formAnswers[i] === OTHER && (
+                              <input
+                                aria-label={`${f.label}: ${OTHER_LABEL[language]}`}
+                                value={formOther[i] ?? ""}
+                                onChange={(e) => setFormOther({ ...formOther, [i]: e.target.value })}
+                                maxLength={300}
+                              />
+                            )}
+                          </>
+                        ) : f.kind === "long" ? (
+                          <textarea
+                            id={`qf-${i}`}
+                            rows={3}
+                            value={formAnswers[i] ?? ""}
+                            placeholder={f.placeholder}
+                            onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}
+                            maxLength={600}
+                          />
+                        ) : (
+                          <input
+                            id={`qf-${i}`}
+                            type={f.kind === "email" || f.kind === "date" || f.kind === "time" || f.kind === "number" ? f.kind : "text"}
+                            min={f.kind === "number" ? 0 : f.kind === "date" ? new Date().toISOString().slice(0, 10) : undefined}
+                            step={f.kind === "number" ? "any" : undefined}
+                            inputMode={f.kind === "number" ? "decimal" : undefined}
+                            value={formAnswers[i] ?? ""}
+                            placeholder={f.placeholder}
+                            onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}
+                            maxLength={300}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : session.questionType === "phone" ? (
                   <div className="phone">
                     <label htmlFor="country" className="visually-hidden">
                       Country code
@@ -301,7 +502,7 @@ export default function App() {
                   <input id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} maxLength={2000} required autoFocus />
                 )}
                 <div className="row">
-                  {answerSpeech.supported && session.questionType !== "phone" && (
+                  {answerSpeech.supported && session.questionType !== "phone" && !session.fields?.length && (
                     <button
                       type="button"
                       className={`button mic ${answerSpeech.listening ? "is-listening" : ""}`}
@@ -343,6 +544,25 @@ export default function App() {
                     </a>
                   </p>
                 )}
+                {session.ownerPath && (
+                  <p className="dashboard-note">
+                    <a href={session.ownerPath} target="_blank" rel="noreferrer">
+                      {u.dashboard} →
+                    </a>
+                    <br />
+                    <span className="hint">{u.dashboardHint}</span>
+                  </p>
+                )}
+                {session.ownerPath && (
+                  <form className="test-first" method="post" action={`${session.ownerPath}/test`} target="_blank">
+                    <input type="hidden" name="_csrf" value={csrfToken()} />
+                    <p className="hint">{TEST_LINE}</p>
+                    <button type="submit" className="button">
+                      {u.testNow}
+                    </button>
+                  </form>
+                )}
+
                 <div className="row">
                   <button type="button" className="button primary" onClick={() => void run(() => sendApproval(session.id, true))}>
                     {t.publish}
@@ -373,10 +593,21 @@ export default function App() {
                       {ORDERS_LINK[language]}
                     </a>
                   )}
+                  {session.ownerPath && (
+                    <button type="submit" form="test-after" className="button">
+                      {u.testNow}
+                    </button>
+                  )}
+                  {session.ownerPath && session.published && (
+                    <a className="button" href={`${session.ownerPath}#collabs`} target="_blank" rel="noreferrer">
+                      {u.collabCheck}
+                    </a>
+                  )}
                   <button type="button" className="button" onClick={startOver}>
                     {t.startAnother}
                   </button>
                 </div>
+                {session.ownerPath && session.published && <p className="hint dashboard-note">{u.dashboardHint}</p>}
               </section>
             )}
           </>
@@ -386,11 +617,67 @@ export default function App() {
           label={notes.photos}
           photos={[...(showcase?.examples ?? []).filter((p): p is NonNullable<typeof p> => !!p), ...(showcase?.recent ?? []).map((r) => r.photo)]}
         />
+
+            {changeKey && (!session || session.status === "DONE") && !busy && (
+              <form className="panel" onSubmit={onChange} aria-labelledby="change-title">
+                <h2 id="change-title">{u.changeTitle}</h2>
+                <p className="hint">{u.changeHint}</p>
+                <label htmlFor="change-text" className="visually-hidden">
+                  {u.changeTitle}
+                </label>
+                <textarea
+                  id="change-text"
+                  className="change-text"
+                  rows={3}
+                  value={changeText}
+                  onChange={(e) => setChangeText(e.target.value)}
+                  placeholder={u.changePlaceholder}
+                  maxLength={3000}
+                />
+                <div className="row">
+                  {changeSpeech.supported && (
+                    <button
+                      type="button"
+                      className={`button mic ${changeSpeech.listening ? "is-listening" : ""}`}
+                      onClick={() => (changeSpeech.listening ? changeSpeech.stop() : changeSpeech.start(t.speech))}
+                    >
+                      <span className="bars" aria-hidden="true">
+                        <i />
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                      {changeSpeech.listening ? t.stopListening : t.speak}
+                    </button>
+                  )}
+                  <button type="submit" className="button primary" disabled={!changeText.trim()}>
+                    {u.changeButton}
+                  </button>
+                </div>
+              </form>
+            )}
+        {session?.ownerPath && (
+          <form id="test-after" method="post" action={`${session.ownerPath}/test`} target="_blank" hidden>
+            <input type="hidden" name="_csrf" value={csrfToken()} />
+          </form>
+        )}
       </main>
+
+      <Coach
+        u={u}
+        language={language}
+        onUse={(text) => {
+          setSession(null);
+          setDescription(text);
+          document.getElementById("description")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }}
+      />
 
       <footer className="foot">
         <span>BazaarReady</span>
-        <span className="holo">Built with love @ Yashi Tripathi</span>
+        <span className="holo">
+          Crafted with <span aria-label="love">♥</span> by Yashi Tripathi
+        </span>
       </footer>
     </>
   );

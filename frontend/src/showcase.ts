@@ -14,6 +14,8 @@ export interface RecentSite {
   tagline: string | null;
   path: string;
   photo: Photo;
+  location: string | null;
+  publishedAt: string | null;
 }
 
 export interface Showcase {

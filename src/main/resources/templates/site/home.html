@@ -150,6 +150,11 @@
         </div>
     </section>
 
+    <section th:each="sec : ${shop.sections()}" th:if="${sec.style() == 'highlight'}" class="extra extra-highlight">
+        <h2 th:text="${sec.title()}">Offer</h2>
+        <p class="lead" style="white-space:pre-line" th:text="${sec.body()}">Text</p>
+    </section>
+
     <section aria-labelledby="all-items" th:if="${layout == 'mart' and !shop.products().isEmpty()}">
         <h2 id="all-items" th:text="${offeringsTitle}">Everything</h2>
         <div class="cats" th:if="${categories.size() > 1}" style="margin-bottom:1.2rem">
@@ -216,6 +221,13 @@
         <div class="cta" style="justify-content:center;margin-top:0">
             <a class="btn light" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>
             <a class="btn ghost" th:href="${base + '/contact'}" th:text="${L.of('send_message')}">Send message</a>
+        </div>
+    </section>
+    <section class="fine-print" th:if="${shop.sections().?[style() != 'highlight'].size() > 0}" aria-label="More information">
+        <div th:each="sec : ${shop.sections()}" th:if="${sec.style() != 'highlight'}" class="fine-block">
+            <h3 th:text="${sec.title()}">Section</h3>
+            <ul th:if="${sec.style() == 'list'}"><li th:each="line : ${sec.lines()}" th:text="${line}">Point</li></ul>
+            <p th:unless="${sec.style() == 'list'}" style="white-space:pre-line" th:text="${sec.body()}">Text</p>
         </div>
     </section>
 </main>

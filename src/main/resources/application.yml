@@ -16,6 +16,19 @@ spring:
 
 server:
   port: 8080
+  # Redirects carry only the path, so they work on any address: localhost, a tunnel or the real domain.
+  tomcat:
+    use-relative-redirects: true
+  # Read the visitor's real address from the proxy in front (Caddy or the tunnel). Tomcat only trusts
+  # these headers from private-network addresses, so they can't be faked from outside.
+  forward-headers-strategy: native
+  servlet:
+    session:
+      timeout: 7d
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${COOKIE_SECURE:false}
 
 management:
   endpoints:
@@ -31,3 +44,15 @@ bazaarready:
     api-key: ${ANTHROPIC_API_KEY:}
   pexels:
     api-key: ${PEXELS_API_KEY:}
+  # Daily caps on calls to Claude, to protect the API credits during public judging.
+  # "Continue with Google". Leave empty to hide the button. Values come from Google Cloud Console.
+  # Sign-in for building sites and the idea coach. Off for the hackathon demo so anyone can try it;
+  # the owner dashboard always needs sign-in. Set AUTH_FOR_BUILDING=true to require it for building too.
+  auth:
+    for-building: ${AUTH_FOR_BUILDING:false}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+  claude:
+    daily-cap: ${CLAUDE_DAILY_CAP:3000}
+    per-account-daily-cap: ${CLAUDE_PER_ACCOUNT_DAILY_CAP:400}

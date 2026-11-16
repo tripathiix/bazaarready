@@ -30,8 +30,11 @@ public class ProfileService {
     private final BusinessRepository businesses;
     private final ProductRepository products;
     private final FaqRepository faqs;
+    private final com.fasterxml.jackson.databind.ObjectMapper json;
 
-    ProfileService(BusinessRepository businesses, ProductRepository products, FaqRepository faqs) {
+    ProfileService(BusinessRepository businesses, ProductRepository products, FaqRepository faqs,
+                   com.fasterxml.jackson.databind.ObjectMapper json) {
+        this.json = json;
         this.businesses = businesses;
         this.products = products;
         this.faqs = faqs;
@@ -65,6 +68,55 @@ public class ProfileService {
         faqs.save(new Faq(id, question.trim(), answer.trim(), 0, Faq.Source.FIX, position));
     }
 
+    // ---- The owner managing their products by hand ----
+
+    /** What the owner typed for one product. price may be null for "price on request". */
+    public record ProductEdit(String name, BigDecimal price, String unit, String description) {
+    }
+
+    @Transactional
+    public UUID addProduct(UUID businessId, ProductEdit edit) {
+        find(businessId);
+        int position = products.findByBusinessIdOrderBySortOrder(businessId).size();
+        Product product = new Product(businessId, edit.name().trim(), position);
+        apply(product, edit);
+        product.setImageQuery(edit.name().trim().toLowerCase(java.util.Locale.ROOT));
+        products.save(product);
+        return product.getId();
+    }
+
+    /** Changes one product and returns its old name, so an uploaded photo can follow a rename. */
+    @Transactional
+    public String updateProduct(UUID businessId, UUID productId, ProductEdit edit) {
+        Product product = owned(businessId, productId);
+        String oldName = product.getName();
+        if (!oldName.equals(edit.name().trim())) {
+            product.setName(edit.name().trim());
+            product.setImageQuery(edit.name().trim().toLowerCase(java.util.Locale.ROOT));
+        }
+        apply(product, edit);
+        return oldName;
+    }
+
+    /** Removes one product and returns its name. */
+    @Transactional
+    public String removeProduct(UUID businessId, UUID productId) {
+        Product product = owned(businessId, productId);
+        products.delete(product);
+        return product.getName();
+    }
+
+    private Product owned(UUID businessId, UUID productId) {
+        return products.findById(productId).filter(p -> p.getBusinessId().equals(businessId))
+                .orElseThrow(() -> new NotFoundException("No such product"));
+    }
+
+    private static void apply(Product product, ProductEdit edit) {
+        product.setPricePaise(edit.price() == null ? null : edit.price().multiply(MINOR_PER_UNIT).longValue());
+        product.setUnit(blankToNull(edit.unit()));
+        product.setDescription(blankToNull(edit.description()));
+    }
+
     @Transactional
     public ProfileResponse publish(UUID id) {
         Business business = find(id);
@@ -87,6 +139,17 @@ public class ProfileService {
     public ProfileResponse getByOwnerKey(UUID ownerKey) {
         return toResponse(businesses.findByOwnerKey(ownerKey)
                 .orElseThrow(() -> new NotFoundException("This owner link is not valid")));
+    }
+
+    private List<ProfileDtos.SectionResponse> sectionsOf(Business b) {
+        if (b.getSections() == null) {
+            return List.of();
+        }
+        try {
+            return json.readValue(b.getSections(), new com.fasterxml.jackson.core.type.TypeReference<List<ProfileDtos.SectionResponse>>() { });
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            return List.of();
+        }
     }
 
     /** Whether a kind of business gets a cart, a booking form, or neither. */
@@ -117,6 +180,16 @@ public class ProfileService {
             business.setCurrency(request.currency().trim());
         }
         business.setAbout(blankToNull(request.about()));
+        if (request.sections() != null) {
+            List<ProfileDtos.SectionResponse> list = request.sections().stream()
+                    .map(x -> new ProfileDtos.SectionResponse(x.title().trim(), x.body().trim(), x.style() == null ? "text" : x.style()))
+                    .toList();
+            try {
+                business.setSections(list.isEmpty() ? null : json.writeValueAsString(list));
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                throw new IllegalStateException("Could not store sections", e);
+            }
+        }
         business.setHeroQuery(blankToNull(request.heroImageQuery()));
         business.setLocation(blankToNull(request.location()));
         business.setHours(blankToNull(request.hours()));
@@ -173,7 +246,7 @@ public class ProfileService {
                 .map(f -> new FaqResponse(f.getId(), f.getQuestion(), f.getAnswer(), f.getTimesAsked(), f.getSource()))
                 .toList();
         return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getKind(),
-                styleOf(b.getKind()), b.getTheme(), b.getLayout(), b.getCurrency(), b.getAbout(), b.getHeroQuery(), b.getLocation(), b.getHours(),
+                styleOf(b.getKind()), b.getTheme(), b.getLayout(), b.getCurrency(), b.getAbout(), sectionsOf(b), b.getHeroQuery(), b.getLocation(), b.getHours(),
                 b.getOfferingsTitle(), b.getDetailsTitle(), b.getOwnerLanguage(), b.getWhatsappNumber(),
                 b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(), b.getStatus(), b.getPublishedAt(),
                 "/s/" + b.getSlug(), "/owner/" + b.getOwnerKey(), productList, faqList);

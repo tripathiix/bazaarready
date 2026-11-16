@@ -13,6 +13,11 @@
         </div>
     </section>
 
+    <section th:each="sec : ${shop.sections()}" th:if="${sec.style() == 'highlight'}" class="extra extra-highlight">
+        <h2 th:text="${sec.title()}">Offer</h2>
+        <p class="lead" style="white-space:pre-line" th:text="${sec.body()}">Text</p>
+    </section>
+
     <section aria-labelledby="details" th:if="${hasDetails}">
         <h2 id="details" th:text="${L.of('details_title')}">Good to know</h2>
         <div class="info">
@@ -40,6 +45,13 @@
             <summary th:text="${f.question()}">Question</summary>
             <p th:text="${f.answer()}">Answer</p>
         </details>
+    </section>
+    <section class="fine-print" th:if="${shop.sections().?[style() != 'highlight'].size() > 0}" aria-label="More information">
+        <div th:each="sec : ${shop.sections()}" th:if="${sec.style() != 'highlight'}" class="fine-block">
+            <h3 th:text="${sec.title()}">Section</h3>
+            <ul th:if="${sec.style() == 'list'}"><li th:each="line : ${sec.lines()}" th:text="${line}">Point</li></ul>
+            <p th:unless="${sec.style() == 'list'}" style="white-space:pre-line" th:text="${sec.body()}">Text</p>
+        </div>
     </section>
 </main>
 

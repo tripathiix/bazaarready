@@ -6,12 +6,38 @@
 <!-- The owner's private page. It is in English for now; the public site is in the owner's language. -->
 <main class="wrap">
     <section aria-labelledby="title">
-        <p style="margin:0"><a th:href="${base}" target="_blank" rel="noopener">Open the public site</a></p>
+        <p style="margin:0;display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
+            <a th:href="${base}" target="_blank" rel="noopener">Open the public site</a>
+            <a href="/account">My sites</a>
+            <form method="post" th:action="@{/logout}" style="display:inline"><button class="btn small outline">Sign out</button></form>
+        </p>
         <h1 id="title" style="color:var(--brand)" th:text="${shop.name()}">Name</h1>
         <p class="demo" role="note" style="margin-top:1rem">This page is private. Anyone with this link can see your orders, so do not share it.</p>
+        <nav class="owner-tabs" aria-label="Owner tools">
+            <a href="#tests">🤖 Test with AI customers</a>
+            <a href="#collabs">🛡️ Is this collab real?</a>
+            <a href="#change">✏️ Change my website</a>
+            <a href="#photos">🛍️ Products and photos</a>
+            <a href="#orders-section">📦 Orders</a>
+            <a href="#messages-section">💬 Messages</a>
+        </nav>
     </section>
+    <style>
+        .owner-tabs { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem;
+            padding: .6rem 0; background: var(--bg); }
+        .owner-tabs a { padding: .55rem .95rem; border-radius: 999px; border: 1px solid var(--line, rgba(127,127,127,.35));
+            text-decoration: none; color: var(--ink); font-weight: 600; font-size: .95rem; }
+        .owner-tabs a:hover, .owner-tabs a:focus-visible { background: var(--brand); color: var(--on-brand, #fff); }
+        section[id] { scroll-margin-top: 4.5rem; }
+        .key-points { margin: 0.6rem 0 1rem; padding-left: 1.3rem; display: grid; gap: 0.7rem; }
+        .test-summary { border-left: 4px solid var(--brand); }
+        .add-product { max-width: none; border-left: 4px solid var(--brand); }
+        .add-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.8rem; }
+        .product-edit .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+        .product-edit input, .product-edit textarea { width: 100%; }
+    </style>
 
-    <section aria-labelledby="orders">
+    <section aria-labelledby="orders" id="orders-section">
         <h2 id="orders">Orders and bookings (<span th:text="${orders.size()}">0</span>)</h2>
         <p th:if="${orders.isEmpty()}">Nothing yet. Orders and booking requests from your site will appear here.</p>
         <div class="panel" th:each="o : ${orders}" style="margin-bottom:1rem">
@@ -34,6 +60,12 @@
             <p style="margin:0.6rem 0 0;color:var(--muted)" th:if="${o.getNote()}">Note: <span th:text="${o.getNote()}">Note</span></p>
             <p style="margin:0.6rem 0 0;color:var(--muted);font-size:0.9rem" th:text="${placed.get(o.getId())}">time</p>
         </div>
+    </section>
+
+    <section aria-labelledby="change-title" id="change">
+        <h2 id="change-title">Change my website</h2>
+        <p style="color:var(--muted)">Say what you'd like changed or added, in your own words. For example: "add mango cake for ₹900", "pineapple cake is sold out", "add a Diwali offer: 10% off above ₹1,000", "make it look darker". The agent updates your site and tells you what it changed.</p>
+        <a class="btn" th:href="${'/?change=' + ownerKey}">Change my website</a>
     </section>
 
     <section aria-labelledby="collabs-title" id="collabs">
@@ -60,12 +92,28 @@
 
     <section aria-labelledby="tests-title" id="tests">
         <h2 id="tests-title">Test my site</h2>
-        <p style="color:var(--muted)">Six AI customers test your site in eight situations: a quick order or booking, a customer who makes mistakes in forms, one who checks every number, a gift or group buyer, a careful customer who checks whether to trust you and your policies, a screen-reader user, and someone new to the internet who reads only your language. A code check looks for accessibility problems. It takes one or two minutes. Test orders and messages are removed afterwards.</p>
+        <p style="color:var(--muted)">Eight AI customers try your site in ten situations: a quick order or booking, someone who makes mistakes, someone who checks every number, a gift or group buyer, a careful buyer who checks whether to trust you and your rules, a student working out the full cost, someone who wants to reach a person, a blind visitor using a screen reader, and someone new to the internet who reads only your language. It takes two or three minutes. Their test orders and messages are removed afterwards.</p>
         <form method="post" th:action="${'/owner/' + ownerKey + '/test'}">
             <button class="btn" th:disabled="${run != null and run.running()}" th:text="${run != null and run.running()} ? 'Testing…' : (${run == null} ? 'Test my site' : 'Test again')">Test my site</button>
         </form>
 
         <th:block th:if="${run != null}">
+            <div class="panel test-summary" th:if="${run.summary() != null}" style="margin-top:1.4rem">
+                <h3 style="margin-top:0">In short</h3>
+                <p style="font-size:1.08rem" th:text="${run.summary().headline()}">Headline</p>
+                <ol class="key-points" th:if="${!run.summary().points().isEmpty()}">
+                    <li th:each="p : ${run.summary().points()}">
+                        <strong th:text="${p.title()}">Title</strong>
+                        <span class="chip" th:if="${p.needs() == 'you'}">Needs your details</span>
+                        <br><span th:text="${p.detail()}">Detail</span>
+                    </li>
+                </ol>
+                <p th:if="${run.summary().fixRequest() != null and !run.summary().fixRequest().isBlank()}" style="margin-bottom:0">
+                    <a class="btn" th:href="${'/?change=' + ownerKey + '&fix=tests'}">✨ Fix my website from these results</a>
+                    <br><span style="color:var(--muted);font-size:0.92rem">You'll see the changes written out first, and can edit them before anything changes. For things only you know, like delivery charges, the agent will ask you.</span>
+                </p>
+            </div>
+            <p th:if="${run.running()}" class="chip" style="margin-top:1rem">The summary appears here when every test has finished.</p>
             <div class="info" style="margin-top:1.4rem">
                 <div>
                     <h3>Tests passed</h3>
@@ -85,7 +133,7 @@
                         <span class="chip" th:text="${c.status() == 'PASSED'} ? 'Reached the goal' : (${c.status() == 'RUNNING'} ? 'Testing…' : (${c.status() == 'STUCK'} ? 'Got stuck' : 'Could not run'))">Status</span>
                         <p th:if="${c.summary()}" th:text="${c.summary()}">Summary</p>
                         <details th:if="${!c.steps().isEmpty()}">
-                            <summary>What they did</summary>
+                            <summary>What they did, step by step</summary>
                             <ol style="margin:0.4rem 0 0;padding-left:1.2rem;font-size:0.92rem">
                                 <li th:each="s : ${c.steps()}" th:text="${s}">Step</li>
                             </ol>
@@ -94,10 +142,12 @@
                 </div>
             </div>
 
-            <div style="margin-top:1.5rem" th:if="${!run.findings().isEmpty()}">
+            <details style="margin-top:1.5rem" th:if="${!run.findings().isEmpty()}">
+            <summary><strong th:text="${'Every problem in detail (' + run.findings().size() + ')'}">Every problem</strong></summary>
+            <div style="margin-top:1rem">
                 <div class="panel" th:each="f : ${run.findings()}" style="margin-bottom:0.9rem">
                     <p style="margin:0"><span class="chip" th:text="${f.persona()}">Rahul</span> <strong th:text="${f.problem()}">Problem</strong></p>
-                    <p style="margin:0.5rem 0 0;color:var(--muted)" th:if="${f.evidence()}">What they saw: <span th:text="${f.evidence()}">Evidence</span></p>
+                    <p style="margin:0.5rem 0 0;color:var(--muted)" th:if="${f.evidence() != null and f.persona() != 'Code check'}">What they saw: <span th:text="${f.evidence()}">Evidence</span></p>
                     <p style="margin:0.5rem 0 0" th:if="${f.suggestion()}">Suggested fix: <span th:text="${f.suggestion()}">Suggestion</span></p>
                     <div th:if="${f.faqQuestion()}" class="info" style="margin-top:0.7rem">
                         <div><h3 th:text="${f.faqQuestion()}">Question</h3><p th:text="${f.faqAnswer()}">Answer</p></div>
@@ -108,19 +158,47 @@
                     <p th:if="${f.fixStatus() == 'APPLIED'}" style="margin:0.6rem 0 0" class="chip">Added to your site</p>
                 </div>
             </div>
+            </details>
             <p th:if="${!run.running() and run.findings().isEmpty()}">No problems found.</p>
         </th:block>
-        <script th:if="${run != null and run.running()}">setTimeout(function () { location.reload(); }, 4000);</script>
+        <script th:if="${run != null and run.running()}" th:attr="nonce=${cspNonce}">setTimeout(function () { location.reload(); }, 4000);</script>
     </section>
 
-    <section aria-labelledby="photos" id="photos">
-        <h2 id="photos-title">Photos</h2>
+    <section aria-labelledby="photos-title" id="photos">
+        <h2 id="photos-title">Products and photos</h2>
+        <p style="color:var(--muted)">Add everything you sell or offer, with a price for each. Change a name, price or description and press Save; the website updates straight away. Your own photos always look better than stock ones.</p>
+        <p th:if="${param.product != null and param.product[0] == 'added'}" class="chip">Product added to your website.</p>
+        <p th:if="${param.product != null and param.product[0] == 'saved'}" class="chip">Saved.</p>
+        <p th:if="${param.product != null and param.product[0] == 'removed'}" class="chip">Product removed.</p>
+        <p th:if="${param.product != null and param.product[0] == 'invalid'}" class="error">Give the product a name, and write the price as a number (or leave it empty for "price on request").</p>
+        <p th:if="${param.product != null and param.product[0] == 'duplicate'}" class="error">You already have a product with that name.</p>
+        <p th:if="${param.product != null and param.product[0] == 'full'}" class="error">You have reached the limit of 60 products.</p>
+        <p th:if="${param.product != null and param.product[0] == 'added-photo-size'}" class="error">Product added, but the photo was over 3 MB. Upload a smaller one below.</p>
+        <p th:if="${param.product != null and param.product[0] == 'added-photo-type'}" class="error">Product added, but that file is not a JPEG, PNG or WebP picture.</p>
         <p th:if="${param.photo != null and param.photo[0] == 'saved'}" class="chip">Photo saved.</p>
         <p th:if="${param.photo != null and param.photo[0] == 'removed'}" class="chip">Your photo was removed.</p>
         <p th:if="${param.photo != null and param.photo[0] == 'size'}" class="error">Choose a picture smaller than 3 MB.</p>
         <p th:if="${param.photo != null and param.photo[0] == 'type'}" class="error">That file is not a JPEG, PNG or WebP picture.</p>
-        <p style="color:var(--muted)">Stock photos are chosen for you. Upload your own to replace any of them.</p>
-        <ul class="grid">
+
+        <datalist id="unit-options">
+            <option value="each"></option><option value="1 kg"></option><option value="500 g"></option>
+            <option value="per piece"></option><option value="per dozen"></option><option value="per box"></option>
+            <option value="per person"></option><option value="per hour"></option><option value="per class"></option>
+            <option value="per month"></option><option value="per day"></option><option value="per session"></option>
+        </datalist>
+        <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/products'}" class="panel form add-product">
+            <h3 style="margin:0">➕ Add a product or service</h3>
+            <div class="add-grid">
+                <div><label for="new-name">Name</label><input id="new-name" name="name" maxlength="80" required placeholder="Mango cake"></div>
+                <div><label for="new-price" th:text="${'Price (' + shop.currency() + ')'}">Price</label><input id="new-price" name="price" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="900"></div>
+                <div><label for="new-unit">Per (optional)</label><input id="new-unit" name="unit" maxlength="30" list="unit-options" placeholder="Choose or type"></div>
+            </div>
+            <div><label for="new-desc">Short description (optional)</label><textarea id="new-desc" name="description" rows="2" maxlength="600" placeholder="Fresh Alphonso mango cream, eggless on request"></textarea></div>
+            <div><label for="new-photo">Photo (optional)</label><input id="new-photo" type="file" name="file" accept="image/jpeg,image/png,image/webp"></div>
+            <button class="btn">Add to my website</button>
+        </form>
+
+        <ul class="grid" style="margin-top:1.2rem">
             <li class="card">
                 <div class="tile"><img th:if="${hero != null}" th:src="${hero.url()}" alt=""><span th:unless="${hero != null}">★</span></div>
                 <div class="card-body">
@@ -138,12 +216,28 @@
                 <div class="tile"><img th:if="${thumbs.get(p.id()) != null}" th:src="${thumbs.get(p.id()).url()}" alt="">
                     <span th:unless="${thumbs.get(p.id()) != null}" th:text="${#strings.substring(p.name(), 0, 1)}">A</span></div>
                 <div class="card-body">
-                    <h3 th:text="${p.name()}">Item</h3>
-                    <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/photo'}" class="form">
+                    <form method="post" th:action="${'/owner/' + ownerKey + '/products/' + p.id()}" class="form product-edit">
+                        <div><label th:for="${'name-' + it.index}">Name</label>
+                            <input th:id="${'name-' + it.index}" name="name" maxlength="80" required th:value="${p.name()}"></div>
+                        <div class="two">
+                            <div><label th:for="${'price-' + it.index}" th:text="${'Price (' + shop.currency() + ')'}">Price</label>
+                                <input th:id="${'price-' + it.index}" name="price" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" th:value="${p.priceRupees()}"></div>
+                            <div><label th:for="${'unit-' + it.index}">Per</label>
+                                <input th:id="${'unit-' + it.index}" name="unit" maxlength="30" list="unit-options" th:value="${p.unit()}"></div>
+                        </div>
+                        <div><label th:for="${'desc-' + it.index}">Description</label>
+                            <textarea th:id="${'desc-' + it.index}" name="description" rows="2" maxlength="600" th:text="${p.description()}"></textarea></div>
+                        <div class="card-actions">
+                            <button class="btn small" name="action" value="save">Save</button>
+                            <button class="btn small outline" name="action" value="remove" formnovalidate
+                                    data-confirm="Remove this product from your website?">Remove</button>
+                        </div>
+                    </form>
+                    <form method="post" enctype="multipart/form-data" th:action="${'/owner/' + ownerKey + '/photo'}" class="form" style="margin-top:0.6rem">
                         <input type="hidden" name="item" th:value="${p.name()}">
-                        <label th:for="${'file-' + it.index}" class="unit">New photo</label>
+                        <label th:for="${'file-' + it.index}" class="unit">Photo</label>
                         <input th:id="${'file-' + it.index}" type="file" name="file" accept="image/jpeg,image/png,image/webp">
-                        <div class="card-actions"><button class="btn small" name="action" value="upload">Upload</button>
+                        <div class="card-actions"><button class="btn small" name="action" value="upload">Upload photo</button>
                         <button class="btn small outline" th:if="${thumbs.get(p.id()) != null and !thumbs.get(p.id()).isStock()}" name="action" value="remove">Remove mine</button></div>
                     </form>
                 </div>
@@ -151,7 +245,7 @@
         </ul>
     </section>
 
-    <section aria-labelledby="messages">
+    <section aria-labelledby="messages" id="messages-section">
         <h2 id="messages">Messages (<span th:text="${enquiries.size()}">0</span>)</h2>
         <p th:if="${enquiries.isEmpty()}">Nothing yet. Messages from your contact page will appear here.</p>
         <div class="panel" th:each="e : ${enquiries}" style="margin-bottom:1rem">
@@ -163,8 +257,12 @@
         </div>
     </section>
 </main>
-<script th:if="${checksRunning}">setTimeout(function () { location.reload(); }, 4000);</script>
-<script>
+<script th:if="${checksRunning}" th:attr="nonce=${cspNonce}">setTimeout(function () { location.reload(); }, 4000);</script>
+<script th:attr="nonce=${cspNonce}">
+document.addEventListener("submit", function (event) {
+    var button = event.submitter;
+    if (button && button.dataset.confirm && !window.confirm(button.dataset.confirm)) event.preventDefault();
+});
 document.addEventListener("click", function (event) {
     var button = event.target.closest("[data-copy]");
     if (!button) return;

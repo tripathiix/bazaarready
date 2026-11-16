@@ -69,6 +69,8 @@ class SiteController {
 
     private final com.bazaarready.testing.TestRunService tests;
     private final com.bazaarready.guard.MessageCheckService checks;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.bazaarready.account.OwnerAccess owners;
 
     SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json,
                    ImageService images, com.bazaarready.testing.TestRunService tests,
@@ -291,7 +293,7 @@ class SiteController {
 
     @GetMapping("/owner/{ownerKey}")
     String owner(@PathVariable UUID ownerKey, Model model) {
-        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileResponse shop = owners.open(ownerKey);
         common(shop, model, "owner");
         List<ShopOrder> all = orders.ordersFor(shop.id());
         Map<UUID, List<OrderService.OrderLine>> lines = new HashMap<>();
@@ -318,7 +320,7 @@ class SiteController {
     String uploadPhoto(@PathVariable UUID ownerKey, @RequestParam(defaultValue = "") String item,
                        @RequestParam(required = false) MultipartFile file,
                        @RequestParam(defaultValue = "upload") String action) throws java.io.IOException {
-        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileResponse shop = owners.open(ownerKey);
         boolean known = item.isEmpty() || shop.products().stream().anyMatch(p -> p.name().equals(item));
         if (!known) {
             return "redirect:/owner/" + ownerKey + "?photo=unknown";
@@ -337,6 +339,101 @@ class SiteController {
         }
         images.saveUpload(shop.id(), item, type, data);
         return "redirect:/owner/" + ownerKey + "?photo=saved#photos";
+    }
+
+    // ---- Products, managed by the owner ----
+
+    private static final int MAX_PRODUCTS = 60;
+
+    @PostMapping("/owner/{ownerKey}/products")
+    String addProduct(@PathVariable UUID ownerKey, @RequestParam(defaultValue = "") String name,
+                      @RequestParam(defaultValue = "") String price, @RequestParam(defaultValue = "") String unit,
+                      @RequestParam(defaultValue = "") String description,
+                      @RequestParam(required = false) MultipartFile file) throws java.io.IOException {
+        ProfileResponse shop = owners.open(ownerKey);
+        ProfileService.ProductEdit edit = productEdit(name, price, unit, description);
+        if (edit == null) {
+            return "redirect:/owner/" + ownerKey + "?product=invalid#photos";
+        }
+        if (shop.products().size() >= MAX_PRODUCTS) {
+            return "redirect:/owner/" + ownerKey + "?product=full#photos";
+        }
+        if (shop.products().stream().anyMatch(p -> p.name().equalsIgnoreCase(edit.name()))) {
+            return "redirect:/owner/" + ownerKey + "?product=duplicate#photos";
+        }
+        profiles.addProduct(shop.id(), edit);
+        String photo = savePhotoIfAny(shop.id(), edit.name(), file);
+        return "redirect:/owner/" + ownerKey + "?product=" + (photo == null ? "added" : photo) + "#photos";
+    }
+
+    @PostMapping("/owner/{ownerKey}/products/{productId}")
+    String editProduct(@PathVariable UUID ownerKey, @PathVariable UUID productId,
+                       @RequestParam(defaultValue = "save") String action, @RequestParam(defaultValue = "") String name,
+                       @RequestParam(defaultValue = "") String price, @RequestParam(defaultValue = "") String unit,
+                       @RequestParam(defaultValue = "") String description) {
+        ProfileResponse shop = owners.open(ownerKey);
+        try {
+            if ("remove".equals(action)) {
+                String removed = profiles.removeProduct(shop.id(), productId);
+                images.removeUpload(shop.id(), removed);
+                return "redirect:/owner/" + ownerKey + "?product=removed#photos";
+            }
+            ProfileService.ProductEdit edit = productEdit(name, price, unit, description);
+            if (edit == null) {
+                return "redirect:/owner/" + ownerKey + "?product=invalid#photos";
+            }
+            boolean clash = shop.products().stream()
+                    .anyMatch(p -> !p.id().equals(productId) && p.name().equalsIgnoreCase(edit.name()));
+            if (clash) {
+                return "redirect:/owner/" + ownerKey + "?product=duplicate#photos";
+            }
+            String oldName = profiles.updateProduct(shop.id(), productId, edit);
+            images.renameUpload(shop.id(), oldName, edit.name());
+        } catch (NotFoundException e) {
+            // Already removed, or not this owner's: just show the page again.
+        }
+        return "redirect:/owner/" + ownerKey + "?product=saved#photos";
+    }
+
+    /** Reads the owner's typed product, or null when the name is missing or the price is not a number. */
+    private static ProfileService.ProductEdit productEdit(String name, String price, String unit, String description) {
+        String n = name.trim();
+        if (n.isEmpty() || n.length() > 80 || unit.length() > 30 || description.length() > 600) {
+            return null;
+        }
+        BigDecimal amount = null;
+        String p = price.replaceAll("(?i)[\\s,₹$€£]|rs\\.?|inr", "");
+        if (!p.matches("[0-9]*(\\.[0-9]{1,2})?")) {
+            return null; // letters or other marks in the price
+        }
+        if (!p.isEmpty()) {
+            try {
+                amount = new BigDecimal(p);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+            if (amount.signum() < 0 || amount.compareTo(BigDecimal.valueOf(10_000_000)) > 0) {
+                return null;
+            }
+        }
+        return new ProfileService.ProductEdit(n, amount, unit, description);
+    }
+
+    /** Saves a photo sent with a new product. Returns a problem code, or null when fine or none sent. */
+    private String savePhotoIfAny(UUID businessId, String itemName, MultipartFile file) throws java.io.IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        if (file.getSize() > ImageService.MAX_UPLOAD) {
+            return "added-photo-size";
+        }
+        byte[] data = file.getBytes();
+        String type = ImageService.detectType(data);
+        if (type == null) {
+            return "added-photo-type";
+        }
+        images.saveUpload(businessId, itemName, type, data);
+        return null;
     }
 
     @GetMapping("/media/{id}")
@@ -360,6 +457,7 @@ class SiteController {
     private ProfileResponse common(String slug, Model model, String page) {
         ProfileResponse shop = profiles.getBySlug(slug);
         common(shop, model, page);
+        model.addAttribute("today", LocalDate.now().toString());
         return shop;
     }
 
@@ -424,7 +522,17 @@ class SiteController {
                 }
             });
         }
+        List<String> missing = new java.util.ArrayList<>();
+        for (ProductResponse p : shop.products()) {
+            if (!large.containsKey(p.id()) && p.imageQuery() != null) {
+                missing.add(p.imageQuery());
+            }
+        }
         ImageService.Picture hero = images.resolve(shop.id(), "", shop.heroImageQuery(), false).orElse(null);
+        if (hero == null && shop.heroImageQuery() != null) {
+            missing.add(shop.heroImageQuery());
+        }
+        images.ensureLater(missing);
         if (hero != null && hero.isStock()) {
             credits.putIfAbsent(hero.photographer(), hero);
         }

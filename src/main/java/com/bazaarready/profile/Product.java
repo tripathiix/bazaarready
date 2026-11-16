@@ -79,6 +79,7 @@ public class Product {
     public String getImageQuery() { return imageQuery; }
     public int getSortOrder() { return sortOrder; }
 
+    public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }
     public void setCategory(String category) { this.category = category; }
     public void setPricePaise(Long pricePaise) { this.pricePaise = pricePaise; }

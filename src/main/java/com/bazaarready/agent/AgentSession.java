@@ -43,6 +43,10 @@ public class AgentSession {
     @Column(name = "pending_answer_type")
     private String pendingAnswerType;
 
+    /** JSON list of form fields when the question is asked as a short form. */
+    @Column(name = "pending_fields")
+    private String pendingFields;
+
     @Column(name = "final_message")
     private String finalMessage;
 
@@ -52,6 +56,10 @@ public class AgentSession {
     /** DESCRIPTION or WHATSAPP: what the owner gave the agent to start from. */
     @Column(nullable = false)
     private String source = "DESCRIPTION";
+
+    /** The account that started this conversation. */
+    @Column(name = "account_id")
+    private UUID accountId;
 
     @Column(name = "model_calls", nullable = false)
     private int modelCalls;
@@ -81,6 +89,7 @@ public class AgentSession {
         this.pendingTool = tool;
         this.pendingQuestion = question;
         this.pendingAnswerType = null;
+        this.pendingFields = null;
     }
 
     public void resume() {
@@ -89,6 +98,7 @@ public class AgentSession {
         this.pendingTool = null;
         this.pendingQuestion = null;
         this.pendingAnswerType = null;
+        this.pendingFields = null;
     }
 
     public void finish(Status status, String finalMessage) {
@@ -120,6 +130,10 @@ public class AgentSession {
     public void setSource(String source) { this.source = source; }
 
     public void setBusinessId(UUID businessId) { this.businessId = businessId; }
+    public UUID getAccountId() { return accountId; }
+    public void setAccountId(UUID accountId) { this.accountId = accountId; }
     public void setPendingAnswerType(String pendingAnswerType) { this.pendingAnswerType = pendingAnswerType; }
+    public String getPendingFields() { return pendingFields; }
+    public void setPendingFields(String pendingFields) { this.pendingFields = pendingFields; }
     public void setMessages(String messages) { this.messages = messages; }
 }

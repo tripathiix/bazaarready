@@ -1,0 +1,3 @@
+-- Extra blocks an owner asks for that have no field of their own: offers, our story, how to order, team...
+-- Stored as a JSON list of {title, body, style}.
+alter table business add column sections text;

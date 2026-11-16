@@ -19,6 +19,12 @@ public final class AgentDtos {
             @Pattern(regexp = Languages.CODE_PATTERN) String language) {
     }
 
+    public record UpdateRequest(
+            @jakarta.validation.constraints.NotNull UUID ownerKey,
+            @NotBlank @Size(max = 3000) String feedback,
+            @Pattern(regexp = Languages.CODE_PATTERN) String language) {
+    }
+
     public record ReplyRequest(@NotBlank @Size(max = 2000) String answer) {
     }
 
@@ -26,11 +32,16 @@ public final class AgentDtos {
     }
 
     /** Everything the owner's screen needs to show the current state of a session. */
+    /** One box in a question asked as a short form. kind: text, long, choice (with options) or email. */
+    public record FieldView(String label, String kind, String placeholder, List<String> options) {
+    }
+
     public record SessionView(
             UUID id,
             AgentSession.Status status,
             String question,
             String questionType,
+            List<FieldView> fields,
             String approvalRequest,
             String finalMessage,
             UUID businessId,
