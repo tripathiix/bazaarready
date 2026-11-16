@@ -424,7 +424,17 @@ class SiteController {
                 }
             });
         }
+        List<String> missing = new java.util.ArrayList<>();
+        for (ProductResponse p : shop.products()) {
+            if (!large.containsKey(p.id()) && p.imageQuery() != null) {
+                missing.add(p.imageQuery());
+            }
+        }
         ImageService.Picture hero = images.resolve(shop.id(), "", shop.heroImageQuery(), false).orElse(null);
+        if (hero == null && shop.heroImageQuery() != null) {
+            missing.add(shop.heroImageQuery());
+        }
+        images.ensureLater(missing);
         if (hero != null && hero.isStock()) {
             credits.putIfAbsent(hero.photographer(), hero);
         }

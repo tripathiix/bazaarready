@@ -115,13 +115,39 @@ public class ImageService {
                 "Pexels", null, null));
     }
 
-    /** Searches Wikimedia Commons for a landscape photo under a free licence that allows commercial use. */
+    /**
+     * Searches Wikimedia Commons for a photo under a free licence that allows commercial use.
+     * Results are ranked by how many of the search words appear in the file's title, so "gaming
+     * mouse" prefers a photo titled "Gaming mouse.jpg" over an unrelated one. If nothing is found,
+     * the search is retried with fewer words: "large gaming mousepad" becomes "gaming mousepad",
+     * then "mousepad".
+     */
+    /** Words that describe how something looks rather than what it is; they mislead a title search. */
+    private static final java.util.Set<String> STYLE_WORDS = java.util.Set.of("rgb", "neon", "dark", "light", "black", "white",
+            "red", "blue", "green", "pink", "gold", "golden", "large", "small", "big", "mini", "modern", "premium", "luxury",
+            "cozy", "colorful", "colourful", "bright", "aesthetic", "beautiful", "elegant", "fresh", "handmade", "homemade");
+
     private Optional<Found> searchCommons(String query) {
+        String[] words = java.util.Arrays.stream(query.split(" ")).filter(w -> !STYLE_WORDS.contains(w)).toArray(String[]::new);
+        if (words.length == 0) {
+            words = query.split(" ");
+        }
+        for (int start = 0; start < words.length; start++) {
+            String attempt = String.join(" ", java.util.Arrays.copyOfRange(words, start, words.length));
+            Optional<Found> found = searchCommonsOnce(attempt);
+            if (found.isPresent()) {
+                return found;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Found> searchCommonsOnce(String query) {
         JsonNode body = commons.get()
                 .uri(uri -> uri.path("/w/api.php")
                         .queryParam("action", "query").queryParam("format", "json")
-                        .queryParam("generator", "search").queryParam("gsrnamespace", 6).queryParam("gsrlimit", 12)
-                        .queryParam("gsrsearch", query + " filetype:bitmap")
+                        .queryParam("generator", "search").queryParam("gsrnamespace", 6).queryParam("gsrlimit", 25)
+                        .queryParam("gsrsearch", query + " filetype:bitmap -logo -icon -diagram -map -drawing")
                         .queryParam("prop", "imageinfo").queryParam("iiprop", "url|size|mime|extmetadata")
                         .queryParam("iiurlwidth", 1200)
                         .build())
@@ -131,11 +157,10 @@ public class ImageService {
         if (pages == null || !pages.isObject()) {
             return Optional.empty();
         }
-        List<JsonNode> ranked = new ArrayList<>();
-        pages.forEach(ranked::add);
-        ranked.sort(Comparator.comparingInt(page -> page.path("index").asInt(Integer.MAX_VALUE)));
-
-        for (JsonNode page : ranked) {
+        List<String> wanted = java.util.Arrays.stream(query.split(" ")).filter(w -> w.length() > 2).toList();
+        JsonNode best = null;
+        double bestScore = -1;
+        for (JsonNode page : (Iterable<JsonNode>) pages::elements) {
             JsonNode info = page.path("imageinfo").path(0);
             JsonNode meta = info.path("extmetadata");
             String mime = info.path("mime").asText();
@@ -143,18 +168,64 @@ public class ImageService {
             int height = info.path("height").asInt();
             String licence = meta.path("LicenseShortName").path("value").asText("").trim();
             boolean nonFree = "true".equalsIgnoreCase(meta.path("NonFree").path("value").asText(""));
-            boolean free = ALLOWED_LICENCE.matcher(licence).matches();
-            boolean landscape = width >= 900 && width >= height * 1.15;
-            if (nonFree || !free || !landscape || !(mime.equals("image/jpeg") || mime.equals("image/png"))) {
+            if (nonFree || !ALLOWED_LICENCE.matcher(licence).matches() || width < 500 || height < 300
+                    || !(mime.equals("image/jpeg") || mime.equals("image/png"))) {
                 continue;
             }
-            String url = info.path("thumburl").asText(info.path("url").asText());
-            String artist = plainText(meta.path("Artist").path("value").asText(""));
-            return Optional.of(new Found(url, url, artist.isEmpty() ? "Unknown author" : artist, null,
-                    info.path("descriptionurl").asText(), "Wikimedia Commons", licence,
-                    meta.path("LicenseUrl").path("value").asText(null)));
+            String title = page.path("title").asText("").toLowerCase(Locale.ROOT);
+            long hits = wanted.stream().filter(w -> title.contains(w) || title.contains(w.replaceAll("s$", ""))).count();
+            String noun = wanted.isEmpty() ? "" : wanted.get(wanted.size() - 1);
+            if (!noun.isEmpty() && !title.contains(noun) && !title.contains(noun.replaceAll("s$", ""))) {
+                continue; // the main object is not in the title, so the photo is probably about something else
+            }
+            double score = 20 + (hits - 1) * 5.0
+                    + (width >= height ? 2 : 0)
+                    + Math.max(0, 25 - page.path("index").asInt(25)) / 10.0;
+            if (score > bestScore) {
+                bestScore = score;
+                best = page;
+            }
         }
-        return Optional.empty();
+        if (best == null) {
+            return Optional.empty();
+        }
+        JsonNode info = best.path("imageinfo").path(0);
+        JsonNode meta = info.path("extmetadata");
+        String url = info.path("thumburl").asText(info.path("url").asText());
+        String artist = plainText(meta.path("Artist").path("value").asText(""));
+        return Optional.of(new Found(url, url, artist.isEmpty() ? "Unknown author" : artist, null,
+                info.path("descriptionurl").asText(), "Wikimedia Commons",
+                meta.path("LicenseShortName").path("value").asText(""), meta.path("LicenseUrl").path("value").asText(null)));
+    }
+
+    private final java.util.Map<String, Long> recentlyTried = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.ExecutorService background = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "photo-search");
+        t.setDaemon(true);
+        return t;
+    });
+
+    /**
+     * Looks up missing photos in the background when a page is shown, so older sites and failed
+     * searches fill in by themselves. Each search is tried at most once an hour.
+     */
+    public void ensureLater(Collection<String> queries) {
+        long now = System.currentTimeMillis();
+        List<String> due = new java.util.ArrayList<>();
+        for (String query : queries) {
+            String q = normalise(query);
+            if (q != null && now - recentlyTried.getOrDefault(q, 0L) > 3_600_000L) {
+                recentlyTried.put(q, now);
+                due.add(q);
+            }
+        }
+        if (!due.isEmpty()) {
+            background.submit(() -> {
+                jdbc.update("delete from stock_photo where not found and query = any (?)",
+                        (Object) due.toArray(new String[0]));
+                ensure(due);
+            });
+        }
     }
 
     private void store(String query, Found found) {
