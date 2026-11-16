@@ -51,6 +51,9 @@ public class Business {
 
     private String about;
 
+    /** Extra page sections as JSON: [{title, body, style}]. */
+    private String sections;
+
     /** Stock photo search words for the site's banner. */
     @Column(name = "hero_query")
     private String heroQuery;
@@ -131,6 +134,7 @@ public class Business {
     public String getLayout() { return layout; }
     public String getCurrency() { return currency; }
     public String getAbout() { return about; }
+    public String getSections() { return sections; }
     public String getHeroQuery() { return heroQuery; }
     public String getLocation() { return location; }
     public String getHours() { return hours; }
@@ -154,6 +158,7 @@ public class Business {
     public void setLayout(String layout) { this.layout = layout; }
     public void setCurrency(String currency) { this.currency = currency; }
     public void setAbout(String about) { this.about = about; }
+    public void setSections(String sections) { this.sections = sections; }
     public void setHeroQuery(String heroQuery) { this.heroQuery = heroQuery; }
     public void setLocation(String location) { this.location = location; }
     public void setHours(String hours) { this.hours = hours; }

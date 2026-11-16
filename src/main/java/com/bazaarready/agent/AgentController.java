@@ -69,6 +69,13 @@ class AgentController {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The files could not be read: " + e.getMessage());
     }
 
+    /** Change an existing site from the owner's feedback. */
+    @PostMapping("/update")
+    @ResponseStatus(HttpStatus.CREATED)
+    SessionView update(@Valid @RequestBody AgentDtos.UpdateRequest request) {
+        return agent.startUpdate(request.ownerKey(), request.feedback(), request.language());
+    }
+
     @GetMapping("/{id}")
     SessionView view(@PathVariable UUID id) {
         return agent.view(id);

@@ -968,3 +968,134 @@ label.button {
 label.button:focus-within {
   outline: 2px solid var(--amber);
 }
+
+/* Guide in the writing card */
+.guide {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+}
+
+.guide-title {
+  margin: 0 0 0.3rem;
+  font-weight: 600;
+  color: #ffd9a0;
+}
+
+.guide ol {
+  margin: 0;
+  padding-inline-start: 1.3rem;
+  color: var(--muted);
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.97rem;
+}
+
+.test-first {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.change-text {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  resize: vertical;
+}
+
+/* Idea coach */
+.coach-fab {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  font: inherit;
+  font-family: var(--display);
+  font-weight: 600;
+  cursor: pointer;
+  color: #22140a;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.2rem;
+  background: linear-gradient(100deg, var(--amber), #f7c065 50%, var(--rose));
+  box-shadow: 0 12px 30px rgba(244, 168, 58, 0.35);
+}
+
+.coach {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  width: min(26rem, calc(100vw - 2rem));
+  height: min(36rem, calc(100vh - 2rem));
+  display: flex;
+  flex-direction: column;
+  background: #17153a;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.coach-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.coach-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.2rem;
+}
+
+.coach-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.coach-msg {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 14px;
+  white-space: pre-wrap;
+  font-size: 0.97rem;
+  max-width: 88%;
+}
+
+.from-coach {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.from-you {
+  align-self: flex-end;
+  background: rgba(244, 168, 58, 0.18);
+}
+
+.thinking {
+  color: var(--muted);
+}
+
+.coach-form {
+  padding: 0.8rem 1rem 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.coach-form textarea {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  resize: none;
+}

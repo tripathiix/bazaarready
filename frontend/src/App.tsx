@@ -1,5 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ActionView, SessionView, sendApproval, sendReply, startFromChats, startSession } from "./api";
+import { ActionView, SessionView, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
+import { Coach } from "./Coach";
+import { UX } from "./ux";
 import { Gallery, OpenSign, Petals, PhotoCredits, Shutters, StringLights } from "./Decor";
 import { countries, defaultCountry } from "./countries";
 import { applyFonts } from "./fonts";
@@ -44,6 +46,13 @@ export default function App() {
   const notes = NOTES[language];
   const chatWords = CHATS[language];
   const [ownerName, setOwnerName] = useState("");
+  const u = UX[language];
+  const params = new URLSearchParams(window.location.search);
+  const [changeKeyFromUrl] = useState(() => {
+    const key = params.get("change");
+    return key && /^[0-9a-f-]{36}$/.test(key) ? key : null;
+  });
+  const [changeText, setChangeText] = useState("");
 
   const [description, setDescription] = useState("");
   const [session, setSession] = useState<SessionView | null>(null);
@@ -58,6 +67,25 @@ export default function App() {
   const speech = useSpeech((text) => setDescription((current) => (current ? current + " " + text : text)));
   const answerSpeech = useSpeech((text) => setAnswer((current) => (current ? current + " " + text : text)));
   const live = session?.status === "DONE" && session.published;
+  const changeSpeech = useSpeech((text) => setChangeText((current) => (current ? current + " " + text : text)));
+  const changeKey = changeKeyFromUrl ?? (session?.ownerPath && session.published ? session.ownerPath.split("/").pop() ?? null : null);
+  const TEST_LINE = `${u.testFirst}. ${u.testHint}`;
+
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("session");
+    if (id && /^[0-9a-f-]{36}$/.test(id)) {
+      getSession(id).then(setSession).catch(() => undefined);
+    }
+  }, []);
+
+  function onChange(event: FormEvent) {
+    event.preventDefault();
+    if (!changeKey || !changeText.trim()) return;
+    if (changeSpeech.listening) changeSpeech.stop();
+    const text = changeText;
+    setChangeText("");
+    void run(() => startUpdate(changeKey, text, language));
+  }
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -166,6 +194,14 @@ export default function App() {
             </label>
             <p className="hint">{t.hint}</p>
             <p className="hand talk-note">{notes.talk}</p>
+            <div className="guide">
+              <p className="guide-title">{u.guideTitle}</p>
+              <ol>
+                {u.guide.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ol>
+            </div>
             <textarea
               id="description"
               rows={6}
@@ -343,6 +379,15 @@ export default function App() {
                     </a>
                   </p>
                 )}
+                {session.ownerPath && (
+                  <form className="test-first" method="post" action={`${session.ownerPath}/test`} target="_blank">
+                    <p className="hint">{TEST_LINE}</p>
+                    <button type="submit" className="button">
+                      {u.testNow}
+                    </button>
+                  </form>
+                )}
+
                 <div className="row">
                   <button type="button" className="button primary" onClick={() => void run(() => sendApproval(session.id, true))}>
                     {t.publish}
@@ -373,6 +418,11 @@ export default function App() {
                       {ORDERS_LINK[language]}
                     </a>
                   )}
+                  {session.ownerPath && (
+                    <button type="submit" form="test-after" className="button">
+                      {u.testNow}
+                    </button>
+                  )}
                   <button type="button" className="button" onClick={startOver}>
                     {t.startAnother}
                   </button>
@@ -386,7 +436,59 @@ export default function App() {
           label={notes.photos}
           photos={[...(showcase?.examples ?? []).filter((p): p is NonNullable<typeof p> => !!p), ...(showcase?.recent ?? []).map((r) => r.photo)]}
         />
+
+            {changeKey && (!session || session.status === "DONE") && !busy && (
+              <form className="panel" onSubmit={onChange} aria-labelledby="change-title">
+                <h2 id="change-title">{u.changeTitle}</h2>
+                <p className="hint">{u.changeHint}</p>
+                <label htmlFor="change-text" className="visually-hidden">
+                  {u.changeTitle}
+                </label>
+                <textarea
+                  id="change-text"
+                  className="change-text"
+                  rows={3}
+                  value={changeText}
+                  onChange={(e) => setChangeText(e.target.value)}
+                  placeholder={u.changePlaceholder}
+                  maxLength={3000}
+                />
+                <div className="row">
+                  {changeSpeech.supported && (
+                    <button
+                      type="button"
+                      className={`button mic ${changeSpeech.listening ? "is-listening" : ""}`}
+                      onClick={() => (changeSpeech.listening ? changeSpeech.stop() : changeSpeech.start(t.speech))}
+                    >
+                      <span className="bars" aria-hidden="true">
+                        <i />
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                      {changeSpeech.listening ? t.stopListening : t.speak}
+                    </button>
+                  )}
+                  <button type="submit" className="button primary" disabled={!changeText.trim()}>
+                    {u.changeButton}
+                  </button>
+                </div>
+              </form>
+            )}
+        {session?.ownerPath && (
+          <form id="test-after" method="post" action={`${session.ownerPath}/test`} target="_blank" hidden />
+        )}
       </main>
+
+      <Coach
+        u={u}
+        language={language}
+        onUse={(text) => {
+          setSession(null);
+          setDescription(text);
+          document.getElementById("description")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }}
+      />
 
       <footer className="foot">
         <span>BazaarReady</span>

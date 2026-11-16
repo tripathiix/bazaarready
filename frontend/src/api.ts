@@ -65,6 +65,15 @@ export async function startFromChats(files: File[], language: string, ownerName:
   return response.json() as Promise<SessionView>;
 }
 
+export const startUpdate = (ownerKey: string, feedback: string, language: string) =>
+  post<SessionView>("/api/agent/sessions/update", { ownerKey, feedback, language });
+
+export async function getSession(id: string): Promise<SessionView> {
+  const response = await fetch(`/api/agent/sessions/${id}`);
+  if (!response.ok) throw new Error(`Could not load that session (${response.status}).`);
+  return response.json() as Promise<SessionView>;
+}
+
 export const sendReply = (id: string, answer: string) =>
   post<SessionView>(`/api/agent/sessions/${id}/reply`, { answer });
 

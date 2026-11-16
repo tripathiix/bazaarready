@@ -30,8 +30,11 @@ public class ProfileService {
     private final BusinessRepository businesses;
     private final ProductRepository products;
     private final FaqRepository faqs;
+    private final com.fasterxml.jackson.databind.ObjectMapper json;
 
-    ProfileService(BusinessRepository businesses, ProductRepository products, FaqRepository faqs) {
+    ProfileService(BusinessRepository businesses, ProductRepository products, FaqRepository faqs,
+                   com.fasterxml.jackson.databind.ObjectMapper json) {
+        this.json = json;
         this.businesses = businesses;
         this.products = products;
         this.faqs = faqs;
@@ -89,6 +92,17 @@ public class ProfileService {
                 .orElseThrow(() -> new NotFoundException("This owner link is not valid")));
     }
 
+    private List<ProfileDtos.SectionResponse> sectionsOf(Business b) {
+        if (b.getSections() == null) {
+            return List.of();
+        }
+        try {
+            return json.readValue(b.getSections(), new com.fasterxml.jackson.core.type.TypeReference<List<ProfileDtos.SectionResponse>>() { });
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            return List.of();
+        }
+    }
+
     /** Whether a kind of business gets a cart, a booking form, or neither. */
     public static String styleOf(String kind) {
         return switch (kind) {
@@ -117,6 +131,16 @@ public class ProfileService {
             business.setCurrency(request.currency().trim());
         }
         business.setAbout(blankToNull(request.about()));
+        if (request.sections() != null) {
+            List<ProfileDtos.SectionResponse> list = request.sections().stream()
+                    .map(x -> new ProfileDtos.SectionResponse(x.title().trim(), x.body().trim(), x.style() == null ? "text" : x.style()))
+                    .toList();
+            try {
+                business.setSections(list.isEmpty() ? null : json.writeValueAsString(list));
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                throw new IllegalStateException("Could not store sections", e);
+            }
+        }
         business.setHeroQuery(blankToNull(request.heroImageQuery()));
         business.setLocation(blankToNull(request.location()));
         business.setHours(blankToNull(request.hours()));
@@ -173,7 +197,7 @@ public class ProfileService {
                 .map(f -> new FaqResponse(f.getId(), f.getQuestion(), f.getAnswer(), f.getTimesAsked(), f.getSource()))
                 .toList();
         return new ProfileResponse(b.getId(), b.getName(), b.getSlug(), b.getTagline(), b.getKind(),
-                styleOf(b.getKind()), b.getTheme(), b.getLayout(), b.getCurrency(), b.getAbout(), b.getHeroQuery(), b.getLocation(), b.getHours(),
+                styleOf(b.getKind()), b.getTheme(), b.getLayout(), b.getCurrency(), b.getAbout(), sectionsOf(b), b.getHeroQuery(), b.getLocation(), b.getHours(),
                 b.getOfferingsTitle(), b.getDetailsTitle(), b.getOwnerLanguage(), b.getWhatsappNumber(),
                 b.getDeliveryNotes(), b.getNoticeDays(), b.getSource(), b.getStatus(), b.getPublishedAt(),
                 "/s/" + b.getSlug(), "/owner/" + b.getOwnerKey(), productList, faqList);

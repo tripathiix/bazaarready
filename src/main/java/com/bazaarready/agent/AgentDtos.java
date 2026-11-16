@@ -19,6 +19,12 @@ public final class AgentDtos {
             @Pattern(regexp = Languages.CODE_PATTERN) String language) {
     }
 
+    public record UpdateRequest(
+            @jakarta.validation.constraints.NotNull UUID ownerKey,
+            @NotBlank @Size(max = 3000) String feedback,
+            @Pattern(regexp = Languages.CODE_PATTERN) String language) {
+    }
+
     public record ReplyRequest(@NotBlank @Size(max = 2000) String answer) {
     }
 

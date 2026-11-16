@@ -36,6 +36,12 @@
         </div>
     </section>
 
+    <section aria-labelledby="change-title" id="change">
+        <h2 id="change-title">Change my website</h2>
+        <p style="color:var(--muted)">Say what you'd like changed or added, in your own words. For example: "add mango cake for ₹900", "pineapple cake is sold out", "add a Diwali offer: 10% off above ₹1,000", "make it look darker". The agent updates your site and tells you what it changed.</p>
+        <a class="btn" th:href="${'/?change=' + ownerKey}">Change my website</a>
+    </section>
+
     <section aria-labelledby="collabs-title" id="collabs">
         <h2 id="collabs-title">Is this collab real?</h2>
         <p style="color:var(--muted)">Paste a brand-deal or collab email, or a message from Instagram or WhatsApp. We look up the sender's website and email records and check the wording for scam patterns, then tell you what we found.</p>

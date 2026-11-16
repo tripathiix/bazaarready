@@ -150,6 +150,12 @@
         </div>
     </section>
 
+    <section th:each="sec : ${shop.sections()}" class="extra" th:classappend="${'extra-' + sec.style()}">
+        <h2 th:text="${sec.title()}">Section</h2>
+        <ul th:if="${sec.style() == 'list'}" class="extra-list"><li th:each="line : ${sec.lines()}" th:text="${line}">Point</li></ul>
+        <p th:unless="${sec.style() == 'list'}" class="lead" style="white-space:pre-line" th:text="${sec.body()}">Text</p>
+    </section>
+
     <section aria-labelledby="all-items" th:if="${layout == 'mart' and !shop.products().isEmpty()}">
         <h2 id="all-items" th:text="${offeringsTitle}">Everything</h2>
         <div class="cats" th:if="${categories.size() > 1}" style="margin-bottom:1.2rem">
