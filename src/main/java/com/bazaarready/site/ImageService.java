@@ -396,6 +396,15 @@ public class ImageService {
         jdbc.update("delete from item_photo where business_id = ? and item_name = ?", businessId, itemName == null ? "" : itemName);
     }
 
+    /** Keeps an owner's photo with its product when the product is renamed. */
+    public void renameUpload(UUID businessId, String oldName, String newName) {
+        if (oldName.equals(newName)) {
+            return;
+        }
+        jdbc.update("delete from item_photo where business_id = ? and item_name = ?", businessId, newName);
+        jdbc.update("update item_photo set item_name = ? where business_id = ? and item_name = ?", newName, businessId, oldName);
+    }
+
     public Optional<Upload> upload(UUID id) {
         return jdbc.query("select content_type, data from item_photo where id = ?",
                 rs -> rs.next() ? Optional.of(new Upload(rs.getString(1), rs.getBytes(2))) : Optional.empty(), id);

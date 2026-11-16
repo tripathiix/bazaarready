@@ -2,6 +2,7 @@ package com.bazaarready.agent;
 
 import com.bazaarready.agent.AgentDtos.ActionView;
 import com.bazaarready.agent.AgentDtos.SessionView;
+import com.bazaarready.agent.AgentDtos.FieldView;
 import com.bazaarready.claude.ClaudeClient;
 import com.bazaarready.claude.ClaudeException;
 import com.bazaarready.common.Languages;
@@ -210,6 +211,7 @@ public class AgentService {
                 String question = input.path("question").asText("").trim();
                 session.pause(AgentSession.Status.WAITING_OWNER, toolUseId, name, question);
                 session.setPendingAnswerType("phone".equals(input.path("answerType").asText()) ? "phone" : "text");
+                session.setPendingFields(cleanFields(input.path("fields")));
                 logAction(session, name, "Asked: " + question, AgentAction.Status.WAITING_OWNER,
                         json.createObjectNode().put("question", question));
             }
@@ -363,7 +365,60 @@ public class AgentService {
         String approval = session.getStatus() == AgentSession.Status.WAITING_APPROVAL
                 ? "Publish your shop so customers can open it?"
                 : null;
-        return new SessionView(session.getId(), session.getStatus(), session.getPendingQuestion(), session.getPendingAnswerType(), approval,
+        return new SessionView(session.getId(), session.getStatus(), session.getPendingQuestion(), session.getPendingAnswerType(),
+                readFields(session.getPendingFields()), approval,
                 session.getFinalMessage(), session.getBusinessId(), shopPath, ownerPath, published, log);
+    }
+
+    /** Keeps only well-formed fields from the model: at most 8, each with a label and a known kind. */
+    private String cleanFields(JsonNode fields) {
+        if (fields == null || !fields.isArray() || fields.isEmpty()) {
+            return null;
+        }
+        ArrayNode clean = json.createArrayNode();
+        for (JsonNode f : fields) {
+            String label = f.path("label").asText("").trim();
+            String kind = f.path("kind").asText("text");
+            if (label.isEmpty() || clean.size() == 8) {
+                continue;
+            }
+            if (!java.util.Set.of("text", "long", "choice", "email").contains(kind)) {
+                kind = "text";
+            }
+            com.fasterxml.jackson.databind.node.ObjectNode out = clean.addObject();
+            out.put("label", label.length() > 120 ? label.substring(0, 120) : label);
+            out.put("kind", kind);
+            out.put("placeholder", f.path("placeholder").asText(""));
+            ArrayNode options = out.putArray("options");
+            if ("choice".equals(kind)) {
+                for (JsonNode o : f.path("options")) {
+                    if (!o.asText("").isBlank() && options.size() < 12) {
+                        options.add(o.asText().trim());
+                    }
+                }
+                if (options.isEmpty()) {
+                    out.put("kind", "text");
+                }
+            }
+        }
+        return clean.isEmpty() ? null : clean.toString();
+    }
+
+    private List<FieldView> readFields(String stored) {
+        if (stored == null) {
+            return List.of();
+        }
+        try {
+            List<FieldView> out = new java.util.ArrayList<>();
+            for (JsonNode f : json.readTree(stored)) {
+                List<String> options = new java.util.ArrayList<>();
+                f.path("options").forEach(o -> options.add(o.asText()));
+                out.add(new FieldView(f.path("label").asText(), f.path("kind").asText("text"),
+                        f.path("placeholder").asText(""), options));
+            }
+            return out;
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

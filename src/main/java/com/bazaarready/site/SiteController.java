@@ -339,6 +339,101 @@ class SiteController {
         return "redirect:/owner/" + ownerKey + "?photo=saved#photos";
     }
 
+    // ---- Products, managed by the owner ----
+
+    private static final int MAX_PRODUCTS = 60;
+
+    @PostMapping("/owner/{ownerKey}/products")
+    String addProduct(@PathVariable UUID ownerKey, @RequestParam(defaultValue = "") String name,
+                      @RequestParam(defaultValue = "") String price, @RequestParam(defaultValue = "") String unit,
+                      @RequestParam(defaultValue = "") String description,
+                      @RequestParam(required = false) MultipartFile file) throws java.io.IOException {
+        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        ProfileService.ProductEdit edit = productEdit(name, price, unit, description);
+        if (edit == null) {
+            return "redirect:/owner/" + ownerKey + "?product=invalid#photos";
+        }
+        if (shop.products().size() >= MAX_PRODUCTS) {
+            return "redirect:/owner/" + ownerKey + "?product=full#photos";
+        }
+        if (shop.products().stream().anyMatch(p -> p.name().equalsIgnoreCase(edit.name()))) {
+            return "redirect:/owner/" + ownerKey + "?product=duplicate#photos";
+        }
+        profiles.addProduct(shop.id(), edit);
+        String photo = savePhotoIfAny(shop.id(), edit.name(), file);
+        return "redirect:/owner/" + ownerKey + "?product=" + (photo == null ? "added" : photo) + "#photos";
+    }
+
+    @PostMapping("/owner/{ownerKey}/products/{productId}")
+    String editProduct(@PathVariable UUID ownerKey, @PathVariable UUID productId,
+                       @RequestParam(defaultValue = "save") String action, @RequestParam(defaultValue = "") String name,
+                       @RequestParam(defaultValue = "") String price, @RequestParam(defaultValue = "") String unit,
+                       @RequestParam(defaultValue = "") String description) {
+        ProfileResponse shop = profiles.getByOwnerKey(ownerKey);
+        try {
+            if ("remove".equals(action)) {
+                String removed = profiles.removeProduct(shop.id(), productId);
+                images.removeUpload(shop.id(), removed);
+                return "redirect:/owner/" + ownerKey + "?product=removed#photos";
+            }
+            ProfileService.ProductEdit edit = productEdit(name, price, unit, description);
+            if (edit == null) {
+                return "redirect:/owner/" + ownerKey + "?product=invalid#photos";
+            }
+            boolean clash = shop.products().stream()
+                    .anyMatch(p -> !p.id().equals(productId) && p.name().equalsIgnoreCase(edit.name()));
+            if (clash) {
+                return "redirect:/owner/" + ownerKey + "?product=duplicate#photos";
+            }
+            String oldName = profiles.updateProduct(shop.id(), productId, edit);
+            images.renameUpload(shop.id(), oldName, edit.name());
+        } catch (NotFoundException e) {
+            // Already removed, or not this owner's: just show the page again.
+        }
+        return "redirect:/owner/" + ownerKey + "?product=saved#photos";
+    }
+
+    /** Reads the owner's typed product, or null when the name is missing or the price is not a number. */
+    private static ProfileService.ProductEdit productEdit(String name, String price, String unit, String description) {
+        String n = name.trim();
+        if (n.isEmpty() || n.length() > 80 || unit.length() > 30 || description.length() > 600) {
+            return null;
+        }
+        BigDecimal amount = null;
+        String p = price.replaceAll("(?i)[\\s,₹$€£]|rs\\.?|inr", "");
+        if (!p.matches("[0-9]*(\\.[0-9]{1,2})?")) {
+            return null; // letters or other marks in the price
+        }
+        if (!p.isEmpty()) {
+            try {
+                amount = new BigDecimal(p);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+            if (amount.signum() < 0 || amount.compareTo(BigDecimal.valueOf(10_000_000)) > 0) {
+                return null;
+            }
+        }
+        return new ProfileService.ProductEdit(n, amount, unit, description);
+    }
+
+    /** Saves a photo sent with a new product. Returns a problem code, or null when fine or none sent. */
+    private String savePhotoIfAny(UUID businessId, String itemName, MultipartFile file) throws java.io.IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        if (file.getSize() > ImageService.MAX_UPLOAD) {
+            return "added-photo-size";
+        }
+        byte[] data = file.getBytes();
+        String type = ImageService.detectType(data);
+        if (type == null) {
+            return "added-photo-type";
+        }
+        images.saveUpload(businessId, itemName, type, data);
+        return null;
+    }
+
     @GetMapping("/media/{id}")
     @ResponseBody
     ResponseEntity<byte[]> media(@PathVariable UUID id) {

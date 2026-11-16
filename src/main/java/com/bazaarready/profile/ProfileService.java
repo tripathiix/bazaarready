@@ -68,6 +68,55 @@ public class ProfileService {
         faqs.save(new Faq(id, question.trim(), answer.trim(), 0, Faq.Source.FIX, position));
     }
 
+    // ---- The owner managing their products by hand ----
+
+    /** What the owner typed for one product. price may be null for "price on request". */
+    public record ProductEdit(String name, BigDecimal price, String unit, String description) {
+    }
+
+    @Transactional
+    public UUID addProduct(UUID businessId, ProductEdit edit) {
+        find(businessId);
+        int position = products.findByBusinessIdOrderBySortOrder(businessId).size();
+        Product product = new Product(businessId, edit.name().trim(), position);
+        apply(product, edit);
+        product.setImageQuery(edit.name().trim().toLowerCase(java.util.Locale.ROOT));
+        products.save(product);
+        return product.getId();
+    }
+
+    /** Changes one product and returns its old name, so an uploaded photo can follow a rename. */
+    @Transactional
+    public String updateProduct(UUID businessId, UUID productId, ProductEdit edit) {
+        Product product = owned(businessId, productId);
+        String oldName = product.getName();
+        if (!oldName.equals(edit.name().trim())) {
+            product.setName(edit.name().trim());
+            product.setImageQuery(edit.name().trim().toLowerCase(java.util.Locale.ROOT));
+        }
+        apply(product, edit);
+        return oldName;
+    }
+
+    /** Removes one product and returns its name. */
+    @Transactional
+    public String removeProduct(UUID businessId, UUID productId) {
+        Product product = owned(businessId, productId);
+        products.delete(product);
+        return product.getName();
+    }
+
+    private Product owned(UUID businessId, UUID productId) {
+        return products.findById(productId).filter(p -> p.getBusinessId().equals(businessId))
+                .orElseThrow(() -> new NotFoundException("No such product"));
+    }
+
+    private static void apply(Product product, ProductEdit edit) {
+        product.setPricePaise(edit.price() == null ? null : edit.price().multiply(MINOR_PER_UNIT).longValue());
+        product.setUnit(blankToNull(edit.unit()));
+        product.setDescription(blankToNull(edit.description()));
+    }
+
     @Transactional
     public ProfileResponse publish(UUID id) {
         Business business = find(id);

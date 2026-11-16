@@ -1242,3 +1242,40 @@ h1 span {
     text-align: left;
   }
 }
+
+/* A question asked as a short form */
+.qform {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1rem;
+}
+
+.qfield {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+}
+
+.qfield.wide {
+  grid-column: 1 / -1;
+}
+
+.qfield label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.qfield input,
+.qfield select,
+.qfield textarea {
+  font: inherit;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+}
+
+.qfield select option {
+  color: #111;
+}

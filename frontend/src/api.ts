@@ -10,11 +10,19 @@ export interface ActionView {
   data: { question?: string; answer?: string; items?: number; faqs?: number; messages?: number; customers?: number } | null;
 }
 
+export interface FieldView {
+  label: string;
+  kind: "text" | "long" | "choice" | "email";
+  placeholder: string;
+  options: string[];
+}
+
 export interface SessionView {
   id: string;
   status: SessionStatus;
   question: string | null;
   questionType: "text" | "phone" | null;
+  fields: FieldView[];
   approvalRequest: string | null;
   finalMessage: string | null;
   businessId: string | null;

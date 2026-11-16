@@ -43,6 +43,10 @@ public class AgentSession {
     @Column(name = "pending_answer_type")
     private String pendingAnswerType;
 
+    /** JSON list of form fields when the question is asked as a short form. */
+    @Column(name = "pending_fields")
+    private String pendingFields;
+
     @Column(name = "final_message")
     private String finalMessage;
 
@@ -81,6 +85,7 @@ public class AgentSession {
         this.pendingTool = tool;
         this.pendingQuestion = question;
         this.pendingAnswerType = null;
+        this.pendingFields = null;
     }
 
     public void resume() {
@@ -89,6 +94,7 @@ public class AgentSession {
         this.pendingTool = null;
         this.pendingQuestion = null;
         this.pendingAnswerType = null;
+        this.pendingFields = null;
     }
 
     public void finish(Status status, String finalMessage) {
@@ -121,5 +127,7 @@ public class AgentSession {
 
     public void setBusinessId(UUID businessId) { this.businessId = businessId; }
     public void setPendingAnswerType(String pendingAnswerType) { this.pendingAnswerType = pendingAnswerType; }
+    public String getPendingFields() { return pendingFields; }
+    public void setPendingFields(String pendingFields) { this.pendingFields = pendingFields; }
     public void setMessages(String messages) { this.messages = messages; }
 }

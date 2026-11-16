@@ -32,6 +32,12 @@ final class AgentPrompts {
             prices, ask for the prices; if they still give none, leave the price out. A site also needs \
             a name and a WhatsApp number so people can get in touch.
             - If the owner gave no name, suggest one in your question and let them confirm.
+            - When you need several details at once (contact details, timings, rules for cancellations, \
+            refunds or delivery, how to order and pay), ask them in one ask_owner call with fields, so the \
+            owner fills in a short form instead of writing a long answer. Use choice with options wherever \
+            there are usual answers (payment: UPI, cash on delivery, card; reply time: within an hour, same \
+            day, next day; refunds: no refunds, exchange only, full refund within 7 days). The owner may \
+            leave boxes empty; then leave those details out rather than asking again.
             - When you need a phone or WhatsApp number, call ask_owner with answerType "phone" and \
             ask only for the number in that question. The screen then shows a country-code picker, \
             and the answer comes back with the country code, for example "+91 9876543210".
@@ -106,7 +112,21 @@ final class AgentPrompts {
                   "type": "object",
                   "properties": {
                     "question": { "type": "string", "description": "One question, in the owner's language." },
-                    "answerType": { "type": "string", "enum": ["text", "phone"], "description": "Use phone when the answer is a phone or WhatsApp number." }
+                    "answerType": { "type": "string", "enum": ["text", "phone"], "description": "Use phone when the answer is a phone or WhatsApp number." },
+                    "fields": {
+                      "type": "array",
+                      "description": "When you need several details at once, ask them as a short form: one entry per detail, at most 8. The question is then a short heading. Leave out for a single simple question or for a phone number.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": { "type": "string", "description": "Short label in the owner's language, e.g. 'Opening hours'." },
+                          "kind": { "type": "string", "enum": ["text", "long", "choice", "email"], "description": "text for a short answer, long for a few sentences, choice for a drop-down, email for an email address." },
+                          "options": { "type": "array", "items": { "type": "string" }, "description": "For choice: 2 to 8 common answers in the owner's language. The owner can also pick 'Other' and type." },
+                          "placeholder": { "type": "string", "description": "A short example answer." }
+                        },
+                        "required": ["label", "kind"]
+                      }
+                    }
                   },
                   "required": ["question"]
                 }

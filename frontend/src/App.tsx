@@ -39,6 +39,18 @@ function actionText(action: ActionView, t: Strings, readChats: string): string {
   }
 }
 
+const OTHER = "__other__";
+const OTHER_LABEL: Record<LanguageCode, string> = {
+  en: "Other…",
+  hi: "अन्य…",
+  kn: "ಇತರೆ…",
+  ta: "மற்றவை…",
+  te: "ఇతర…",
+  mr: "इतर…",
+  bn: "অন্য…",
+  gu: "અન્ય…",
+};
+
 export default function App() {
   const [language, setLanguage] = useState<LanguageCode>(initialLanguage);
   const t = STRINGS[language];
@@ -53,6 +65,8 @@ export default function App() {
     return key && /^[0-9a-f-]{36}$/.test(key) ? key : null;
   });
   const [changeText, setChangeText] = useState("");
+  const [formAnswers, setFormAnswers] = useState<Record<number, string>>({});
+  const [formOther, setFormOther] = useState<Record<number, string>>({});
 
   const [description, setDescription] = useState("");
   const [session, setSession] = useState<SessionView | null>(null);
@@ -164,6 +178,20 @@ export default function App() {
   function onReply(event: FormEvent) {
     event.preventDefault();
     if (!session) return;
+    if (session.fields?.length) {
+      const lines = session.fields
+        .map((f, i) => {
+          const raw = formAnswers[i] ?? "";
+          const value = raw === OTHER ? (formOther[i] ?? "").trim() : raw.trim();
+          return value ? `${f.label}: ${value}` : null;
+        })
+        .filter((l): l is string => l !== null);
+      const text = lines.length ? lines.join("\n") : "(left these empty)";
+      setFormAnswers({});
+      setFormOther({});
+      void run(() => sendReply(session.id, text));
+      return;
+    }
     if (answerSpeech.listening) answerSpeech.stop();
     const dial = countryList.find((c) => c.iso === country)?.dial ?? "";
     const text = session.questionType === "phone" ? `+${dial} ${answer.replace(/[^0-9]/g, "")}` : answer;
@@ -352,10 +380,61 @@ export default function App() {
 
             {session.status === "WAITING_OWNER" && !busy && (
               <form className="panel ask" onSubmit={onReply}>
-                <label htmlFor="answer" className="label">
-                  {session.question}
-                </label>
-                {session.questionType === "phone" ? (
+                {session.fields?.length ? (
+                  <h2 className="label">{session.question}</h2>
+                ) : (
+                  <label htmlFor="answer" className="label">
+                    {session.question}
+                  </label>
+                )}
+                {session.fields?.length ? (
+                  <div className="qform">
+                    {session.fields.map((f, i) => (
+                      <div key={`${f.label}-${i}`} className={`qfield ${f.kind === "long" ? "wide" : ""}`}>
+                        <label htmlFor={`qf-${i}`}>{f.label}</label>
+                        {f.kind === "choice" ? (
+                          <>
+                            <select id={`qf-${i}`} value={formAnswers[i] ?? ""} onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}>
+                              <option value="">—</option>
+                              {f.options.map((o) => (
+                                <option key={o} value={o}>
+                                  {o}
+                                </option>
+                              ))}
+                              <option value={OTHER}>{OTHER_LABEL[language]}</option>
+                            </select>
+                            {formAnswers[i] === OTHER && (
+                              <input
+                                aria-label={`${f.label}: ${OTHER_LABEL[language]}`}
+                                value={formOther[i] ?? ""}
+                                onChange={(e) => setFormOther({ ...formOther, [i]: e.target.value })}
+                                maxLength={300}
+                              />
+                            )}
+                          </>
+                        ) : f.kind === "long" ? (
+                          <textarea
+                            id={`qf-${i}`}
+                            rows={3}
+                            value={formAnswers[i] ?? ""}
+                            placeholder={f.placeholder}
+                            onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}
+                            maxLength={600}
+                          />
+                        ) : (
+                          <input
+                            id={`qf-${i}`}
+                            type={f.kind === "email" ? "email" : "text"}
+                            value={formAnswers[i] ?? ""}
+                            placeholder={f.placeholder}
+                            onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}
+                            maxLength={300}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : session.questionType === "phone" ? (
                   <div className="phone">
                     <label htmlFor="country" className="visually-hidden">
                       Country code
@@ -384,7 +463,7 @@ export default function App() {
                   <input id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} maxLength={2000} required autoFocus />
                 )}
                 <div className="row">
-                  {answerSpeech.supported && session.questionType !== "phone" && (
+                  {answerSpeech.supported && session.questionType !== "phone" && !session.fields?.length && (
                     <button
                       type="button"
                       className={`button mic ${answerSpeech.listening ? "is-listening" : ""}`}
