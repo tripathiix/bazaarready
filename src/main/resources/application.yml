@@ -16,6 +16,9 @@ spring:
 
 server:
   port: 8080
+  # Redirects carry only the path, so they work on any address: localhost, a tunnel or the real domain.
+  tomcat:
+    use-relative-redirects: true
 
 management:
   endpoints:
