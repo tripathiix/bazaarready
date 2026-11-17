@@ -1,0 +1,36 @@
+# Production settings, layered on top of docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Differences from local development:
+#   - Caddy in front (ports 80/443) handles HTTPS; the app's own port is not published,
+#     because Docker-published ports bypass the server firewall.
+#   - Secure cookies and the real domain.
+#   - Containers restart automatically after a crash or a server reboot.
+
+services:
+  db:
+    restart: unless-stopped
+
+  app:
+    restart: unless-stopped
+    ports: !reset []
+    environment:
+      APP_DOMAIN: bazaarready.com
+      COOKIE_SECURE: "true"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
