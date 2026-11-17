@@ -53,6 +53,14 @@ bazaarready:
   google:
     client-id: ${GOOGLE_CLIENT_ID:}
     client-secret: ${GOOGLE_CLIENT_SECRET:}
+  # Contact form mail, sent through the Titan mailbox (smtp.titan.email, port 465). Without a password,
+  # messages are still saved and simply not emailed.
+  smtp:
+    host: ${SMTP_HOST:smtp.titan.email}
+    port: ${SMTP_PORT:465}
+    username: ${SMTP_USERNAME:support@bazaarready.com}
+    password: ${SMTP_PASSWORD:}
+    to: ${SUPPORT_EMAIL:support@bazaarready.com}
   claude:
     daily-cap: ${CLAUDE_DAILY_CAP:3000}
     per-account-daily-cap: ${CLAUDE_PER_ACCOUNT_DAILY_CAP:400}

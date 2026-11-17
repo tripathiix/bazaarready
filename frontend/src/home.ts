@@ -5,6 +5,7 @@ export interface HomeStrings {
   promise: [string, string];
   templates: string;
   features: string;
+  contact: string;
   myDashboard: string;
   importChats: string;
   speak: string;
@@ -27,6 +28,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["Describe your business.", "We build it, test it, and keep it safe."],
     templates: "Templates",
     features: "Features",
+    contact: "Contact",
     myDashboard: "My dashboard",
     speak: "Speak",
     importChats: "Import WhatsApp chats",
@@ -56,6 +58,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["अपने काम के बारे में बताइए।", "हम वेबसाइट बनाते हैं, जाँचते हैं और सुरक्षित रखते हैं।"],
     templates: "डिज़ाइन",
     features: "खूबियाँ",
+    contact: "संपर्क",
     myDashboard: "मेरा डैशबोर्ड",
     speak: "बोलिए",
     importChats: "WhatsApp चैट लाएँ",
@@ -85,6 +88,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["ನಿಮ್ಮ ವ್ಯಾಪಾರದ ಬಗ್ಗೆ ಹೇಳಿ.", "ನಾವು ಅದನ್ನು ನಿರ್ಮಿಸಿ, ಪರೀಕ್ಷಿಸಿ, ಸುರಕ್ಷಿತವಾಗಿಡುತ್ತೇವೆ."],
     templates: "ವಿನ್ಯಾಸಗಳು",
     features: "ವೈಶಿಷ್ಟ್ಯಗಳು",
+    contact: "ಸಂಪರ್ಕ",
     myDashboard: "ನನ್ನ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     speak: "ಮಾತನಾಡಿ",
     importChats: "WhatsApp ಚಾಟ್ ತನ್ನಿ",
@@ -114,6 +118,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["உங்கள் தொழிலைப் பற்றி சொல்லுங்கள்.", "நாங்கள் உருவாக்கி, சோதித்து, பாதுகாப்பாக வைக்கிறோம்."],
     templates: "வடிவமைப்புகள்",
     features: "அம்சங்கள்",
+    contact: "தொடர்பு",
     myDashboard: "என் டாஷ்போர்டு",
     speak: "பேசுங்கள்",
     importChats: "WhatsApp உரையாடல்களைக் கொண்டு வா",
@@ -143,6 +148,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["మీ వ్యాపారం గురించి చెప్పండి.", "మేము దాన్ని తయారు చేసి, పరీక్షించి, సురక్షితంగా ఉంచుతాం."],
     templates: "డిజైన్లు",
     features: "ప్రత్యేకతలు",
+    contact: "సంప్రదించండి",
     myDashboard: "నా డాష్‌బోర్డ్",
     speak: "మాట్లాడండి",
     importChats: "WhatsApp చాట్‌లు తీసుకురండి",
@@ -172,6 +178,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["तुमच्या व्यवसायाबद्दल सांगा.", "आम्ही वेबसाइट बनवतो, तपासतो आणि सुरक्षित ठेवतो."],
     templates: "डिझाइन",
     features: "वैशिष्ट्ये",
+    contact: "संपर्क",
     myDashboard: "माझा डॅशबोर्ड",
     speak: "बोला",
     importChats: "WhatsApp चॅट आणा",
@@ -201,6 +208,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["আপনার ব্যবসার কথা বলুন।", "আমরা বানাই, পরীক্ষা করি আর সুরক্ষিত রাখি।"],
     templates: "ডিজাইন",
     features: "বৈশিষ্ট্য",
+    contact: "যোগাযোগ",
     myDashboard: "আমার ড্যাশবোর্ড",
     speak: "বলুন",
     importChats: "WhatsApp চ্যাট আনুন",
@@ -230,6 +238,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     promise: ["તમારા વેપાર વિશે કહો.", "અમે બનાવીએ, ચકાસીએ અને સુરક્ષિત રાખીએ."],
     templates: "ડિઝાઇન",
     features: "ખાસિયતો",
+    contact: "સંપર્ક",
     myDashboard: "મારું ડેશબોર્ડ",
     speak: "બોલો",
     importChats: "WhatsApp ચેટ લાવો",

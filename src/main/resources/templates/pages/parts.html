@@ -44,6 +44,8 @@
             color: #22140a; background: linear-gradient(100deg, var(--amber), #f7c065 50%, var(--rose)); }
         .foot { display: flex; flex-direction: column; align-items: center; gap: .7rem; padding: 3.5rem 1rem 2.5rem; text-align: center;
             font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: -.02em; color: rgba(246,239,228,.35); }
+        .foot-mail { font-family: "Anek Latin", sans-serif; font-weight: 400; letter-spacing: 0; font-size: .92rem; color: var(--muted); }
+        .foot-mail:hover { color: var(--ivory); }
         .holo { font-family: "Anek Latin", sans-serif; font-weight: 600; font-size: .82rem; letter-spacing: .04em; padding: .35rem .95rem; border-radius: 999px;
             border: 1px solid rgba(255,255,255,.18); background: linear-gradient(110deg, #8c9cff, #ec7a8c, #f4a83a, #4fc3a1, #8c9cff) text, rgba(255,255,255,.04);
             -webkit-background-clip: text; color: transparent; background-size: 300% 100%;
@@ -107,6 +109,7 @@
             <a href="/templates" th:classappend="${active == 'templates'} ? 'on'" th:attr="aria-current=${active == 'templates'} ? 'page'">Templates</a>
             <a href="/guide" th:classappend="${active == 'guide'} ? 'on'" th:attr="aria-current=${active == 'guide'} ? 'page'">How it works</a>
             <a href="/features" th:classappend="${active == 'features'} ? 'on'" th:attr="aria-current=${active == 'features'} ? 'page'">Features</a>
+            <a href="/contact" th:classappend="${active == 'contact'} ? 'on'" th:attr="aria-current=${active == 'contact'} ? 'page'">Contact</a>
             <a href="/account">My dashboard</a>
             <a class="cta-small" href="/">Build my website</a>
         </nav>
@@ -115,6 +118,7 @@
 
 <footer th:fragment="foot" class="foot">
     <span>BazaarReady</span>
+    <a class="foot-mail" href="/contact">Contact us · support@bazaarready.com</a>
     <span class="holo">Crafted with <span aria-label="love">♥</span> by Yashi Tripathi</span>
 </footer>
 

@@ -52,6 +52,8 @@ class RateLimitFilter extends OncePerRequestFilter {
                     10, Duration.ofMinutes(15), "Too many sign-in attempts. Please wait 15 minutes and try again."),
             new Rule("customer-forms", r -> post(r) && r.getRequestURI().startsWith("/s/"),
                     20, Duration.ofMinutes(10), "Too many orders or messages from your connection. Please wait a few minutes."),
+            new Rule("contact-us", r -> post(r) && r.getRequestURI().equals("/contact"),
+                    5, Duration.ofHours(1), "You've sent several messages already. Please wait an hour, or email support@bazaarready.com."),
             new Rule("owner-edits", r -> post(r) && OWNER_EDIT.matcher(r.getRequestURI()).matches(),
                     40, Duration.ofMinutes(10), "Too many changes in a short time. Please wait a few minutes."));
 

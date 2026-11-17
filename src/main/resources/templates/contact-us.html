@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{pages/parts :: head('Contact BazaarReady', 'Questions, help with your website, or a problem to report. Write to the BazaarReady team and we reply by email.')}"></head>
+<body>
+<div th:replace="~{pages/parts :: top('contact')}"></div>
+<style>
+    .layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1.4rem; margin-top: 2.2rem; align-items: start; }
+    .form { padding: 1.6rem; display: grid; gap: 1rem; }
+    .form label { display: grid; gap: .35rem; font-weight: 600; font-size: .97rem; }
+    .form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form input, .form select, .form textarea { font: inherit; font-weight: 400; color: var(--ivory); background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: .7rem .9rem; width: 100%; }
+    .form select option { color: #1a1838; }
+    .form textarea { min-height: 9rem; resize: vertical; }
+    .form input:focus, .form select:focus, .form textarea:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(244,168,58,.25); }
+    .form button { justify-self: start; border: 0; cursor: pointer; font: inherit; font-weight: 700; }
+    .hint { color: var(--muted); font-size: .88rem; font-weight: 400; margin: 0; }
+    .trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+    .error { margin: 0; padding: .7rem 1rem; border-radius: 12px; background: rgba(236,122,140,.15); border: 1px solid rgba(236,122,140,.5); }
+    .sent { padding: 1.8rem; display: grid; gap: .6rem; border-color: rgba(79,195,161,.55); }
+    .sent h2 { margin: 0; font-size: 1.6rem; }
+    .sent p { margin: 0; color: #cfc7de; }
+    .side { padding: 1.4rem; display: grid; gap: 1rem; }
+    .side h2 { margin: 0; font-size: 1.25rem; }
+    .side p { margin: 0; color: #cfc7de; }
+    .side .mail { font-weight: 600; word-break: break-all; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .form .row { grid-template-columns: 1fr; } .form { padding: 1.2rem; } }
+</style>
+<main class="wrap">
+    <p class="hand rise" style="margin-top:2.4rem">A real person reads every message</p>
+    <h1 class="rise" style="margin-top:.3rem">Talk to us</h1>
+    <p class="lead rise">Questions, help with your website, or something that isn't working. Write to us and we'll reply by email, usually within a day.</p>
+
+    <div class="layout">
+        <section class="card sent rise" th:if="${param.sent != null}" role="status">
+            <h2>Thanks, your message is on its way</h2>
+            <p>It has gone to support@bazaarready.com. We'll reply to the email address you gave.</p>
+            <p><a href="/contact">Send another message</a> · <a href="/">Back to BazaarReady</a></p>
+        </section>
+
+        <form class="card form rise" th:if="${param.sent == null}" method="post" th:action="@{/contact}" novalidate>
+            <p class="error" th:if="${error != null}" th:text="${error}" role="alert">Error</p>
+            <div class="row">
+                <label>Your name
+                    <input type="text" name="name" th:value="${name}" autocomplete="name" required maxlength="100">
+                </label>
+                <label>Your email
+                    <input type="email" name="email" th:value="${email}" autocomplete="email" required maxlength="200">
+                </label>
+            </div>
+            <label>What is it about?
+                <select name="topic">
+                    <option th:each="t : ${topics}" th:value="${t}" th:text="${t}" th:selected="${t == topic}">General question</option>
+                </select>
+            </label>
+            <label>Your message
+                <textarea name="message" required minlength="10" maxlength="5000" th:text="${message}"></textarea>
+                <span class="hint">If it's about your website, include its address so we can find it.</span>
+            </label>
+            <div class="trap" aria-hidden="true">
+                <label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+            </div>
+            <button class="cta" type="submit">Send message</button>
+        </form>
+
+        <aside class="card side rise">
+            <div>
+                <h2>Email us directly</h2>
+                <p class="mail"><a href="mailto:support@bazaarready.com">support@bazaarready.com</a></p>
+            </div>
+            <div>
+                <h2>Before you write</h2>
+                <p><a href="/guide">How it works</a> answers most questions about building and changing your site.</p>
+            </div>
+            <div>
+                <h2>Your privacy</h2>
+                <p>We use your details only to reply. We don't add you to a mailing list.</p>
+            </div>
+        </aside>
+    </div>
+</main>
+<footer th:replace="~{pages/parts :: foot}"></footer>
+</body>
+</html>
