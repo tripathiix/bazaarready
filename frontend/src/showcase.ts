@@ -18,9 +18,21 @@ export interface RecentSite {
   publishedAt: string | null;
 }
 
+export interface FeaturedSite {
+  name: string;
+  tagline: string | null;
+  path: string;
+  photo: Photo;
+  items: { name: string; price: string | null; photo: Photo | null }[];
+  /** Result of the site's latest AI customer test; null when it hasn't been tested. */
+  passed: number | null;
+  total: number | null;
+}
+
 export interface Showcase {
   examples: (Photo | null)[];
   recent: RecentSite[];
+  featured: FeaturedSite | null;
 }
 
 /** Photos for the home page. The page works without them, so a failed request is ignored. */

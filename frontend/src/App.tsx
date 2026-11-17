@@ -1,6 +1,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ActionView, Me, SessionView, csrfToken, getMe, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
-import { Coach } from "./Coach";
+import { Coach, OPEN_COACH } from "./Coach";
+import { DESIGNS, HOME } from "./home";
+import { FeaturedPreview, LinksStrip } from "./HomeParts";
 import { SideDecor } from "./SideDecor";
 import { UX } from "./ux";
 import { Gallery, OpenSign, Petals, PhotoCredits, Shutters, StringLights } from "./Decor";
@@ -60,12 +62,19 @@ export default function App() {
   const chatWords = CHATS[language];
   const [ownerName, setOwnerName] = useState("");
   const u = UX[language];
+  const h = HOME[language];
   const params = new URLSearchParams(window.location.search);
   const [changeKeyFromUrl] = useState(() => {
     const key = params.get("change");
     return key && /^[0-9a-f-]{36}$/.test(key) ? key : null;
   });
   const [changeText, setChangeText] = useState("");
+  // A design picked on the Templates page ("Use this"), passed on to the agent as a wish.
+  const [design, setDesign] = useState<string | null>(() => {
+    const d = params.get("design");
+    return d && (DESIGNS as readonly string[]).includes(d) ? d : null;
+  });
+  const [showChats, setShowChats] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
   useEffect(() => {
     void getMe().then(setMe);
@@ -181,7 +190,8 @@ export default function App() {
       return;
     }
     if (speech.listening) speech.stop();
-    void run(() => startSession(description, language));
+    const wish = design ? `\n\nPlease use the ${design} design.` : "";
+    void run(() => startSession(description + wish, language));
   }
 
   function onReply(event: FormEvent) {
@@ -228,8 +238,9 @@ export default function App() {
             <h1>
               Bazaar<span>Ready</span>
             </h1>
-            <p className="headline" key={language}>
-              {extra.headline}
+            <p className="headline promise" key={language}>
+              <span className="promise-a">{h.promise[0]}</span>
+              <span className="promise-b">{h.promise[1]}</span>
             </p>
             <svg className="scribble" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
               <defs>
@@ -242,30 +253,24 @@ export default function App() {
             </svg>
           </div>
           <div className="hero-side">
-            <div className="account-links">
-              <a className="how-link" href="/guide">
-                {u.howItWorks} →
+            <nav className="top-nav" aria-label="Main">
+              <a href="/templates">{h.templates}</a>
+              <a href="/guide">{u.howItWorks}</a>
+              <a href="/features">{h.features}</a>
+              <a className="nav-pill" href="/account">
+                {h.myDashboard}
               </a>
               {me?.signedIn ? (
-                <>
-                  <a className="how-link" href="/account">
-                    {u.mySites}
-                  </a>
-                  <form method="post" action="/logout">
-                    <input type="hidden" name="_csrf" value={csrfToken()} />
-                    <button type="submit" className="how-link as-button">
-                      {u.signOut}
-                    </button>
-                  </form>
-                </>
+                <form method="post" action="/logout">
+                  <input type="hidden" name="_csrf" value={csrfToken()} />
+                  <button type="submit" className="nav-link-button">
+                    {u.signOut}
+                  </button>
+                </form>
               ) : (
-                me?.authForBuilding && (
-                  <a className="how-link signin" href="/login">
-                    {u.signIn}
-                  </a>
-                )
+                me?.authForBuilding && <a href="/login">{u.signIn}</a>
               )}
-            </div>
+            </nav>
             <OpenSign />
           </div>
         </div>
@@ -294,20 +299,19 @@ export default function App() {
 
       <main className="wrap workspace">
         {!session && (
+          <>
           <form className="ledger" data-reveal onSubmit={onStart}>
-            <label htmlFor="description" className="label">
-              {t.tellUs}
+            <label htmlFor="description" className="label box-title">
+              {extra.headline}
             </label>
-            <p className="hint">{t.hint}</p>
-            <p className="hand talk-note">{notes.talk}</p>
-            <div className="guide">
-              <p className="guide-title">{u.guideTitle}</p>
+            <details className="guide">
+              <summary className="guide-title">{h.include}</summary>
               <ol>
                 {u.guide.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ol>
-            </div>
+            </details>
             {me && me.authForBuilding && !me.signedIn && (
               <p className="signin-note">
                 {u.signInToBuild} <a href="/login">{u.signIn} →</a>
@@ -326,24 +330,40 @@ export default function App() {
               {speech.supported ? (
                 <button
                   type="button"
-                  className={`button mic ${speech.listening ? "is-listening" : ""}`}
+                  className={`button pill mic ${speech.listening ? "is-listening" : ""}`}
                   onClick={() => (speech.listening ? speech.stop() : speech.start(t.speech))}
                 >
-                  <span className="bars" aria-hidden="true">
-                    <i />
-                    <i />
-                    <i />
-                    <i />
-                  </span>
-                  {speech.listening ? t.stopListening : t.speak}
+                  {speech.listening ? (
+                    <span className="bars" aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                  ) : (
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <rect x="9" y="3" width="6" height="11" rx="3" />
+                      <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                    </svg>
+                  )}
+                  {speech.listening ? t.stopListening : h.speak}
                 </button>
               ) : (
                 <span className="hint">{t.speechUnsupported}</span>
               )}
-              <button type="button" className="button" onClick={() => setDescription(t.example)}>
-                {t.useExample}
+              <button
+                type="button"
+                className={`button pill ${showChats ? "is-on" : ""}`}
+                aria-expanded={showChats}
+                aria-controls="chats"
+                onClick={() => setShowChats((v) => !v)}
+              >
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+                </svg>
+                {h.importChats}
               </button>
-              <button type="submit" className="button primary" disabled={busy || description.trim().length === 0}>
+              <button type="submit" className="button primary push-right" disabled={busy || description.trim().length === 0}>
                 {busy ? t.working : t.build}
               </button>
             </div>
@@ -352,8 +372,15 @@ export default function App() {
                 {t.listening}
               </p>
             )}
-            <div className="chats">
-              <p className="chats-or">{chatWords.or}</p>
+            {design && (
+              <p className="design-wish">
+                {h.design.replace("{name}", design.charAt(0).toUpperCase() + design.slice(1))}
+                <button type="button" className="nav-link-button" onClick={() => setDesign(null)}>
+                  {h.removeDesign}
+                </button>
+              </p>
+            )}
+            <div className="chats" id="chats" hidden={!showChats}>
               <p className="hint">{chatWords.how}</p>
               <div className="row">
                 <label htmlFor="chat-owner" className="visually-hidden">
@@ -386,6 +413,31 @@ export default function App() {
               </div>
             </div>
           </form>
+          <div className="try-row" data-reveal>
+            <span className="hint">{h.tryLabel}</span>
+            {h.examples.map((ex) => (
+              <button
+                key={ex.label}
+                type="button"
+                className="try-chip"
+                onClick={() => {
+                  setDescription(ex.text);
+                  document.getElementById("description")?.focus();
+                }}
+              >
+                {ex.label}
+              </button>
+            ))}
+          </div>
+          <p className="hint coach-ask">
+            {h.coachAsk}{" "}
+            <button type="button" className="link-button" onClick={() => window.dispatchEvent(new Event(OPEN_COACH))}>
+              {h.coachLink}
+            </button>
+          </p>
+          <FeaturedPreview site={showcase?.featured ?? null} h={h} />
+          <LinksStrip h={h} />
+          </>
         )}
 
         {error && (

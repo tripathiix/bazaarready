@@ -1407,3 +1407,435 @@ h1 span {
 .signin-note a {
   font-weight: 700;
 }
+
+/* ---------- Home page redesign: header links, promise, build box extras, preview, links strip ---------- */
+
+.top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem 1.2rem;
+  font-size: 0.95rem;
+}
+
+.top-nav a,
+.nav-link-button {
+  color: #d8d1e6;
+  text-decoration: none;
+}
+
+.top-nav a:hover,
+.top-nav a:focus-visible,
+.nav-link-button:hover {
+  color: var(--ivory);
+}
+
+.top-nav form {
+  margin: 0;
+}
+
+.nav-link-button {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.top-nav .nav-pill {
+  color: var(--ivory);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+}
+
+.top-nav .nav-pill:hover {
+  border-color: var(--amber);
+}
+
+.lang-pick {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #d8d1e6;
+}
+
+.lang-pick select {
+  font: inherit;
+  color: var(--ivory);
+  background: var(--glass-strong);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+}
+
+.lang-pick option {
+  color: #111;
+}
+
+/* The promise under the wordmark: first line in ivory, second in amber. */
+.headline.promise {
+  max-width: 34rem;
+}
+
+.promise-a,
+.promise-b {
+  display: block;
+}
+
+.promise-a {
+  color: var(--ivory);
+}
+
+.promise-b {
+  color: var(--amber);
+}
+
+/* Build box */
+.box-title {
+  font-weight: 700;
+}
+
+details.guide summary {
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+details.guide[open] summary {
+  margin-bottom: 0.3rem;
+}
+
+.row .push-right {
+  margin-left: auto;
+}
+
+.row .button svg {
+  vertical-align: -0.15em;
+  margin-right: 0.35rem;
+}
+
+.button.is-on {
+  border-color: var(--amber);
+  color: var(--ivory);
+}
+
+.chats[hidden] {
+  display: none;
+}
+
+.design-wish {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  margin: 0.6rem 0 0;
+  color: #ffd9a0;
+  font-weight: 600;
+}
+
+.design-wish .nav-link-button {
+  color: var(--muted);
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+.try-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.try-row .hint {
+  margin: 0;
+}
+
+.try-chip {
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #e9e2f5;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.try-chip:hover,
+.try-chip:focus-visible {
+  border-color: var(--amber);
+  color: var(--ivory);
+}
+
+.coach-ask {
+  margin-top: 0.8rem;
+}
+
+.link-button {
+  font: inherit;
+  color: var(--amber);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* A real site in a browser frame */
+.featured {
+  position: relative;
+  margin-top: 3.5rem;
+}
+
+.featured-note {
+  margin: 0 0 0.9rem;
+  font-size: 1.25rem;
+  color: #ffd9a0;
+}
+
+.browser {
+  display: block;
+  color: #2a1d10;
+  text-decoration: none;
+  background: #fffaf2;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.browser:hover,
+.browser:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 36px 90px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(244, 168, 58, 0.5);
+}
+
+.browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.9rem;
+  background: #efe6d6;
+}
+
+.browser-bar i {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  background: #e0b4a6;
+}
+
+.browser-bar i:nth-child(2) { background: #e6d29a; }
+.browser-bar i:nth-child(3) { background: #b6d6b0; }
+
+.browser-url {
+  margin-left: 0.6rem;
+  font-size: 0.78rem;
+  color: #6b5a44;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.browser-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.browser-hero {
+  width: 100%;
+  height: 100%;
+  min-height: 16rem;
+  object-fit: cover;
+}
+
+.browser-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.4rem 1.5rem;
+}
+
+.browser-name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+
+.browser-tagline {
+  color: #6b5a44;
+}
+
+.browser-items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.browser-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #eadfcd;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.browser-item img,
+.browser-item-blank {
+  width: 100%;
+  height: 3.6rem;
+  object-fit: cover;
+  background: #e9d9c0;
+}
+
+.browser-item strong {
+  padding: 0.35rem 0.5rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.browser-item em {
+  font-style: normal;
+  color: #8a5a1c;
+  padding: 0 0.5rem 0.4rem;
+}
+
+.browser-open {
+  margin-top: auto;
+  font-weight: 600;
+  color: #b4651c;
+}
+
+.featured-badge {
+  position: absolute;
+  right: 1.5rem;
+  bottom: -1.2rem;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border-radius: 12px;
+  background: #1a1838;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  font-size: 0.9rem;
+}
+
+.featured-badge strong {
+  color: #7be0a4;
+  font-weight: 600;
+}
+
+/* Four cards that open the Templates, How it works and Features pages */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 4rem;
+}
+
+.strip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  color: var(--ivory);
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.strip-card:hover,
+.strip-card:focus-visible {
+  border-color: var(--amber);
+  transform: translateY(-3px);
+}
+
+.strip-card strong {
+  font-family: var(--display);
+  font-size: 1.25rem;
+}
+
+.strip-card span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.strip-card em {
+  font-style: normal;
+  color: var(--amber);
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 760px) {
+  .top-nav {
+    justify-content: flex-start;
+  }
+
+  .browser-body {
+    grid-template-columns: 1fr;
+  }
+
+  .browser-hero {
+    min-height: 11rem;
+    max-height: 13rem;
+  }
+
+  .featured-badge {
+    position: static;
+    margin-top: 0.8rem;
+    display: inline-block;
+  }
+
+  .strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Wide screens: the links sit in the top right corner, with the neon sign under them (as in the approved design). */
+@media (min-width: 900px) {
+  .hero {
+    position: relative;
+  }
+
+  .hero-side {
+    position: absolute;
+    top: 0.6rem;
+    right: 1.25rem;
+    max-width: 36rem;
+  }
+}
+
+/* Speak and Import WhatsApp chats: matching outline pills with an icon (as in the approved design). */
+.row .button.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: var(--ivory);
+  font-weight: 600;
+}
+
+.row .button.pill svg {
+  margin: 0;
+  flex: none;
+}
+
+.row .button.pill:hover:not(:disabled),
+.row .button.pill.is-on,
+.row .button.pill.is-listening {
+  border-color: var(--amber);
+  background: rgba(244, 168, 58, 0.08);
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{pages/parts :: head('BazaarReady templates', 'Seven website designs for small businesses. The agent picks one for you, and you can switch any time.')}"></head>
+<body>
+<div th:replace="~{pages/parts :: top('templates')}"></div>
+<style>
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.3rem; margin: 2.2rem 0 0; }
+    .tpl { overflow: hidden; display: flex; flex-direction: column; transition: transform .25s ease, border-color .25s ease; }
+    .tpl:hover { transform: translateY(-4px); border-color: rgba(244,168,58,.5); }
+    .shot { position: relative; height: 13rem; background: #2a2650; overflow: hidden; }
+    .shot img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+    .tpl:hover .shot img { transform: scale(1.04); }
+    .shot .site { position: absolute; left: .8rem; bottom: .8rem; font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: .9rem;
+        color: var(--night); background: var(--ivory); border-radius: 999px; padding: .2rem .75rem; }
+    .shot .empty { display: grid; place-items: center; height: 100%; color: var(--muted); font-size: .9rem; }
+    .mock { height: 100%; padding: .8rem; display: grid; gap: .45rem; background: #efe6d6; }
+    .mock i { display: block; border-radius: 6px; background: #d9c3a5; }
+    .mock .m-bar { background: #c9b08c; height: .7rem; }
+    .mock-mart { grid-template: auto 1fr 1fr / repeat(4, 1fr); background: #e3efe0; }
+    .mock-mart i { background: #b9d3b2; } .mock-mart .m-bar { grid-column: 1 / -1; background: #fff; border: 1px solid #b9d3b2; }
+    .mock-mart .m-hero { grid-column: span 2; }
+    .mock-split { grid-template: auto 1fr 1fr / 1.3fr 1fr; background: #e2e9f3; }
+    .mock-split i { background: #b8c9e0; } .mock-split .m-bar { grid-column: 1 / -1; } .mock-split .m-hero { grid-row: span 2; }
+    .mock-split .m-c, .mock-split .m-d { display: none; }
+    .mock-bento { grid-template: auto 1fr 1fr / repeat(3, 1fr); background: #ebe5f5; }
+    .mock-bento i { background: #cbbfe6; border-radius: 10px; } .mock-bento .m-bar { grid-column: 1 / -1; }
+    .mock-bento .m-hero { grid-column: span 2; } .mock-bento .m-c { grid-row: span 1; } .mock-bento .m-d { display: none; }
+    .mock-magazine { grid-template: auto 1.4fr 1fr / 1fr 1fr 1fr; background: #f5ecd6; }
+    .mock-magazine i { background: #e2cfa3; } .mock-magazine .m-bar { grid-column: 1 / -1; }
+    .mock-magazine .m-hero { grid-column: 1 / -1; background: #c9a96a; }
+    .mock-magazine .m-d { display: none; }
+    .mock-classic, .mock-boutique, .mock-noir { grid-template: auto 1.3fr 1fr / repeat(3, 1fr); }
+    .mock-classic .m-bar, .mock-boutique .m-bar, .mock-noir .m-bar { grid-column: 1 / -1; }
+    .mock-classic .m-hero, .mock-boutique .m-hero, .mock-noir .m-hero { grid-column: 1 / -1; } .mock-classic .m-d, .mock-boutique .m-d, .mock-noir .m-d { display: none; }
+    .mock-boutique { background: #f6e0da; } .mock-boutique i { background: #e8b9ad; border-radius: 14px; }
+    .mock-noir { background: #1b1a24; } .mock-noir i { background: #2d2b3a; } .mock-noir .m-bar { background: #c9a45a; height: .3rem; }
+    .body { padding: 1.1rem 1.2rem 1.3rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
+    .body h2 { margin: 0; font-size: 1.4rem; }
+    .body p { margin: 0; color: #cfc7de; }
+    .for { color: var(--muted) !important; font-size: .9rem; flex: 1; }
+    .actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .7rem; }
+    .btn { border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: .4rem 1rem; color: var(--ivory); text-decoration: none; font-weight: 600; font-size: .95rem; }
+    .btn:hover, .btn:focus-visible { border-color: var(--amber); }
+    .use { padding: .4rem .2rem; font-weight: 600; text-decoration: none; font-size: .95rem; }
+    @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+</style>
+<main class="wrap">
+    <p class="hand rise" style="margin-top:2.4rem">Every one works on a phone</p>
+    <h1 class="rise" style="margin-top:.3rem">A design that fits your business</h1>
+    <p class="lead rise">The agent picks one for you from what you sell. You can switch any time by asking for it.</p>
+
+    <div class="grid">
+        <article class="card tpl rise" th:each="t : ${designs}" th:id="${t.key}">
+            <div class="shot">
+                <img th:if="${t.photo != null}" th:src="${t.photo}" alt="" loading="lazy">
+                <div th:if="${t.photo == null}" class="mock" th:classappend="${'mock-' + t.key}" aria-hidden="true">
+                    <i class="m-bar"></i><i class="m-hero"></i><i class="m-a"></i><i class="m-b"></i><i class="m-c"></i><i class="m-d"></i>
+                </div>
+                <span class="site" th:if="${t.siteName != null}" th:text="${t.siteName}">Site</span>
+            </div>
+            <div class="body">
+                <h2 th:text="${t.name}">Classic</h2>
+                <p th:text="${t.blurb}">Blurb</p>
+                <p class="for" th:text="${'Great for ' + t.goodFor}">Great for</p>
+                <div class="actions">
+                    <a class="btn" th:if="${t.sitePath != null}" th:href="${t.sitePath}" target="_blank" rel="noopener"
+                       th:attr="aria-label=${'Preview the ' + t.name + ' design'}">Preview</a>
+                    <a class="use" th:href="${'/?design=' + t.key}">Use this →</a>
+                </div>
+            </div>
+        </article>
+    </div>
+</main>
+<footer th:replace="~{pages/parts :: foot}"></footer>
+</body>
+</html>
