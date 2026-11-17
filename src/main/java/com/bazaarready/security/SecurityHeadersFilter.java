@@ -37,7 +37,7 @@ class SecurityHeadersFilter extends OncePerRequestFilter {
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self'",
-                "frame-ancestors 'none'"));
+                "frame-ancestors 'self'"));
         // The microphone is used for "Speak instead"; nothing else is needed.
         response.setHeader("Permissions-Policy", "microphone=(self), camera=(), geolocation=(), payment=(), usb=()");
         response.setHeader("Cross-Origin-Opener-Policy", "same-origin");

@@ -135,6 +135,10 @@ class SiteController {
                     @RequestParam String address, @RequestParam(required = false) String note,
                     @RequestParam(required = false) String deliveryDate,
                     @RequestParam String cart, Model model) {
+        String sampleStop = sampleStop(slug);
+        if (sampleStop != null) {
+            return sampleStop;
+        }
         ProfileResponse shop = profiles.getBySlug(slug);
         LocalDate wanted = isBlank(deliveryDate) ? null : parseDate(deliveryDate);
         Map<String, String> errors = new HashMap<>();
@@ -184,6 +188,10 @@ class SiteController {
 
     @PostMapping("/s/{slug}/pay/{orderId}")
     String payDemo(@PathVariable String slug, @PathVariable UUID orderId, @RequestParam String method) {
+        String sampleStop = sampleStop(slug);
+        if (sampleStop != null) {
+            return sampleStop;
+        }
         ProfileResponse shop = profiles.getBySlug(slug);
         if ("demo".equals(method)) {
             orders.markPaidDemo(shop.id(), orderId);
@@ -216,6 +224,10 @@ class SiteController {
     String placeBooking(@PathVariable String slug, @RequestParam UUID item, @RequestParam String date,
                         @RequestParam(required = false) String time, @RequestParam String name,
                         @RequestParam String phone, @RequestParam(required = false) String note, Model model) {
+        String sampleStop = sampleStop(slug);
+        if (sampleStop != null) {
+            return sampleStop;
+        }
         ProfileResponse shop = profiles.getBySlug(slug);
         LocalDate day = parseDate(date);
         Map<String, String> errors = new HashMap<>();
@@ -259,6 +271,10 @@ class SiteController {
     @PostMapping("/s/{slug}/contact")
     String sendMessage(@PathVariable String slug, @RequestParam String name, @RequestParam String contact,
                        @RequestParam String message, @RequestParam(required = false) String website, Model model) {
+        String sampleStop = sampleStop(slug);
+        if (sampleStop != null) {
+            return sampleStop;
+        }
         ProfileResponse shop = common(slug, model, "contact");
         // "website" is a hidden field people never see; only automated form-fillers complete it.
         if (isBlank(website)) {
@@ -454,6 +470,12 @@ class SiteController {
 
     // ---- Shared ----
 
+    /** Sample sites are for looking only: their forms send the visitor back with a note instead of saving anything. */
+    private String sampleStop(String slug) {
+        ProfileResponse shop = profiles.getBySlug(slug);
+        return profiles.isSample(shop.id()) ? "redirect:/s/" + slug + "?sample" : null;
+    }
+
     private ProfileResponse common(String slug, Model model, String page) {
         ProfileResponse shop = profiles.getBySlug(slug);
         common(shop, model, page);
@@ -479,6 +501,7 @@ class SiteController {
             }, "Anek Latin"};
         }
         model.addAttribute("layout", layout);
+        model.addAttribute("sample", profiles.isSample(shop.id()));
         model.addAttribute("categories", shop.products().stream()
                 .map(ProductResponse::category).filter(Objects::nonNull).distinct().toList());
         String digits = shop.whatsappNumber() == null ? null : shop.whatsappNumber().replaceAll("[^0-9]", "");

@@ -55,7 +55,7 @@ class ShowcaseController {
                 select b.id, b.name, b.slug, b.tagline, b.hero_query, b.location, b.published_at,
                        (select p.name from product p where p.business_id = b.id order by p.sort_order limit 1) as first_name,
                        (select p.image_query from product p where p.business_id = b.id order by p.sort_order limit 1) as first_query
-                from business b where b.status = 'PUBLISHED' order by b.published_at desc limit 24
+                from business b where b.status = 'PUBLISHED' and not b.sample order by b.published_at desc limit 24
                 """);
         for (Map<String, Object> row : rows) {
             UUID id = (UUID) row.get("id");
@@ -87,7 +87,8 @@ class ShowcaseController {
 
     /**
      * The published site whose latest finished AI customer test went best (most customers got what they came for),
-     * so the home page shows a real site and a real result. Null when there is nothing with a photo yet.
+     * so the home page shows a real site and a real result. Built-in sample sites are used only when no
+     * real site has a photo yet. Null when there is nothing with a photo.
      */
     private Featured featured(List<String> missing) {
         List<Map<String, Object>> rows = jdbc.queryForList("""
@@ -100,7 +101,7 @@ class ShowcaseController {
                                   order by r2.started_at desc limit 1)
                 ) t on true
                 where b.status = 'PUBLISHED'
-                order by coalesce(t.passed, -1) desc, b.published_at desc
+                order by b.sample, coalesce(t.passed, -1) desc, b.published_at desc
                 limit 6
                 """);
         for (Map<String, Object> row : rows) {

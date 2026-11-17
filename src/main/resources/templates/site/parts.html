@@ -30,6 +30,8 @@
         :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
         [hidden] { display: none !important; }
 
+        .sample-bar { background: #15132e; color: #f6efe4; padding: 0.5rem 1rem; text-align: center; font: 0.92rem/1.5 system-ui, sans-serif; }
+        .sample-bar a { color: #f4a83a; font-weight: 600; }
         .draft { background: #fff1d6; color: #5c3a00; padding: 0.5rem 1rem; text-align: center; font-size: 0.95rem; }
         .top { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); }
         .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.5rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
@@ -307,6 +309,8 @@
 
 <header th:fragment="nav" class="top">
     <div class="draft" role="status" th:if="${draft}" th:text="${L.of('draft_banner')}">Preview</div>
+    <div class="sample-bar" role="note" th:if="${sample}">Sample site made with BazaarReady. Orders and messages here are not sent.
+        <a href="/templates" target="_top">All templates</a> · <a th:href="${'/?design=' + layout}" target="_top">Use this design →</a></div>
     <nav class="bar wrap" aria-label="Main">
         <a class="brand" th:href="${base}" th:text="${shop.name()}">Name</a>
         <div class="links">
