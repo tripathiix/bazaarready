@@ -23,7 +23,14 @@ class ShowcaseController {
     record RecentSite(String name, String tagline, String path, Photo photo, String location, java.time.Instant publishedAt) {
     }
 
-    record Showcase(List<Photo> examples, List<RecentSite> recent) {
+    record Item(String name, String price, Photo photo) {
+    }
+
+    /** One real published site for the home page preview, with the result of its latest AI customer test. */
+    record Featured(String name, String tagline, String path, Photo photo, List<Item> items, Integer passed, Integer total) {
+    }
+
+    record Showcase(List<Photo> examples, List<RecentSite> recent, Featured featured) {
     }
 
     private final JdbcTemplate jdbc;
@@ -48,7 +55,7 @@ class ShowcaseController {
                 select b.id, b.name, b.slug, b.tagline, b.hero_query, b.location, b.published_at,
                        (select p.name from product p where p.business_id = b.id order by p.sort_order limit 1) as first_name,
                        (select p.image_query from product p where p.business_id = b.id order by p.sort_order limit 1) as first_query
-                from business b where b.status = 'PUBLISHED' order by b.published_at desc limit 24
+                from business b where b.status = 'PUBLISHED' and not b.sample order by b.published_at desc limit 24
                 """);
         for (Map<String, Object> row : rows) {
             UUID id = (UUID) row.get("id");
@@ -73,8 +80,68 @@ class ShowcaseController {
                 break;
             }
         }
+        Featured featured = featured(missing);
         images.ensureLater(missing);
-        return new Showcase(examples, recent);
+        return new Showcase(examples, recent, featured);
+    }
+
+    /**
+     * The published site whose latest finished AI customer test went best (most customers got what they came for),
+     * so the home page shows a real site and a real result. Built-in sample sites are used only when no
+     * real site has a photo yet. Null when there is nothing with a photo.
+     */
+    private Featured featured(List<String> missing) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select b.id, b.name, b.slug, b.tagline, b.hero_query, t.passed, t.total
+                from business b
+                left join lateral (
+                    select count(*) filter (where c.status = 'PASSED')::int as passed, count(*)::int as total
+                    from test_run r join test_case c on c.run_id = r.id
+                    where r.id = (select r2.id from test_run r2 where r2.business_id = b.id and r2.status = 'DONE'
+                                  order by r2.started_at desc limit 1)
+                ) t on true
+                where b.status = 'PUBLISHED'
+                order by b.sample, coalesce(t.passed, -1) desc, b.published_at desc
+                limit 6
+                """);
+        for (Map<String, Object> row : rows) {
+            UUID id = (UUID) row.get("id");
+            var hero = images.resolve(id, "", (String) row.get("hero_query"), true);
+            if (hero.isEmpty()) {
+                continue;
+            }
+            List<Item> items = new ArrayList<>();
+            for (Map<String, Object> p : jdbc.queryForList("""
+                    select name, price_paise, unit, image_query from product
+                    where business_id = ? order by sort_order limit 3
+                    """, id)) {
+                var picture = images.resolve(id, (String) p.get("name"), (String) p.get("image_query"), true);
+                if (picture.isEmpty() && p.get("image_query") != null) {
+                    missing.add((String) p.get("image_query"));
+                }
+                items.add(new Item((String) p.get("name"), price((Number) p.get("price_paise"), (String) p.get("unit")),
+                        picture.map(ShowcaseController::photo).orElse(null)));
+            }
+            Integer total = (Integer) row.get("total");
+            boolean tested = total != null && total > 0;
+            return new Featured((String) row.get("name"), (String) row.get("tagline"), "/s/" + row.get("slug"),
+                    photo(hero.get()), items, tested ? (Integer) row.get("passed") : null, tested ? total : null);
+        }
+        return null;
+    }
+
+    private static String price(Number paise, String unit) {
+        if (paise == null) {
+            return null;
+        }
+        long p = paise.longValue();
+        String amount = p % 100 == 0
+                ? java.text.NumberFormat.getIntegerInstance(new java.util.Locale("en", "IN")).format(p / 100)
+                : String.format("%.2f", p / 100.0);
+        if (unit == null || unit.isBlank()) {
+            return "₹" + amount;
+        }
+        return "₹" + amount + (unit.trim().equalsIgnoreCase("each") ? " each" : " / " + unit.trim());
     }
 
     private static Photo photo(ImageService.Picture p) {

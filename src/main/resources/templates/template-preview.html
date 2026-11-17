@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{pages/parts :: head(${design.name() + ' template · BazaarReady'}, ${'A live preview of the ' + design.name() + ' design, shown as a real sample site.'})}"></head>
+<body class="preview-page">
+<style>
+    body.preview-page { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .pbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1rem;
+        padding: .7rem clamp(16px, 3vw, 28px); border-bottom: 1px solid var(--line); background: rgba(15,14,34,.92); }
+    .pbar .left { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+    .pbar .back { color: #d8d1e6; text-decoration: none; font-weight: 600; white-space: nowrap; }
+    .pbar .back:hover { color: var(--ivory); }
+    .pbar h1 { margin: 0; font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pbar h1 small { font-family: "Anek Latin", sans-serif; font-weight: 400; color: var(--muted); font-size: .95rem; margin-left: .4rem; }
+    .views { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+    .views button { font: inherit; font-size: .9rem; font-weight: 600; color: #d8d1e6; background: none; border: 0; border-radius: 999px; padding: .3rem .9rem; cursor: pointer; }
+    .views button[aria-pressed="true"] { background: rgba(255,255,255,.12); color: var(--ivory); }
+    .right { display: flex; align-items: center; gap: .8rem; }
+    .stage { flex: 1; display: flex; justify-content: center; padding: 1rem; overflow: auto; }
+    .frame { width: 100%; max-width: 1280px; height: 100%; border: 1px solid var(--line); border-radius: 12px; background: #fff;
+        transition: max-width .35s ease; }
+    .stage.phone .frame { max-width: 390px; border-radius: 28px; border: 8px solid #2b2950; }
+    @media (max-width: 700px) { .views { display: none; } .pbar h1 small { display: none; } .stage { padding: 0; } .frame { border-radius: 0; border: 0; } }
+</style>
+<header class="pbar">
+    <div class="left">
+        <a class="back" href="/templates">← Templates</a>
+        <h1><span th:text="${design.name()}">Classic</span><small th:text="${'Sample: ' + design.siteName()}">Sample</small></h1>
+    </div>
+    <div class="views" role="group" aria-label="Preview size">
+        <button type="button" data-view="desktop" aria-pressed="true">Desktop</button>
+        <button type="button" data-view="phone" aria-pressed="false">Phone</button>
+    </div>
+    <div class="right">
+        <a class="cta" th:href="${'/?design=' + design.key()}" style="padding:.55rem 1.2rem">Use this design</a>
+    </div>
+</header>
+<div class="stage" id="stage">
+    <iframe class="frame" th:src="${design.sitePath()}" th:title="${design.name() + ' sample site'}" loading="eager"></iframe>
+</div>
+<script th:attr="nonce=${cspNonce}">
+    (function () {
+        var stage = document.getElementById('stage');
+        var buttons = document.querySelectorAll('.views button');
+        buttons.forEach(function (b) {
+            b.addEventListener('click', function () {
+                buttons.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+                stage.classList.toggle('phone', b.dataset.view === 'phone');
+            });
+        });
+    })();
+</script>
+</body>
+</html>

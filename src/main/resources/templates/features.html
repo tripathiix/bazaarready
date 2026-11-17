@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{pages/parts :: head('BazaarReady features', 'Everything a small business needs to open online: build by talking, AI test customers, collab scam checks, 8 languages and more.')}"></head>
+<body>
+<div th:replace="~{pages/parts :: top('features')}"></div>
+<style>
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; margin-top: 2.2rem; }
+    .feature { padding: 1.4rem; display: flex; flex-direction: column; gap: .45rem; scroll-margin-top: 1rem; }
+    .feature:target { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber), 0 0 40px rgba(244,168,58,.2); }
+    .tag { margin: 0; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+    .feature h2 { margin: 0; font-size: 1.4rem; }
+    .feature p { margin: 0; color: #cfc7de; }
+    .where { font-size: .88rem; color: var(--mint); }
+    .end { margin: 3rem 0 0; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } .feature { padding: 1.15rem; } }
+</style>
+<main class="wrap">
+    <h1 class="rise">Everything a small business needs<br><span class="accent">to open online.</span></h1>
+    <p class="lead rise">Built for home businesses, tutors, artisans and creators, in their own language.</p>
+
+    <div class="grid">
+        <article class="card feature rise" id="build"><p class="tag">Build by talking</p><h2>Describe it, get a real website</h2>
+            <p>Type or speak about your business. You get a multi-page website: home, everything on offer, a page per item, about and contact.</p><span class="where">Home page</span></article>
+        <article class="card feature rise" id="whatsapp"><p class="tag">WhatsApp</p><h2>Already selling on WhatsApp?</h2>
+            <p>Import exported chats. Products, prices and common questions are picked out. Customers' names and numbers are removed first.</p><span class="where">Home page → Import WhatsApp chats</span></article>
+        <article class="card feature rise" id="coach"><p class="tag">Idea coach</p><h2>Will my idea work?</h2>
+            <p>An honest mentor chat about customers, pricing and risks. Then turn the chat into your website with one tap.</p><span class="where">Button at the bottom right of the home page</span></article>
+        <article class="card feature rise" id="testing"><p class="tag">AI customers</p><h2>Tested before anyone visits</h2>
+            <p>Ten AI customers try your site in different situations, including a blind visitor and someone new to the internet. You get a plain-words summary and one-tap fixes.</p><span class="where">Before publishing, and on your dashboard</span></article>
+        <article class="card feature rise" id="collab"><p class="tag">Collab check</p><h2>Is this brand deal real?</h2>
+            <p>Paste a brand-deal or collab message. We check the sender's website age and email records and look for scam signs, like asking you to pay a fee, then give a verdict and a suggested reply.</p><span class="where">Your dashboard → Is this collab real?</span></article>
+        <article class="card feature rise" id="languages"><p class="tag">Your language</p><h2>Eight Indian languages</h2>
+            <p>English, Hindi, Kannada, Tamil, Telugu, Marathi, Bengali and Gujarati, by voice or text. Your website can be in any language.</p><span class="where">Home page</span></article>
+        <article class="card feature rise" id="shop"><p class="tag">Orders and bookings</p><h2>A real shop or booking site</h2>
+            <p>Customers can add to cart and order, book a date, or send you a message, depending on your business. Payments are a demo for now.</p><span class="where">Your public website</span></article>
+        <article class="card feature rise" id="changes"><p class="tag">Changes</p><h2>Change it by saying so</h2>
+            <p>“Add mango cake for ₹900.” “Add a Diwali offer.” The agent changes only what you asked. Add and edit products yourself too.</p><span class="where">Your dashboard</span></article>
+        <article class="card feature rise" id="photos"><p class="tag">Photos</p><h2>Relevant photos on every site</h2>
+            <p>Free stock photos are checked by AI to make sure they really show your product. Upload your own at any time.</p><span class="where">Your dashboard → Products and photos</span></article>
+        <article class="card feature rise" id="safety"><p class="tag">Safety</p><h2>Built to be safe</h2>
+            <p>Sign-in for your dashboard, protection against spam and fake requests, rate limits and a daily cap on AI use. Messages get a real-or-fake check too.</p><span class="where">Everywhere</span></article>
+    </div>
+
+    <div class="end">
+        <a class="cta" href="/">Build my website →</a>
+        <a href="/guide">How it works →</a>
+    </div>
+</main>
+<footer th:replace="~{pages/parts :: foot}"></footer>
+</body>
+</html>

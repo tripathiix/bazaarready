@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<!-- Shared pieces for BazaarReady's own pages (Templates, How it works, Features): head, top links and footer. -->
+<head th:fragment="head(title, description)">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">BazaarReady</title>
+    <meta name="description" th:content="${description}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Anek+Latin:wght@400;600&family=Kalam:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root { --night: #0f0e22; --night-2: #19173a; --panel: #1a1838; --ivory: #f6efe4; --muted: #b9b2c9; --line: rgba(255,255,255,.12);
+            --amber: #f4a83a; --rose: #ec7a8c; --jade: #4fc3a1; --mint: #8fd9c4; color-scheme: dark; }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { margin: 0; color: var(--ivory); font: 1.05rem/1.65 "Anek Latin", "Segoe UI", system-ui, sans-serif; min-height: 100vh;
+            background: radial-gradient(60rem 40rem at 10% -10%, rgba(244,168,58,.14), transparent 60%),
+                        radial-gradient(50rem 40rem at 100% 30%, rgba(236,122,140,.1), transparent 60%),
+                        linear-gradient(180deg, var(--night), var(--night-2)) fixed; }
+        a { color: var(--amber); }
+        :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding-left: clamp(16px, 4vw, 32px); padding-right: clamp(16px, 4vw, 32px); }
+        .lights { display: block; width: 100%; height: 2.4rem; }
+        .lights circle { fill: #ffd27a; filter: drop-shadow(0 0 4px rgba(255,196,92,.9)); animation: twinkle 3.2s ease-in-out infinite; }
+        @keyframes twinkle { 0%,100% { opacity: 1 } 50% { opacity: .45 } }
+        .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem 1.5rem; padding-top: .6rem; }
+        .brand { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1.45rem; letter-spacing: -.02em; color: var(--ivory); text-decoration: none; }
+        .brand span { background: linear-gradient(100deg, var(--amber), var(--rose)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .top nav { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.3rem; font-size: .97rem; }
+        .top nav a { color: #d8d1e6; text-decoration: none; padding-bottom: 2px; border-bottom: 2px solid transparent; }
+        .top nav a:hover, .top nav a:focus-visible { color: var(--ivory); }
+        .top nav a.on { color: var(--ivory); border-bottom-color: var(--amber); }
+        .top nav a.cta-small { color: #22140a; font-weight: 600; border: 0; border-radius: 999px; padding: .4rem 1rem;
+            background: linear-gradient(100deg, var(--amber), #f7c065 55%, var(--rose)); }
+        h1, h2, h3 { font-family: "Bricolage Grotesque", sans-serif; line-height: 1.12; }
+        h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); font-weight: 800; letter-spacing: -.02em; margin: 2.6rem 0 .6rem; }
+        h1 .accent { color: var(--amber); }
+        h1, h2, .lead { overflow-wrap: break-word; }
+        .lead { color: #cfc7de; font-size: 1.18rem; max-width: 42rem; margin: 0; }
+        .hand { font-family: Kalam, cursive; color: #ffd9a0; font-size: 1.2rem; margin: 0; }
+        .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; }
+        .cta { display: inline-block; padding: .85rem 1.5rem; border-radius: 999px; text-decoration: none; font-weight: 700;
+            color: #22140a; background: linear-gradient(100deg, var(--amber), #f7c065 50%, var(--rose)); }
+        .foot { display: flex; flex-direction: column; align-items: center; gap: .7rem; padding: 3.5rem 1rem 2.5rem; text-align: center;
+            font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: -.02em; color: rgba(246,239,228,.35); }
+        .holo { font-family: "Anek Latin", sans-serif; font-weight: 600; font-size: .82rem; letter-spacing: .04em; padding: .35rem .95rem; border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.18); background: linear-gradient(110deg, #8c9cff, #ec7a8c, #f4a83a, #4fc3a1, #8c9cff) text, rgba(255,255,255,.04);
+            -webkit-background-clip: text; color: transparent; background-size: 300% 100%;
+            box-shadow: 0 0 18px rgba(140,156,255,.18), inset 0 0 10px rgba(236,122,140,.12); animation: holo 6s linear infinite; }
+        @keyframes holo { to { background-position: 300% 0; } }
+        @media (prefers-reduced-motion: no-preference) {
+            .rise { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+            @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        }
+        @media (max-width: 640px) {
+            .top { flex-direction: column; align-items: flex-start; gap: .6rem; }
+            .top nav { width: 100%; gap: .5rem 1.1rem; }
+            .top nav a.cta-small { margin-top: .2rem; }
+            h1 { margin-top: 1.8rem; }
+        }
+        @media (prefers-reduced-motion: reduce) { .lights circle, .holo { animation: none; } }
+    </style>
+</head>
+<body>
+
+<div th:fragment="top(active)">
+    <svg class="lights" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 4 Q166 46 333 4 M333 4 Q500 46 666 4 M666 4 Q833 46 1000 4" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.2"/>
+        <circle cx="27.8" cy="11.7" r="3" style="animation-delay:0.45s"/>
+        <circle cx="55.6" cy="17.0" r="3" style="animation-delay:0.90s"/>
+        <circle cx="83.3" cy="21.6" r="3" style="animation-delay:1.35s"/>
+        <circle cx="111.1" cy="25.1" r="3" style="animation-delay:1.80s"/>
+        <circle cx="138.9" cy="27.3" r="3" style="animation-delay:2.25s"/>
+        <circle cx="166.7" cy="28.0" r="3" style="animation-delay:2.70s"/>
+        <circle cx="194.4" cy="27.3" r="3" style="animation-delay:0.00s"/>
+        <circle cx="222.2" cy="25.1" r="3" style="animation-delay:0.45s"/>
+        <circle cx="250.0" cy="21.6" r="3" style="animation-delay:0.90s"/>
+        <circle cx="277.8" cy="17.0" r="3" style="animation-delay:1.35s"/>
+        <circle cx="305.6" cy="11.7" r="3" style="animation-delay:1.80s"/>
+        <circle cx="361.1" cy="11.7" r="3" style="animation-delay:2.25s"/>
+        <circle cx="388.9" cy="17.0" r="3" style="animation-delay:2.70s"/>
+        <circle cx="416.7" cy="21.6" r="3" style="animation-delay:0.00s"/>
+        <circle cx="444.4" cy="25.1" r="3" style="animation-delay:0.45s"/>
+        <circle cx="472.2" cy="27.3" r="3" style="animation-delay:0.90s"/>
+        <circle cx="500.0" cy="28.0" r="3" style="animation-delay:1.35s"/>
+        <circle cx="527.8" cy="27.3" r="3" style="animation-delay:1.80s"/>
+        <circle cx="555.5" cy="25.1" r="3" style="animation-delay:2.25s"/>
+        <circle cx="583.3" cy="21.6" r="3" style="animation-delay:2.70s"/>
+        <circle cx="611.1" cy="17.0" r="3" style="animation-delay:0.00s"/>
+        <circle cx="638.9" cy="11.7" r="3" style="animation-delay:0.45s"/>
+        <circle cx="694.4" cy="11.7" r="3" style="animation-delay:0.90s"/>
+        <circle cx="722.2" cy="17.0" r="3" style="animation-delay:1.35s"/>
+        <circle cx="750.0" cy="21.6" r="3" style="animation-delay:1.80s"/>
+        <circle cx="777.8" cy="25.1" r="3" style="animation-delay:2.25s"/>
+        <circle cx="805.5" cy="27.3" r="3" style="animation-delay:2.70s"/>
+        <circle cx="833.3" cy="28.0" r="3" style="animation-delay:0.00s"/>
+        <circle cx="861.1" cy="27.3" r="3" style="animation-delay:0.45s"/>
+        <circle cx="888.9" cy="25.1" r="3" style="animation-delay:0.90s"/>
+        <circle cx="916.7" cy="21.6" r="3" style="animation-delay:1.35s"/>
+        <circle cx="944.4" cy="17.0" r="3" style="animation-delay:1.80s"/>
+        <circle cx="972.2" cy="11.7" r="3" style="animation-delay:2.25s"/>
+    </svg>
+    <header class="wrap top">
+        <a class="brand" href="/">Bazaar<span>Ready</span></a>
+        <nav aria-label="Main">
+            <a href="/templates" th:classappend="${active == 'templates'} ? 'on'" th:attr="aria-current=${active == 'templates'} ? 'page'">Templates</a>
+            <a href="/guide" th:classappend="${active == 'guide'} ? 'on'" th:attr="aria-current=${active == 'guide'} ? 'page'">How it works</a>
+            <a href="/features" th:classappend="${active == 'features'} ? 'on'" th:attr="aria-current=${active == 'features'} ? 'page'">Features</a>
+            <a href="/account">My dashboard</a>
+            <a class="cta-small" href="/">Build my website</a>
+        </nav>
+    </header>
+</div>
+
+<footer th:fragment="foot" class="foot">
+    <span>BazaarReady</span>
+    <span class="holo">Crafted with <span aria-label="love">♥</span> by Yashi Tripathi</span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Caddy: the only service that faces the internet.
+# It gets and renews HTTPS certificates from Let's Encrypt automatically,
+# then forwards each request to the Spring Boot app on the internal Docker network.
+
+www.bazaarready.com {
+	redir https://bazaarready.com{uri} permanent
+}
+
+bazaarready.com {
+	encode zstd gzip
+	reverse_proxy app:8080
+}

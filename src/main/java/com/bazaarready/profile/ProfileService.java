@@ -153,6 +153,12 @@ public class ProfileService {
     }
 
     /** Whether a kind of business gets a cart, a booking form, or neither. */
+    /** True for the built-in example sites shown in the Templates gallery. */
+    @Transactional(readOnly = true)
+    public boolean isSample(UUID id) {
+        return businesses.findById(id).map(Business::isSample).orElse(false);
+    }
+
     public static String styleOf(String kind) {
         return switch (kind) {
             case "shop", "food" -> "STORE";

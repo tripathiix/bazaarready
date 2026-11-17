@@ -98,6 +98,10 @@ public class Business {
     @Column(name = "published_at")
     private Instant publishedAt;
 
+    /** A built-in example site for the Templates gallery: never listed, and its forms do not submit. */
+    @Column(nullable = false)
+    private boolean sample;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -150,6 +154,7 @@ public class Business {
     public UUID getOwnerKey() { return ownerKey; }
     public Instant getPublishedAt() { return publishedAt; }
     public Instant getCreatedAt() { return createdAt; }
+    public boolean isSample() { return sample; }
 
     public void setName(String name) { this.name = name; }
     public void setTagline(String tagline) { this.tagline = tagline; }

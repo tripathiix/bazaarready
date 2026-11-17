@@ -26,7 +26,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  *       the token from the XSRF-TOKEN cookie; server pages carry it as a hidden field. Customer
  *       forms on generated sites (/s/...) are exempt: their visitors are anonymous, so there is no
  *       signed-in session to abuse.</li>
- *   <li>Headers: frames denied, strict referrer, HSTS over HTTPS, and a nonce-based
+ *   <li>Headers: frames only from this site (the template preview), strict referrer, HSTS over HTTPS, and a nonce-based
  *       Content-Security-Policy (see {@link SecurityHeadersFilter}).</li>
  * </ul>
  */
@@ -93,7 +93,7 @@ class SecurityConfig {
                 .exceptionHandling(e -> e.defaultAuthenticationEntryPointFor(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), request -> request.getRequestURI().startsWith("/api/")))
                 .headers(h -> h
-                        .frameOptions(f -> f.deny())
+                        .frameOptions(f -> f.sameOrigin())
                         .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                         .httpStrictTransportSecurity(s -> s.maxAgeInSeconds(31_536_000).includeSubDomains(true)))
                 .addFilterBefore(new RateLimitFilter(), UsernamePasswordAuthenticationFilter.class)
