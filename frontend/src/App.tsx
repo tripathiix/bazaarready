@@ -257,6 +257,7 @@ export default function App() {
               <a href="/templates">{h.templates}</a>
               <a href="/guide">{u.howItWorks}</a>
               <a href="/features">{h.features}</a>
+              <a href="/contact">{h.contact}</a>
               <a className="nav-pill" href="/account">
                 {h.myDashboard}
               </a>
