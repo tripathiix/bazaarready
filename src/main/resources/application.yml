@@ -53,10 +53,11 @@ bazaarready:
   google:
     client-id: ${GOOGLE_CLIENT_ID:}
     client-secret: ${GOOGLE_CLIENT_SECRET:}
-  # Contact form mail, sent through the Titan mailbox (smtp.titan.email, port 465). Without a password,
+  # Contact form mail, sent through the Titan mailbox. GoDaddy-sold Titan uses smtpout.secureserver.net
+  # (port 465, SSL), not smtp.titan.email. Without a password,
   # messages are still saved and simply not emailed.
   smtp:
-    host: ${SMTP_HOST:smtp.titan.email}
+    host: ${SMTP_HOST:smtpout.secureserver.net}
     port: ${SMTP_PORT:465}
     username: ${SMTP_USERNAME:support@bazaarready.com}
     password: ${SMTP_PASSWORD:}
