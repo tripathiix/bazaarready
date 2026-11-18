@@ -31,8 +31,10 @@ class RateLimitFilter extends OncePerRequestFilter {
     private record Rule(String name, Predicate<HttpServletRequest> applies, int limit, Duration window, String message) {
     }
 
-    private static final Pattern OWNER_AI = Pattern.compile("^/owner/[0-9a-f-]{36}/(test|check)$");
-    private static final Pattern OWNER_EDIT = Pattern.compile("^/owner/[0-9a-f-]{36}/(photo|products.*)$");
+    private static final Pattern OWNER_AI = Pattern.compile("^/owner/[0-9a-f-]{36}/(test|check|focus|shutter/voice|chat/[0-9a-f-]{36})$");
+    /** Shopper actions on a generated site that call Claude: bargaining and chat messages. */
+    private static final Pattern SHOPPER_AI = Pattern.compile("^/s/[^/]+/(haggle|chat(/[0-9a-f-]{36})?)$");
+    private static final Pattern OWNER_EDIT = Pattern.compile("^/owner/[0-9a-f-]{36}/(photo|products.*|shutter.*|haggle|mediakit|comingsoon)$");
 
     private static boolean post(HttpServletRequest r) {
         return "POST".equalsIgnoreCase(r.getMethod());
@@ -40,7 +42,8 @@ class RateLimitFilter extends OncePerRequestFilter {
 
     private static boolean ai(HttpServletRequest r) {
         String uri = r.getRequestURI();
-        return post(r) && (uri.startsWith("/api/agent/") || uri.startsWith("/api/coach") || OWNER_AI.matcher(uri).matches());
+        return post(r) && (uri.startsWith("/api/agent/") || uri.startsWith("/api/coach") || OWNER_AI.matcher(uri).matches()
+                || SHOPPER_AI.matcher(uri).matches());
     }
 
     private static final String AI_MESSAGE = "You're going a little fast. Please wait a minute and try again.";
@@ -50,7 +53,7 @@ class RateLimitFilter extends OncePerRequestFilter {
             new Rule("ai-day", RateLimitFilter::ai, 250, Duration.ofDays(1), "You've reached today's limit for AI requests. Please come back tomorrow."),
             new Rule("sign-in", r -> post(r) && (r.getRequestURI().equals("/login") || r.getRequestURI().equals("/signup")),
                     10, Duration.ofMinutes(15), "Too many sign-in attempts. Please wait 15 minutes and try again."),
-            new Rule("customer-forms", r -> post(r) && r.getRequestURI().startsWith("/s/"),
+            new Rule("customer-forms", r -> post(r) && r.getRequestURI().startsWith("/s/") && !SHOPPER_AI.matcher(r.getRequestURI()).matches(),
                     20, Duration.ofMinutes(10), "Too many orders or messages from your connection. Please wait a few minutes."),
             new Rule("contact-us", r -> post(r) && r.getRequestURI().equals("/contact"),
                     5, Duration.ofHours(1), "You've sent several messages already. Please wait an hour, or email support@bazaarready.com."),
@@ -95,7 +98,10 @@ class RateLimitFilter extends OncePerRequestFilter {
         response.setStatus(429);
         response.setHeader("Retry-After", String.valueOf(Math.max(1, retryMillis / 1000)));
         response.setCharacterEncoding("UTF-8");
-        if (request.getRequestURI().startsWith("/api/")) {
+        if (SHOPPER_AI.matcher(request.getRequestURI()).matches()) {
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"" + rule.message() + "\"}");
+        } else if (request.getRequestURI().startsWith("/api/")) {
             response.setContentType("application/problem+json");
             response.getWriter().write("{\"status\":429,\"title\":\"Too many requests\",\"detail\":\"" + rule.message() + "\"}");
         } else {

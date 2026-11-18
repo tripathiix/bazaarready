@@ -71,6 +71,12 @@ class SiteController {
     private final com.bazaarready.guard.MessageCheckService checks;
     @org.springframework.beans.factory.annotation.Autowired
     private com.bazaarready.account.OwnerAccess owners;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.bazaarready.extras.ExtrasService extras;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.bazaarready.extras.HaggleService haggle;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.bazaarready.extras.OwnerExtrasController ownerExtras;
 
     SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json,
                    ImageService images, com.bazaarready.testing.TestRunService tests,
@@ -85,10 +91,109 @@ class SiteController {
     }
 
     @GetMapping("/s/{slug}")
-    String home(@PathVariable String slug, Model model) {
+    String home(@PathVariable String slug, Model model, jakarta.servlet.http.HttpServletRequest request,
+                jakarta.servlet.http.HttpServletResponse response) {
         ProfileResponse shop = common(slug, model, "home");
         model.addAttribute("featured", shop.products().stream().limit(6).toList());
+        var ex = (com.bazaarready.extras.ExtrasService.Extras) model.getAttribute("ex");
+        if (ex != null && ex.comingSoon() && !ex.priceOptions().isEmpty()) {
+            model.addAttribute("testPrice", priceFor(ex, request, response, shop.slug()));
+        }
         return "site/home";
+    }
+
+    /**
+     * The coming-soon price test: each visitor is shown one of the owner's prices, chosen at random on the
+     * first visit and kept in a cookie, so sign-ups can be compared per price.
+     */
+    private BigDecimal priceFor(com.bazaarready.extras.ExtrasService.Extras ex, jakarta.servlet.http.HttpServletRequest request,
+                                jakarta.servlet.http.HttpServletResponse response, String slug) {
+        String name = "pv-" + slug.replaceAll("[^a-z0-9-]", "");
+        if (request.getCookies() != null) {
+            for (var c : request.getCookies()) {
+                if (name.equals(c.getName())) {
+                    try {
+                        int i = Integer.parseInt(c.getValue());
+                        if (i >= 0 && i < ex.priceOptions().size()) {
+                            return ex.priceOptions().get(i);
+                        }
+                    } catch (NumberFormatException ignored) {
+                        // pick again
+                    }
+                }
+            }
+        }
+        int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(ex.priceOptions().size());
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, String.valueOf(i));
+        cookie.setPath("/s/" + slug);
+        cookie.setMaxAge(60 * 60 * 24 * 90);
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+        return ex.priceOptions().get(i);
+    }
+
+    // ---- Coming soon: the waitlist ----
+
+    @PostMapping("/s/{slug}/waitlist")
+    String joinWaitlist(@PathVariable String slug, @RequestParam(defaultValue = "") String name,
+                        @RequestParam(defaultValue = "") String contact, @RequestParam(required = false) String website,
+                        Model model, jakarta.servlet.http.HttpServletRequest request,
+                        jakarta.servlet.http.HttpServletResponse response) {
+        String sampleStop = sampleStop(slug);
+        if (sampleStop != null) {
+            return sampleStop;
+        }
+        ProfileResponse shop = common(slug, model, "home");
+        var ex = extras.get(shop.id());
+        if (isBlank(name) || isBlank(contact)) {
+            return "redirect:/s/" + slug + "?join=missing#waitlist";
+        }
+        if (isBlank(website)) {
+            String seen = ex.priceOptions().isEmpty() ? null : priceFor(ex, request, response, shop.slug()).toPlainString();
+            extras.addSignup(shop.id(), clip(name, 80), clip(contact, 120), seen);
+        }
+        model.addAttribute("doneKind", "waitlist");
+        return "site/done";
+    }
+
+    // ---- Creator media kit ----
+
+    @GetMapping("/s/{slug}/media-kit")
+    String mediaKit(@PathVariable String slug, Model model) {
+        ProfileResponse shop = common(slug, model, "kit");
+        if (!extras.get(shop.id()).hasMediaKit()) {
+            throw new NotFoundException("No media kit");
+        }
+        model.addAttribute("form", new HashMap<String, String>());
+        return "site/kit";
+    }
+
+    @PostMapping("/s/{slug}/collab")
+    String collab(@PathVariable String slug, @RequestParam(defaultValue = "") String brand,
+                  @RequestParam(defaultValue = "") String contact, @RequestParam(defaultValue = "") String budget,
+                  @RequestParam(defaultValue = "") String message, @RequestParam(required = false) String website, Model model) {
+        String sampleStop = sampleStop(slug);
+        if (sampleStop != null) {
+            return sampleStop;
+        }
+        ProfileResponse shop = common(slug, model, "kit");
+        if (isBlank(brand) || isBlank(contact) || isBlank(message)) {
+            model.addAttribute("error", true);
+            Map<String, String> form = new HashMap<>();
+            form.put("brand", clip(brand, 80));
+            form.put("contact", clip(contact, 120));
+            form.put("budget", clip(budget, 60));
+            form.put("message", clip(message, 2000));
+            model.addAttribute("form", form);
+            return "site/kit";
+        }
+        if (isBlank(website)) {
+            String body = "[Collab enquiry]" + (isBlank(budget) ? "" : " Budget: " + clip(budget, 60) + ".") + "\n" + clip(message, 2000);
+            var enquiry = orders.saveEnquiry(shop.id(), clip(brand, 80), clip(contact, 120), body);
+            checks.checkEnquiry(shop.id(), enquiry.getId(), enquiry.getName(), enquiry.getContact(), enquiry.getMessage());
+        }
+        model.addAttribute("doneKind", "message");
+        return "site/done";
     }
 
     @GetMapping("/s/{slug}/catalogue")
@@ -134,7 +239,7 @@ class SiteController {
     String checkout(@PathVariable String slug, @RequestParam String name, @RequestParam String phone,
                     @RequestParam String address, @RequestParam(required = false) String note,
                     @RequestParam(required = false) String deliveryDate,
-                    @RequestParam String cart, Model model) {
+                    @RequestParam String cart, @RequestParam(defaultValue = "") String deals, Model model) {
         String sampleStop = sampleStop(slug);
         if (sampleStop != null) {
             return sampleStop;
@@ -170,9 +275,14 @@ class SiteController {
             return "site/cart";
         }
         ShopOrder order;
+        String orderNote = clip(note, 300);
+        if (!extras.get(shop.id()).openNow()) {
+            // Placed while the shutter was down: the owner sees it marked as a pre-order.
+            orderNote = "Pre-order (placed while closed)" + (isBlank(orderNote) ? "" : ". " + orderNote);
+        }
         try {
-            order = orders.placeOrder(shop, parseCart(cart),
-                    new Customer(clip(name, 80), clip(phone, 20), clip(address, 300), clip(note, 300)), wanted);
+            order = orders.placeOrder(shop, parseCart(cart), haggle.redeem(shop, parseDeals(deals)),
+                    new Customer(clip(name, 80), clip(phone, 20), clip(address, 300), orderNote), wanted);
         } catch (IllegalArgumentException e) {
             return "redirect:/s/" + slug + "/cart";
         }
@@ -328,6 +438,7 @@ class SiteController {
         allChecks.stream().filter(c -> c.enquiryId() != null).forEach(c -> byEnquiry.putIfAbsent(c.enquiryId(), c));
         model.addAttribute("enquiryChecks", byEnquiry);
         model.addAttribute("checksRunning", allChecks.stream().anyMatch(c -> c.running()));
+        ownerExtras.addTo(model, shop);
         return "site/owner";
     }
 
@@ -512,8 +623,15 @@ class SiteController {
         model.addAttribute("page", page);
         model.addAttribute("base", "/s/" + shop.slug());
         model.addAttribute("draft", shop.status() == Business.Status.DRAFT);
-        model.addAttribute("store", "STORE".equals(shop.style()));
-        model.addAttribute("booking", "BOOKING".equals(shop.style()));
+        var ex = extras.get(shop.id());
+        model.addAttribute("ex", ex);
+        model.addAttribute("openNow", ex.openNow());
+        model.addAttribute("comingSoon", ex.comingSoon());
+        model.addAttribute("haggleOn", ex.haggleOn() && "STORE".equals(shop.style()) && !ex.comingSoon());
+        model.addAttribute("chatOn", !profiles.isSample(shop.id()));
+        model.addAttribute("chatLanguages", com.bazaarready.extras.ChatService.LANGUAGES);
+        model.addAttribute("store", "STORE".equals(shop.style()) && !ex.comingSoon());
+        model.addAttribute("booking", "BOOKING".equals(shop.style()) && !ex.comingSoon());
         model.addAttribute("money", new Money(shop.currency()));
         model.addAttribute("htmlLang", "hinglish".equals(language) ? "hi-Latn" : language);
         model.addAttribute("dir", RIGHT_TO_LEFT.contains(language.split("-")[0]) ? "rtl" : "ltr");
@@ -584,6 +702,21 @@ class SiteController {
             node.put("unit", product.unit());
         }
         return array.toString().replace("</", "<\\/");
+    }
+
+    /** Deal ids from the browser; only their ids are used, the prices come from the database. */
+    private static List<UUID> parseDeals(String deals) {
+        List<UUID> ids = new java.util.ArrayList<>();
+        for (String part : deals.split(",")) {
+            try {
+                if (!part.isBlank() && ids.size() < 10) {
+                    ids.add(UUID.fromString(part.trim()));
+                }
+            } catch (IllegalArgumentException ignored) {
+                // not a deal id
+            }
+        }
+        return ids;
     }
 
     private Map<UUID, Integer> parseCart(String cart) {

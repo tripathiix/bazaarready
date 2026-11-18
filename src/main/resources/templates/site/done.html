@@ -12,7 +12,11 @@
             <h1 id="title" style="color:var(--brand);max-width:none" th:text="${L.of('message_done')}">Message sent</h1>
         </th:block>
 
-        <th:block th:if="${doneKind != 'message'}">
+        <th:block th:if="${doneKind == 'waitlist'}">
+            <h1 id="title" style="color:var(--brand);max-width:none" th:text="${L.of('waitlist_done')}">You're on the list</h1>
+        </th:block>
+
+        <th:block th:if="${doneKind != 'message' and doneKind != 'waitlist'}">
             <h1 id="title" style="color:var(--brand);max-width:none" th:text="${doneKind == 'booking'} ? ${L.of('booking_done')} : ${L.of('order_done')}">Order received</h1>
             <p class="lead" style="margin:1rem auto" th:text="${L.of('thanks', 'name', shop.name())}">Thank you!</p>
 

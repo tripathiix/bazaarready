@@ -82,6 +82,53 @@ public final class SiteLabels {
         put("send_message", "Send message");
         put("message_done", "Message sent. Thank you!");
         put("back_home", "Back to home");
+        // Living shutter
+        put("closed_sign", "Closed");
+        put("closed_title", "We're closed right now");
+        put("closed_preorder", "You can still look around and leave a pre-order. We'll confirm when we open.");
+        put("browse_anyway", "Look around anyway");
+        put("closed_bar", "Closed now. Orders placed now are pre-orders.");
+        put("reopened", "We're open again!");
+        // Haggle mode
+        put("make_offer", "Make an offer");
+        put("haggle_title", "Let's bargain");
+        put("haggle_hint", "Say your price, like at a real market. Write in any language.");
+        put("haggle_placeholder", "Can you do it for less?");
+        put("haggle_quantity", "How many?");
+        put("send", "Send");
+        put("deal_done", "Deal! This price is saved in your cart for 30 minutes.");
+        put("bargained", "bargained");
+        put("go_to_cart", "Go to cart");
+        put("close", "Close");
+        put("thinking", "Thinking…");
+        // Two-language chat
+        put("chat_open", "Chat with us");
+        put("chat_hint", "Write in your own language. We translate both ways, so the owner reads it in theirs.");
+        put("chat_language", "Your language");
+        put("chat_name", "Your name (optional)");
+        put("chat_start", "Start chat");
+        put("chat_placeholder", "Type a message");
+        put("chat_waiting", "Sent. The reply will appear here. You can close this and come back later.");
+        put("see_original", "Original");
+        // Creator media kit
+        put("nav_media_kit", "Media kit");
+        put("kit_title", "Work with me");
+        put("kit_audience", "My audience");
+        put("kit_followers", "Followers");
+        put("kit_views", "Average views");
+        put("kit_rates", "Rates");
+        put("collab_title", "Send a collab request");
+        put("brand", "Brand or company");
+        put("budget", "Budget (optional)");
+        put("collab_message", "What do you have in mind?");
+        // Coming soon
+        put("soon_badge", "Coming soon");
+        put("waitlist_title", "Be the first to know");
+        put("waitlist_lead", "We're launching soon. Join the waitlist for first access.");
+        put("launch_price", "Launch price");
+        put("join", "Join the waitlist");
+        put("nav_waitlist", "Join waitlist");
+        put("waitlist_done", "You're on the list! We'll tell you first when we launch.");
     }
 
     private final Map<String, String> values;

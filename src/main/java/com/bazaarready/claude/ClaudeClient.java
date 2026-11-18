@@ -42,7 +42,11 @@ public class ClaudeClient {
         TEST_SUMMARY("Test report summary", false),
         SCOPE_CHECK("Off-topic check", false),
         PHOTO_PICK("Choosing photos", false),
-        LABELS("Translating site labels", false);
+        LABELS("Translating site labels", false),
+        HAGGLE("Haggle mode", true),
+        CHAT_TRANSLATE("Two-language chat", false),
+        SHUTTER_VOICE("Shutter voice notes", false),
+        FOCUS_GROUP("AI focus group", false);
 
         private final String label;
         private final boolean conversation;

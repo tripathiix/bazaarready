@@ -302,6 +302,94 @@
             .btn:hover::after { animation: sheen 0.8s ease; }
             .faq details[open] p { animation: site-rise 0.35s ease both; }
         }
+        /* ---- Living shutter ---- */
+        .closed-bar { background: #2a2622; color: #f6efe4; text-align: center; padding: 0.45rem 1rem; font-size: 0.95rem; }
+        .closed-bar::before { content: "●"; color: #e5534b; margin-inline-end: 0.5rem; }
+        .shutter { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; overflow: hidden;
+            background:
+                linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.25)),
+                repeating-linear-gradient(180deg, #9aa0a8 0 20px, #7b8189 20px 22px, #b7bcc2 22px 24px, #8a9098 24px 42px);
+            transform: translateY(-102%); transition: transform 1.4s cubic-bezier(0.6, 0.02, 0.3, 1); }
+        .shutter.down { transform: none; }
+        .shutter::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 26px;
+            background: linear-gradient(180deg, #4b5057, #2f3338); box-shadow: 0 -2px 0 #c9cdd2 inset; }
+        .shutter-sign { position: relative; background: #fffaf0; color: #1c1d22; border: 5px solid var(--brand); border-radius: 16px;
+            padding: 1.5rem 1.4rem 1.3rem; width: min(25rem, calc(100vw - 2.5rem)); margin: 0; text-align: center; box-shadow: 0 22px 50px rgba(0, 0, 0, 0.4);
+            transform: rotate(-2.5deg); transform-origin: top center; }
+        .shutter.down .shutter-sign { animation: sway 2.4s ease-in-out 1.4s 2 both; }
+        .shutter-sign::before, .shutter-sign::after { content: ""; position: absolute; top: -3.2rem; width: 2px; height: 3.2rem; background: #3b3f45; }
+        .shutter-sign::before { left: 22%; transform: rotate(14deg); transform-origin: bottom; }
+        .shutter-sign::after { right: 22%; transform: rotate(-14deg); transform-origin: bottom; }
+        .sign-word { margin: 0; font-family: var(--display), sans-serif; font-weight: 800; font-size: clamp(2.2rem, 9vw, 3.2rem);
+            line-height: 1; letter-spacing: 0.1em; text-transform: uppercase; color: #b3261e; }
+        .shutter-sign h2 { margin: 0.6rem 0 0.3rem; font-size: 1.3rem; }
+        .shutter-sign h2::after { display: none; }
+        .shutter-sign p { margin: 0.3rem 0; }
+        .shutter-note { font-weight: 700; color: var(--brand); }
+        .shutter-sign .btn { margin-top: 0.9rem; }
+        @keyframes sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2deg); } }
+        .toast { position: fixed; left: 50%; bottom: 1.4rem; z-index: 70; transform: translateX(-50%); background: var(--wa); color: #ffffff;
+            padding: 0.7rem 1.3rem; border-radius: 999px; font-weight: 700; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25); }
+
+        /* ---- Haggle mode ---- */
+        .btn.haggle { background: var(--surface); color: var(--brand); border-color: var(--accent); }
+        .btn.haggle::before { content: "🪙 "; }
+        dialog.haggle { border: 0; border-radius: 22px; padding: 0; width: min(30rem, calc(100vw - 1.5rem)); color: var(--ink);
+            background: var(--surface); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
+        dialog.haggle::backdrop { background: rgba(15, 12, 30, 0.55); }
+        .hg-head { background: var(--brand); color: #ffffff; padding: 1.1rem 1.3rem 1rem; position: relative; }
+        .hg-head h2 { margin: 0; font-size: 1.35rem; color: #ffffff; }
+        .hg-head h2::after { display: none; }
+        .hg-head p { margin: 0.2rem 0 0; opacity: 0.9; font-size: 0.95rem; }
+        .hg-x { position: absolute; top: 0.6rem; inset-inline-end: 0.7rem; background: transparent; border: 0; color: #ffffff; font-size: 1.6rem; cursor: pointer; line-height: 1; }
+        .hg-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem 1.3rem; background: var(--tint); }
+        .hg-bar label { margin: 0; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+        .hg-bar input { width: 4.5rem; padding: 0.35rem 0.5rem; }
+        .hg-offer { font-family: var(--display), sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--brand); transition: transform 0.25s ease; }
+        .hg-offer.moved { transform: scale(1.18); }
+        .hg-log, .chat-log { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem 1.2rem; overflow-y: auto; }
+        .hg-log { height: min(18rem, 40vh); }
+        .bubble { margin: 0; max-width: 85%; padding: 0.55rem 0.9rem; border-radius: 16px 16px 16px 4px; background: var(--tint); align-self: flex-start; line-height: 1.45; }
+        .bubble p { margin: 0; }
+        .bubble.me { align-self: flex-end; background: var(--brand); color: #ffffff; border-radius: 16px 16px 4px 16px; }
+        .bubble.wait { opacity: 0.6; font-style: italic; }
+        .bubble details { margin-top: 0.3rem; font-size: 0.82rem; opacity: 0.75; }
+        .bubble summary { cursor: pointer; }
+        .hg-form, .chat-form { display: flex; gap: 0.5rem; padding: 0.8rem 1.2rem 1.1rem; border-top: 1px solid var(--line); }
+        .hg-form input, .chat-form input { flex: 1; }
+        .hg-deal { padding: 1rem 1.3rem 1.3rem; text-align: center; border-top: 1px solid var(--line); }
+        .hg-deal p { margin: 0 0 0.8rem; font-weight: 700; color: var(--wa); }
+
+        /* ---- Two-language chat ---- */
+        .chat-fab { position: fixed; inset-inline-end: 1rem; bottom: 1rem; z-index: 40; border: 0; cursor: pointer; border-radius: 999px;
+            background: var(--brand); color: #ffffff; font: inherit; font-weight: 800; padding: 0.8rem 1.2rem; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28); }
+        .chat-fab::before { content: "💬 "; }
+        .chat-panel { position: fixed; inset-inline-end: 1rem; bottom: 4.6rem; z-index: 41; width: min(23rem, calc(100vw - 2rem)); max-height: min(34rem, 75vh);
+            display: flex; flex-direction: column; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3); overflow: hidden; }
+        .chat-head { background: var(--brand); color: #ffffff; padding: 0.9rem 1.1rem; }
+        .chat-head strong { display: block; font-family: var(--display), sans-serif; font-size: 1.1rem; }
+        .chat-head span { font-size: 0.88rem; opacity: 0.9; }
+        .chat-start { display: grid; gap: 0.7rem; padding: 1rem 1.1rem 1.2rem; }
+        .chat-thread { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+        .chat-log { flex: 1; min-height: 9rem; }
+        .chat-note { margin: 0; padding: 0 1.2rem; font-size: 0.85rem; color: var(--muted); }
+
+        /* ---- Media kit and coming soon ---- */
+        .kit-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem; padding: 0; margin: 0; list-style: none; }
+        .kit-stats li { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 1.2rem 1.3rem; }
+        .kit-stats .platform { font-weight: 800; color: var(--brand); font-family: var(--display), sans-serif; font-size: 1.2rem; }
+        .kit-stats .handle { color: var(--muted); font-size: 0.95rem; }
+        .kit-stats .big { display: block; font-family: var(--display), sans-serif; font-weight: 800; font-size: 2.1rem; line-height: 1.1; margin-top: 0.5rem; }
+        .soon { background: var(--brand); color: #ffffff; border-radius: 24px; padding: 2rem 1.6rem; display: grid; gap: 1.2rem;
+            grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); align-items: center; position: relative; overflow: hidden; }
+        .soon h2 { color: #ffffff; }
+        .soon h2::after { background: #ffffff; opacity: 0.6; }
+        .soon .lead { color: #ffffff; opacity: 0.92; }
+        .soon-badge { display: inline-block; background: var(--accent); color: var(--ink); font-weight: 800; border-radius: 999px; padding: 0.15rem 0.8rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        .soon-price { font-family: var(--display), sans-serif; font-weight: 800; font-size: 2.4rem; line-height: 1; margin: 0.6rem 0 0; }
+        .soon form { background: var(--surface); color: var(--ink); border-radius: 18px; padding: 1.2rem; display: grid; gap: 0.8rem; }
+        @media (prefers-reduced-motion: reduce) { .shutter { transition: none; } .shutter.down .shutter-sign { animation: none; } .hg-offer { transition: none; } }
     </style>
 </head>
 
@@ -309,6 +397,7 @@
 
 <header th:fragment="nav" class="top">
     <div class="draft" role="status" th:if="${draft}" th:text="${L.of('draft_banner')}">Preview</div>
+    <div class="closed-bar" role="status" data-closed-bar th:hidden="${openNow}" th:text="${L.of('closed_bar')}">Closed now</div>
     <div class="sample-bar" role="note" th:if="${sample}">Sample site made with BazaarReady. Orders and messages here are not sent.
         <a href="/templates" target="_top">All templates</a> · <a th:href="${'/?design=' + layout}" target="_top">Use this design →</a></div>
     <nav class="bar wrap" aria-label="Main">
@@ -317,7 +406,9 @@
             <a th:href="${base}" th:classappend="${page == 'home'} ? 'on'" th:text="${L.of('nav_home')}">Home</a>
             <a th:href="${base + '/catalogue'}" th:classappend="${page == 'catalogue'} ? 'on'" th:text="${offeringsTitle}">Catalogue</a>
             <a th:href="${base + '/about'}" th:classappend="${page == 'about'} ? 'on'" th:text="${L.of('nav_about')}">About</a>
+            <a th:if="${ex.hasMediaKit()}" th:href="${base + '/media-kit'}" th:classappend="${page == 'kit'} ? 'on'" th:text="${L.of('nav_media_kit')}">Media kit</a>
             <a th:href="${base + '/contact'}" th:classappend="${page == 'contact'} ? 'on'" th:text="${L.of('nav_contact')}">Contact</a>
+            <a class="pill" th:if="${comingSoon}" th:href="${base + '#waitlist'}" th:text="${L.of('nav_waitlist')}">Join waitlist</a>
             <a class="pill" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('nav_book')}">Book</a>
             <a class="pill" th:if="${store}" th:href="${base + '/cart'}"><span th:text="${L.of('nav_cart')}">Cart</span><b data-cart-count hidden>0</b></a>
         </div>
@@ -345,6 +436,8 @@
         <div class="card-actions">
             <button type="button" class="btn small" th:if="${store and p.priceRupees() != null}"
                     th:attr="data-add=${p.id()},data-label=${L.of('add_to_cart')},data-added=${L.of('added')},aria-label=${L.of('add_to_cart') + ': ' + p.name()}" th:text="${L.of('add_to_cart')}">Add to cart</button>
+            <button type="button" class="btn small haggle" th:if="${haggleOn and p.priceRupees() != null}"
+                    th:attr="data-haggle=${p.id()},data-name=${p.name()},data-price=${p.priceRupees()},aria-label=${L.of('make_offer') + ': ' + p.name()}" th:text="${L.of('make_offer')}">Make an offer</button>
             <a class="btn small" th:if="${booking}" th:href="${base + '/book?item=' + p.id()}" th:attr="aria-label=${L.of('book_now') + ': ' + p.name()}" th:text="${L.of('book_now')}">Book</a>
             <a th:href="${base + '/item/' + p.id()}" th:attr="aria-label=${L.of('view') + ': ' + p.name()}" th:text="${L.of('view')}">View details</a>
         </div>
@@ -374,6 +467,59 @@
 </div>
 
 <footer th:fragment="foot">
+    <!-- The living shutter: always on the page, so it can come down live when the owner closes. -->
+    <div class="shutter" data-shutter hidden th:attr="data-open=${openNow},data-reopened=${L.of('reopened')}" role="dialog" aria-modal="true" aria-labelledby="shutter-title">
+        <div class="shutter-sign">
+            <p class="sign-word" th:text="${L.of('closed_sign')}">Closed</p>
+            <h2 id="shutter-title" th:text="${L.of('closed_title')}">We're closed right now</h2>
+            <p class="shutter-note" data-note th:text="${ex.closedNote()}"></p>
+            <p th:text="${comingSoon or (!store and !booking)} ? '' : ${L.of('closed_preorder')}">Pre-order</p>
+            <button type="button" class="btn" data-browse th:text="${L.of('browse_anyway')}">Look around anyway</button>
+        </div>
+    </div>
+
+    <dialog class="haggle" th:if="${haggleOn}" data-haggle-dialog aria-labelledby="hg-title"
+            th:attr="data-currency=${shop.currency()},data-thinking=${L.of('thinking')}">
+        <div class="hg-head">
+            <h2 id="hg-title" th:text="${L.of('haggle_title')}">Let's bargain</h2>
+            <p><strong data-product>Item</strong> · <span th:text="${L.of('haggle_hint')}">Hint</span></p>
+            <button type="button" class="hg-x" data-close th:attr="aria-label=${L.of('close')}">×</button>
+        </div>
+        <div class="hg-bar">
+            <label><span th:text="${L.of('haggle_quantity')}">How many?</span> <input type="number" name="qty" min="1" max="99" value="1"></label>
+            <span class="hg-offer" data-offer aria-live="polite">0</span>
+        </div>
+        <div class="hg-log" data-log aria-live="polite"></div>
+        <form class="hg-form" data-hg-form>
+            <input name="msg" maxlength="300" autocomplete="off" th:placeholder="${L.of('haggle_placeholder')}" th:attr="aria-label=${L.of('haggle_placeholder')}">
+            <button class="btn small" th:text="${L.of('send')}">Send</button>
+        </form>
+        <div class="hg-deal" data-deal hidden>
+            <p th:text="${L.of('deal_done')}">Deal!</p>
+            <a class="btn" th:href="${base + '/cart'}" th:text="${L.of('go_to_cart')}">Go to cart</a>
+        </div>
+    </dialog>
+
+    <div th:if="${chatOn}" data-chat th:attr="data-original=${L.of('see_original')},data-waiting=${L.of('chat_waiting')}">
+        <button type="button" class="chat-fab" data-chat-fab aria-expanded="false" aria-controls="chat-panel" th:text="${L.of('chat_open')}">Chat with us</button>
+        <section class="chat-panel" id="chat-panel" data-chat-panel hidden aria-labelledby="chat-title">
+            <div class="chat-head"><strong id="chat-title" th:text="${shop.name()}">Name</strong><span th:text="${L.of('chat_hint')}">Hint</span></div>
+            <form class="chat-start" data-chat-start>
+                <div><label for="chat-lang" th:text="${L.of('chat_language')}">Your language</label>
+                    <select id="chat-lang" name="language"><option th:each="l : ${chatLanguages}" th:value="${l.key}" th:text="${l.value}">English</option></select></div>
+                <div><label for="chat-name" th:text="${L.of('chat_name')}">Your name</label><input id="chat-name" name="name" maxlength="80" autocomplete="name"></div>
+                <button class="btn" th:text="${L.of('chat_start')}">Start chat</button>
+            </form>
+            <div class="chat-thread" data-chat-thread hidden>
+                <div class="chat-log" data-chat-log aria-live="polite"></div>
+                <p class="chat-note" data-chat-note hidden></p>
+                <form class="chat-form" data-chat-send>
+                    <input name="text" maxlength="1000" autocomplete="off" th:placeholder="${L.of('chat_placeholder')}" th:attr="aria-label=${L.of('chat_placeholder')}">
+                    <button class="btn small" th:text="${L.of('send')}">Send</button>
+                </form>
+            </div>
+        </section>
+    </div>
     <p><span th:text="${shop.name()}">Name</span> · Made with BazaarReady</p>
     <p class="credits" th:if="${!credits.isEmpty()}">Photos:
         <th:block th:each="c, it : ${credits}"><a th:href="${c.pageUrl()}" rel="noopener" th:text="${c.photographer()}">Name</a><span th:if="${c.licence()}"> (<a th:href="${c.licenceUrl()}" rel="noopener license" th:text="${c.licence()}">CC BY</a>)</span> <span th:text="${'via ' + c.source()}">via Pexels</span><span th:unless="${it.last}">; </span></th:block>
@@ -400,19 +546,218 @@
                 io.observe(el);
             });
         })();
+        var slug = body.dataset.slug;
+        var DEALS = 'deals:' + slug;
         function read() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
         function write(cart) { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) { /* cart stays for this page only */ } badge(); }
         function count(cart) { return Object.keys(cart).reduce(function (sum, id) { return sum + cart[id]; }, 0); }
+        // Bargained deals live next to the cart. Only their ids are sent at checkout; the server holds the prices.
+        function readDeals() {
+            try {
+                var now = Date.now();
+                return (JSON.parse(localStorage.getItem(DEALS)) || []).filter(function (d) { return d.until > now; });
+            } catch (e) { return []; }
+        }
+        function writeDeals(list) { try { localStorage.setItem(DEALS, JSON.stringify(list)); } catch (e) { /* ignore */ } badge(); }
+        function fmt(symbol, value) { return symbol + (Math.round(value * 100) % 100 === 0 ? Math.round(value) : value.toFixed(2)); }
+        function toast(text) {
+            var t = document.createElement('div');
+            t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = text;
+            document.body.appendChild(t);
+            setTimeout(function () { t.remove(); }, 3500);
+        }
         function badge() {
             var el = document.querySelector('[data-cart-count]');
             if (!el) return;
-            var n = count(read());
+            var n = count(read()) + readDeals().reduce(function (sum, d) { return sum + d.qty; }, 0);
             el.textContent = n;
             el.hidden = n === 0;
         }
-        if (body.dataset.clearCart === 'true') write({});
+        if (body.dataset.clearCart === 'true') { writeDeals([]); write({}); }
         if (body.dataset.keptCart) { try { var kept = JSON.parse(body.dataset.keptCart); if (Object.keys(kept).length) write(kept); } catch (e) { /* ignore */ } }
         badge();
+
+
+        // ---- Living shutter: rolls down when closed, and follows the owner's switch live. ----
+        (function () {
+            var shutter = document.querySelector('[data-shutter]');
+            var bar = document.querySelector('[data-closed-bar]');
+            if (!shutter || !slug) return;
+            var SEEN = 'shutter-seen:' + slug;
+            var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var open = shutter.dataset.open === 'true';
+            function seen() { try { return sessionStorage.getItem(SEEN) === '1'; } catch (e) { return false; } }
+            function setSeen(v) { try { if (v) sessionStorage.setItem(SEEN, '1'); else sessionStorage.removeItem(SEEN); } catch (e) { /* ignore */ } }
+            function down(note) {
+                if (note !== null) shutter.querySelector('[data-note]').textContent = note;
+                shutter.hidden = false;
+                if (bar) bar.hidden = false;
+                requestAnimationFrame(function () { requestAnimationFrame(function () { shutter.classList.add('down'); }); });
+                setTimeout(function () { var b = shutter.querySelector('[data-browse]'); if (b) b.focus(); }, reduce ? 0 : 1400);
+            }
+            function up() {
+                shutter.classList.remove('down');
+                setTimeout(function () { shutter.hidden = true; }, reduce ? 0 : 1400);
+            }
+            if (!open && !seen()) down(null);
+            shutter.querySelector('[data-browse]').addEventListener('click', function () { setSeen(true); up(); });
+            setInterval(function () {
+                if (document.hidden) return;
+                fetch('/s/' + slug + '/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (s) {
+                    if (s.open === open) return;
+                    open = s.open;
+                    if (!open) { setSeen(false); down(s.note || ''); }
+                    else { up(); if (bar) bar.hidden = true; toast(shutter.dataset.reopened); }
+                }).catch(function () { /* try again later */ });
+            }, 12000);
+        })();
+
+        // ---- Haggle mode: a short bargaining chat; the server decides the lowest price. ----
+        (function () {
+            var dlg = document.querySelector('[data-haggle-dialog]');
+            if (!dlg) return;
+            var log = dlg.querySelector('[data-log]');
+            var form = dlg.querySelector('[data-hg-form]');
+            var input = form.querySelector('[name=msg]');
+            var qty = dlg.querySelector('[name=qty]');
+            var offer = dlg.querySelector('[data-offer]');
+            var deal = dlg.querySelector('[data-deal]');
+            var symbol = dlg.dataset.currency;
+            var state = null;
+            function bubble(text, me) {
+                var p = document.createElement('p');
+                p.className = 'bubble' + (me ? ' me' : '');
+                p.textContent = text;
+                log.appendChild(p);
+                log.scrollTop = log.scrollHeight;
+                return p;
+            }
+            document.addEventListener('click', function (event) {
+                var b = event.target.closest('[data-haggle]');
+                if (!b) return;
+                state = { id: b.dataset.haggle, price: Number(b.dataset.price), history: [], busy: false };
+                dlg.querySelector('[data-product]').textContent = b.dataset.name;
+                offer.textContent = fmt(symbol, state.price);
+                log.textContent = '';
+                deal.hidden = true;
+                form.hidden = false;
+                qty.value = 1;
+                input.value = '';
+                if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+                input.focus();
+            });
+            dlg.querySelector('[data-close]').addEventListener('click', function () { dlg.close(); });
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                var msg = input.value.trim();
+                if (!msg || !state || state.busy) return;
+                bubble(msg, true);
+                input.value = '';
+                state.busy = true;
+                var wait = bubble(dlg.dataset.thinking, false);
+                wait.classList.add('wait');
+                fetch('/s/' + slug + '/haggle', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId: state.id, quantity: Number(qty.value) || 1, history: state.history, message: msg })
+                }).then(function (r) { return r.json(); }).then(function (res) {
+                    wait.remove();
+                    if (res.error) { bubble(res.error, false); return; }
+                    state.history.push({ from: 'me', text: msg }, { from: 'shop', text: res.reply });
+                    bubble(res.reply, false);
+                    offer.textContent = fmt(symbol, Number(res.offer));
+                    offer.classList.remove('moved'); void offer.offsetWidth; offer.classList.add('moved');
+                    if (res.quantity) qty.value = res.quantity;
+                    if (res.dealId) {
+                        var list = readDeals();
+                        list.push({ id: res.dealId, name: res.name, qty: res.quantity, price: Number(res.offer), until: Date.now() + 29 * 60000 });
+                        writeDeals(list);
+                        form.hidden = true;
+                        deal.hidden = false;
+                    }
+                }).catch(function () { wait.remove(); bubble('…', false); })
+                  .then(function () { state.busy = false; });
+            });
+        })();
+
+        // ---- Two-language chat: each side writes in their language; the server translates. ----
+        (function () {
+            var box = document.querySelector('[data-chat]');
+            if (!box) return;
+            var CHAT = 'chat:' + slug;
+            var fab = box.querySelector('[data-chat-fab]');
+            var panel = box.querySelector('[data-chat-panel]');
+            var start = panel.querySelector('[data-chat-start]');
+            var thread = panel.querySelector('[data-chat-thread]');
+            var log = panel.querySelector('[data-chat-log]');
+            var send = panel.querySelector('[data-chat-send]');
+            var note = panel.querySelector('[data-chat-note]');
+            var token = null, last = 0, timer = null;
+            try { token = localStorage.getItem(CHAT); } catch (e) { /* no storage */ }
+            var select = start.querySelector('select');
+            var mine = (navigator.language || 'en').toLowerCase().split('-')[0];
+            if (select.querySelector('option[value="' + mine + '"]')) select.value = mine;
+            function show() { start.hidden = !!token; thread.hidden = !token; }
+            function add(m) {
+                last = Math.max(last, m.id);
+                var div = document.createElement('div');
+                div.className = 'bubble' + (m.mine ? ' me' : '');
+                var p = document.createElement('p');
+                p.textContent = m.text;
+                div.appendChild(p);
+                if (m.original) {
+                    var d = document.createElement('details');
+                    var s = document.createElement('summary');
+                    s.textContent = box.dataset.original;
+                    var o = document.createElement('p');
+                    o.textContent = m.original;
+                    d.appendChild(s); d.appendChild(o); div.appendChild(d);
+                    note.hidden = true;
+                }
+                log.appendChild(div);
+                log.scrollTop = log.scrollHeight;
+            }
+            function poll() {
+                if (!token) return;
+                fetch('/s/' + slug + '/chat/' + token + '?after=' + last, { cache: 'no-store' }).then(function (r) {
+                    if (r.status === 404) { token = null; try { localStorage.removeItem(CHAT); } catch (e) { /* ignore */ } show(); return null; }
+                    return r.json();
+                }).then(function (res) { if (res && res.messages) res.messages.forEach(add); }).catch(function () { /* later */ });
+            }
+            fab.addEventListener('click', function () {
+                var opening = panel.hidden;
+                panel.hidden = !opening;
+                fab.setAttribute('aria-expanded', String(opening));
+                clearInterval(timer);
+                if (opening) { show(); poll(); timer = setInterval(poll, 4000); }
+            });
+            start.addEventListener('submit', function (event) {
+                event.preventDefault();
+                fetch('/s/' + slug + '/chat', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: start.querySelector('[name=name]').value, language: select.value })
+                }).then(function (r) { return r.json(); }).then(function (res) {
+                    if (res.error) { note.textContent = res.error; note.hidden = false; thread.hidden = false; start.hidden = true; return; }
+                    token = res.token;
+                    try { localStorage.setItem(CHAT, token); } catch (e) { /* this visit only */ }
+                    show();
+                    send.querySelector('input').focus();
+                });
+            });
+            send.addEventListener('submit', function (event) {
+                event.preventDefault();
+                var field = send.querySelector('input');
+                var text = field.value.trim();
+                if (!text || !token) return;
+                field.value = '';
+                fetch('/s/' + slug + '/chat/' + token, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text })
+                }).then(function (r) { return r.json(); }).then(function (res) {
+                    if (res.error) { note.textContent = res.error; note.hidden = false; return; }
+                    poll();
+                    if (!log.querySelector('.bubble:not(.me)')) { note.textContent = box.dataset.waiting; note.hidden = false; }
+                });
+            });
+        })();
 
         // "Add to cart" buttons anywhere on the site.
         document.addEventListener('click', function (event) {
@@ -504,6 +849,23 @@
                     link.addEventListener('click', function () { var next = read(); delete next[product.id]; write(next); draw(); });
                     remove.appendChild(link);
                 });
+                readDeals().forEach(function (d) {
+                    total += d.price * d.qty;
+                    var row = rows.insertRow();
+                    row.insertCell().textContent = d.name + ' (' + cartEl.dataset.bargained + ')';
+                    row.insertCell().textContent = d.qty;
+                    var price = row.insertCell();
+                    price.className = 'num';
+                    price.textContent = money(d.price * d.qty);
+                    var remove = row.insertCell();
+                    remove.className = 'num';
+                    var link = document.createElement('button');
+                    link.type = 'button';
+                    link.className = 'linkish';
+                    link.textContent = cartEl.dataset.remove;
+                    link.addEventListener('click', function () { writeDeals(readDeals().filter(function (x) { return x.id !== d.id; })); draw(); });
+                    remove.appendChild(link);
+                });
                 var any = rows.children.length > 0;
                 cartEl.querySelector('[data-filled]').hidden = !any;
                 cartEl.querySelector('[data-empty]').hidden = any;
@@ -511,7 +873,11 @@
                 if (form) form.hidden = !any;
             };
             draw();
-            if (form) form.addEventListener('submit', function () { form.querySelector('[name=cart]').value = JSON.stringify(read()); });
+            if (form) form.addEventListener('submit', function () {
+                form.querySelector('[name=cart]').value = JSON.stringify(read());
+                var dealsField = form.querySelector('[name=deals]');
+                if (dealsField) dealsField.value = readDeals().map(function (d) { return d.id; }).join(',');
+            });
         }
     })();
     </script>

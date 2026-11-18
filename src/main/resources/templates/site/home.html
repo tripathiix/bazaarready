@@ -143,6 +143,25 @@
 </div>
 
 <main class="wrap">
+    <section class="soon" id="waitlist" th:if="${comingSoon}" aria-labelledby="waitlist-title">
+        <div>
+            <span class="soon-badge" th:text="${L.of('soon_badge')}">Coming soon</span>
+            <h2 id="waitlist-title" style="margin-top:0.8rem" th:text="${L.of('waitlist_title')}">Be the first to know</h2>
+            <p class="lead" th:text="${L.of('waitlist_lead')}">Join the waitlist.</p>
+            <th:block th:if="${testPrice != null}">
+                <p style="margin:1rem 0 0;opacity:0.85" th:text="${L.of('launch_price')}">Launch price</p>
+                <p class="soon-price" th:text="${money.format(testPrice)}">₹199</p>
+            </th:block>
+        </div>
+        <form method="post" th:action="${base + '/waitlist'}">
+            <p class="error" role="alert" th:if="${param.join != null}" th:text="${L.of('err_required')}">Please fill this in.</p>
+            <div><label for="wl-name" th:text="${L.of('name')}">Your name</label><input id="wl-name" name="name" maxlength="80" autocomplete="name" required></div>
+            <div><label for="wl-contact" th:text="${L.of('your_contact')}">Phone or email</label><input id="wl-contact" name="contact" maxlength="120" required></div>
+            <input class="trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <button class="btn" th:text="${L.of('join')}">Join the waitlist</button>
+        </form>
+    </section>
+
     <section aria-labelledby="about" th:if="${shop.about()}" class="about-band">
         <div>
             <h2 id="about" th:text="${L.of('about_title')}">About us</h2>
