@@ -194,7 +194,7 @@ public class AgentService {
                     break;
                 }
                 session.countModelCall();
-                JsonNode response = claude.createMessage(ClaudeClient.AGENT_MODEL, MAX_TOKENS, system, tools, messages);
+                JsonNode response = claude.createMessage(ClaudeClient.Feature.BUILD, ClaudeClient.AGENT_MODEL, MAX_TOKENS, system, tools, messages);
                 JsonNode content = response.path("content");
                 messages.addObject().put("role", "assistant").set("content", content);
 

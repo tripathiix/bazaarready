@@ -16,6 +16,14 @@ import java.time.Duration;
 /**
  * Thin client for the Claude Messages API. It sends one request and returns the raw response;
  * the agent loop decides what to do with it.
+ *
+ * <p>Prompt caching: the fixed instructions (tools, then the system prompt) carry a cache marker, so
+ * repeated requests read them from Claude's cache at a fraction of the price. Multi-step features
+ * (see {@link Feature#conversation()}) also turn on automatic caching, which moves the marker to the end
+ * of the conversation so each step re-reads everything before it. One-off questions don't, because
+ * their last part is different every time and would be written to the cache and never read.
+ *
+ * <p>Every reply's token counts are recorded by {@link ClaudeUsage} for the public /usage page.
  */
 @Component
 public class ClaudeClient {
@@ -25,18 +33,48 @@ public class ClaudeClient {
     /** For simple, high-volume jobs such as translating labels. */
     public static final String FAST_MODEL = "claude-haiku-5-5";
 
+    /** What a call is for, shown on the usage page. Conversation features call Claude several times in a row. */
+    public enum Feature {
+        BUILD("Building websites", true),
+        COACH("Idea coach", true),
+        COLLAB_CHECK("Collab and enquiry check", true),
+        TEST_CUSTOMERS("AI test customers", true),
+        TEST_SUMMARY("Test report summary", false),
+        SCOPE_CHECK("Off-topic check", false),
+        PHOTO_PICK("Choosing photos", false),
+        LABELS("Translating site labels", false);
+
+        private final String label;
+        private final boolean conversation;
+
+        Feature(String label, boolean conversation) {
+            this.label = label;
+            this.conversation = conversation;
+        }
+
+        public String label() {
+            return label;
+        }
+
+        public boolean conversation() {
+            return conversation;
+        }
+    }
+
     private final RestClient http;
     private final ObjectMapper json;
     private final String apiKey;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final int dailyCap;
     private final int perAccountCap;
+    private final ClaudeUsage usage;
 
     ClaudeClient(@Value("${bazaarready.anthropic.api-key:}") String apiKey, RestClient.Builder builder, ObjectMapper json,
-                 org.springframework.jdbc.core.JdbcTemplate jdbc,
+                 org.springframework.jdbc.core.JdbcTemplate jdbc, ClaudeUsage usage,
                  @Value("${bazaarready.claude.daily-cap:3000}") int dailyCap,
                  @Value("${bazaarready.claude.per-account-daily-cap:400}") int perAccountCap) {
         this.jdbc = jdbc;
+        this.usage = usage;
         this.dailyCap = dailyCap;
         this.perAccountCap = perAccountCap;
         JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory();
@@ -72,10 +110,10 @@ public class ClaudeClient {
     }
 
     /** One plain question and answer, with no tools. Returns the text of the reply. */
-    public String createText(String model, int maxTokens, String system, String userText) {
+    public String createText(Feature feature, String model, int maxTokens, String system, String userText) {
         ArrayNode messages = json.createArrayNode();
         messages.addObject().put("role", "user").put("content", userText);
-        JsonNode response = createMessage(model, maxTokens, system, null, messages);
+        JsonNode response = createMessage(feature, model, maxTokens, system, null, messages);
         StringBuilder text = new StringBuilder();
         for (JsonNode block : response.path("content")) {
             if ("text".equals(block.path("type").asText())) {
@@ -86,7 +124,7 @@ public class ClaudeClient {
     }
 
     /** One call to Claude with tools. The model may answer with text or ask to use exactly one tool. */
-    public JsonNode createMessage(String model, int maxTokens, String system, ArrayNode tools, ArrayNode messages) {
+    public JsonNode createMessage(Feature feature, String model, int maxTokens, String system, ArrayNode tools, ArrayNode messages) {
         if (!isConfigured()) {
             throw new ClaudeException("The Claude API key is not set. Add ANTHROPIC_API_KEY to the .env file and restart.");
         }
@@ -94,7 +132,15 @@ public class ClaudeClient {
         ObjectNode body = json.createObjectNode();
         body.put("model", model);
         body.put("max_tokens", maxTokens);
-        body.put("system", system);
+        // The system prompt as one text block with a cache marker. Tools come before it in the prompt,
+        // so the marker covers both. Prompts shorter than the model's minimum (512 tokens) are simply not cached.
+        ObjectNode systemBlock = body.putArray("system").addObject();
+        systemBlock.put("type", "text");
+        systemBlock.put("text", system);
+        systemBlock.putObject("cache_control").put("type", "ephemeral");
+        if (feature.conversation()) {
+            body.putObject("cache_control").put("type", "ephemeral");
+        }
         if (tools != null) {
             body.set("tools", tools);
             ObjectNode toolChoice = body.putObject("tool_choice");
@@ -103,8 +149,9 @@ public class ClaudeClient {
         }
         body.set("messages", messages);
 
+        long started = System.nanoTime();
         try {
-            return http.post()
+            JsonNode response = http.post()
                     .uri("/v1/messages")
                     .header("x-api-key", apiKey)
                     .header("anthropic-version", "2023-06-01")
@@ -112,6 +159,8 @@ public class ClaudeClient {
                     .body(body)
                     .retrieve()
                     .body(JsonNode.class);
+            usage.record(feature, model, response, (System.nanoTime() - started) / 1_000_000);
+            return response;
         } catch (RestClientResponseException e) {
             String detail = e.getResponseBodyAsString();
             if (detail.length() > 300) {

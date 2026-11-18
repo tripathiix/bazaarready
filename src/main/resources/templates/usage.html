@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{pages/parts :: head('How BazaarReady uses AI', 'Live totals of how much BazaarReady uses Claude: calls, tokens, cost, and what prompt caching saves.')}"></head>
+<body>
+<div th:replace="~{pages/parts :: top('usage')}"></div>
+<style>
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; margin-top: 2.2rem; }
+    .stat { padding: 1.3rem 1.4rem; display: grid; gap: .55rem; }
+    .stat h2 { margin: 0; font-size: 1rem; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); font-family: "Anek Latin", sans-serif; font-weight: 600; }
+    .stat dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: .35rem 1rem; }
+    .stat dt { color: var(--muted); }
+    .stat dd { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .stat .saved { color: var(--mint); }
+    .meter { height: .5rem; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+    .meter span { display: block; height: 100%; background: linear-gradient(90deg, var(--jade), var(--mint)); }
+    section.block { margin-top: 2.6rem; }
+    section.block > h2 { font-size: 1.6rem; margin: 0 0 .4rem; }
+    section.block > p { margin: 0 0 1.1rem; color: #cfc7de; max-width: 46rem; }
+    .chart { padding: 1.3rem 1.4rem 1rem; }
+    .bars { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: .45rem; align-items: end; height: 11rem; }
+    .bar { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; }
+    .bar i { display: block; border-radius: 4px; min-height: 0; }
+    .bar .other { background: var(--amber); }
+    .bar .cached { background: var(--jade); }
+    .daylabels { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: .45rem; margin-top: .4rem; text-align: center; color: var(--muted); font-size: .8rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: .4rem 1.3rem; margin-top: .9rem; color: #cfc7de; font-size: .9rem; }
+    .legend span::before { content: ""; display: inline-block; width: .7rem; height: .7rem; border-radius: 3px; margin-right: .4rem; vertical-align: -1px; }
+    .legend .c::before { background: var(--jade); }
+    .legend .o::before { background: var(--amber); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 640px; }
+    th, td { padding: .7rem .9rem; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: var(--muted); font-weight: 600; font-size: .88rem; }
+    td small { display: block; color: var(--muted); font-size: .8rem; }
+    tr:last-child td { border-bottom: 0; }
+    .how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; }
+    .how .card { padding: 1.2rem 1.3rem; }
+    .how h3 { margin: 0 0 .35rem; font-size: 1.15rem; }
+    .how p { margin: 0; color: #cfc7de; }
+    .cap { padding: 1.2rem 1.4rem; display: grid; gap: .6rem; }
+    .cap p { margin: 0; }
+    .empty { padding: 1.3rem; color: var(--muted); }
+    @media (max-width: 860px) { .stats, .how { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) { .bars, .daylabels { gap: .2rem; } .daylabels { font-size: .7rem; } }
+</style>
+<main class="wrap">
+    <p class="hand rise" style="margin-top:2.4rem">Live numbers, updated with every request</p>
+    <h1 class="rise" style="margin-top:.3rem">How BazaarReady uses AI</h1>
+    <p class="lead rise">Every website, test customer and check here is made with Claude. This page shows how much we use it, what it costs,
+        and how much prompt caching saves. Totals only: no names, messages or prompts.</p>
+
+    <div class="stats">
+        <article class="card stat rise" th:each="p : ${periods}">
+            <h2 th:text="${p.label()}">Today</h2>
+            <dl>
+                <dt>AI calls</dt><dd th:text="${#numbers.formatInteger(p.calls(), 1, 'COMMA')}">0</dd>
+                <dt>Tokens</dt><dd th:text="${p.tokens()}">0</dd>
+                <dt>Cost</dt><dd th:text="${p.cost()}">$0.00</dd>
+                <dt>Saved by caching</dt><dd class="saved" th:text="${p.saved()}">$0.00</dd>
+                <dt>Input read from cache</dt><dd th:text="${p.hitRate() + '%'}">0%</dd>
+            </dl>
+            <div class="meter" role="img" th:attr="aria-label=${p.hitRate() + '% of input read from cache'}"><span th:style="${'width:' + p.hitRate() + '%'}"></span></div>
+        </article>
+    </div>
+
+    <section class="block">
+        <h2>The last 14 days</h2>
+        <p>Tokens sent to and from Claude each day. Green is the part read from the prompt cache, which costs a small fraction of the normal price.</p>
+        <div class="card chart">
+            <div class="bars" role="img" aria-label="Daily tokens for the last 14 days">
+                <div class="bar" th:each="d : ${days}" th:title="${d.title()}">
+                    <i class="other" th:style="${'height:' + d.otherPct() + '%'}"></i>
+                    <i class="cached" th:style="${'height:' + d.cachedPct() + '%'}"></i>
+                </div>
+            </div>
+            <div class="daylabels" aria-hidden="true"><span th:each="d : ${days}" th:text="${d.label()}">1</span></div>
+            <div class="legend"><span class="c">Read from cache</span><span class="o">Full price and replies</span></div>
+        </div>
+    </section>
+
+    <section class="block">
+        <h2>By feature</h2>
+        <p>Building websites and the AI test customers call Claude many times in a row, so they gain the most from caching.</p>
+        <div class="card table-wrap" th:if="${!features.isEmpty()}">
+            <table>
+                <thead><tr><th>Feature</th><th>Calls</th><th>Tokens</th><th>Cost</th><th>Saved</th><th>From cache</th><th>Avg time</th></tr></thead>
+                <tbody>
+                <tr th:each="f : ${features}">
+                    <td><span th:text="${f.label()}">Building websites</span><small th:text="${f.model()}">Sonnet 5.5</small></td>
+                    <td th:text="${#numbers.formatInteger(f.calls(), 1, 'COMMA')}">0</td>
+                    <td th:text="${f.tokens()}">0</td>
+                    <td th:text="${f.cost()}">$0</td>
+                    <td th:text="${f.saved()}">$0</td>
+                    <td th:text="${f.hitRate() + '%'}">0%</td>
+                    <td th:text="${f.avgSeconds()}">0 s</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="card empty" th:if="${features.isEmpty()}">No AI calls recorded yet. Build a website and come back.</p>
+    </section>
+
+    <section class="block">
+        <h2>How we keep it efficient</h2>
+        <div class="how">
+            <article class="card"><h3>Prompt caching</h3>
+                <p>The fixed instructions and tools are cached, and multi-step work re-reads the earlier steps from the cache instead of paying for them again.</p></article>
+            <article class="card"><h3>The right model for the job</h3>
+                <p>Claude Sonnet 5.5 builds websites and plays test customers. The much cheaper Claude Haiku 5.5 handles quick jobs like checking photos and translating labels.</p></article>
+            <article class="card"><h3>Daily limits</h3>
+                <p>A cap on AI calls per day, for the whole service and for each account, so the credits can't be used up by mistake or abuse.</p></article>
+        </div>
+    </section>
+
+    <section class="block">
+        <div class="card cap">
+            <p><strong th:text="${#numbers.formatInteger(capUsed, 1, 'COMMA') + ' of ' + #numbers.formatInteger(cap, 1, 'COMMA')}">0 of 3,000</strong> AI calls used today.</p>
+            <div class="meter" role="img" th:attr="aria-label=${capPct + '% of today''s limit used'}"><span th:style="${'width:' + capPct + '%'}"></span></div>
+        </div>
+        <p style="margin-top:1rem;color:var(--muted);font-size:.9rem">
+            <span th:if="${since != null}" th:text="${'Tracking since ' + since + '. '}"></span>Costs are estimates from Claude's published prices and the token counts in each reply. Days are in UTC.
+        </p>
+    </section>
+</main>
+<footer th:replace="~{pages/parts :: foot}"></footer>
+</body>
+</html>

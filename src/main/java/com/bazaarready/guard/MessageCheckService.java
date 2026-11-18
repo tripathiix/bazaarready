@@ -104,7 +104,7 @@ public class MessageCheckService {
                     shop.ownerLanguage());
             StringBuilder facts = new StringBuilder();
             for (int step = 0; step < MAX_STEPS; step++) {
-                JsonNode response = claude.createMessage(ClaudeClient.AGENT_MODEL, 1500, system, tools, messages);
+                JsonNode response = claude.createMessage(ClaudeClient.Feature.COLLAB_CHECK, ClaudeClient.AGENT_MODEL, 1500, system, tools, messages);
                 JsonNode content = response.path("content");
                 messages.addObject().put("role", "assistant").set("content", content);
                 JsonNode use = null;

@@ -249,7 +249,7 @@ public class ImageService {
                 return null;
             }
             content.addObject().put("type", "text").put("text", "The photo must show: " + query);
-            JsonNode response = claude.createMessage(ClaudeClient.FAST_MODEL, 2000, PICK_SYSTEM, null, messages);
+            JsonNode response = claude.createMessage(ClaudeClient.Feature.PHOTO_PICK, ClaudeClient.FAST_MODEL, 2000, PICK_SYSTEM, null, messages);
             StringBuilder reply = new StringBuilder();
             for (JsonNode block : response.path("content")) {
                 reply.append(block.path("text").asText(""));

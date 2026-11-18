@@ -70,7 +70,7 @@ public class ScopeGuard {
         }
         boolean onTopic = true;
         try {
-            String reply = claude.createText(ClaudeClient.FAST_MODEL, 1000, SYSTEM,
+            String reply = claude.createText(ClaudeClient.Feature.SCOPE_CHECK, ClaudeClient.FAST_MODEL, 1000, SYSTEM,
                     "<message>\n" + text.strip() + "\n</message>");
             var m = VERDICT.matcher(reply);
             onTopic = !m.find() || Boolean.parseBoolean(m.group(1));
