@@ -57,6 +57,30 @@ class SiteController {
             "bn", new String[] {"Baloo Da 2", "Anek Bangla"},
             "gu", new String[] {"Baloo Bhai 2", "Anek Gujarati"});
     private static final String[] LATIN_FONTS = {"Baloo 2", "Anek Latin"};
+    /** Sites in other scripts: one family that covers the script, for headings and text. */
+    private static final Map<String, String[]> SCRIPT_FONTS = Map.ofEntries(
+            Map.entry("ar", new String[] {"Noto Kufi Arabic", "Noto Naskh Arabic"}),
+            Map.entry("fa", new String[] {"Noto Kufi Arabic", "Noto Naskh Arabic"}),
+            Map.entry("ur", new String[] {"Noto Kufi Arabic", "Noto Naskh Arabic"}),
+            Map.entry("he", new String[] {"Noto Sans Hebrew", "Noto Sans Hebrew"}),
+            Map.entry("zh", new String[] {"Noto Sans SC", "Noto Sans SC"}),
+            Map.entry("ja", new String[] {"Noto Sans JP", "Noto Sans JP"}),
+            Map.entry("ko", new String[] {"Noto Sans KR", "Noto Sans KR"}),
+            Map.entry("th", new String[] {"Noto Sans Thai", "Noto Sans Thai"}),
+            Map.entry("ml", new String[] {"Baloo Chettan 2", "Anek Malayalam"}),
+            Map.entry("pa", new String[] {"Baloo Paaji 2", "Anek Gurmukhi"}),
+            Map.entry("or", new String[] {"Baloo Bhaina 2", "Anek Odia"}),
+            Map.entry("as", new String[] {"Baloo Da 2", "Anek Bangla"}),
+            Map.entry("ne", new String[] {"Baloo 2", "Anek Devanagari"}),
+            Map.entry("si", new String[] {"Noto Sans Sinhala", "Noto Sans Sinhala"}),
+            Map.entry("my", new String[] {"Noto Sans Myanmar", "Noto Sans Myanmar"}),
+            Map.entry("km", new String[] {"Noto Sans Khmer", "Noto Sans Khmer"}),
+            Map.entry("am", new String[] {"Noto Sans Ethiopic", "Noto Sans Ethiopic"}),
+            Map.entry("ru", new String[] {"Noto Sans", "Noto Sans"}),
+            Map.entry("uk", new String[] {"Noto Sans", "Noto Sans"}),
+            Map.entry("el", new String[] {"Noto Sans", "Noto Sans"}),
+            Map.entry("kk", new String[] {"Noto Sans", "Noto Sans"}),
+            Map.entry("vi", new String[] {"Noto Sans", "Noto Sans"}));
     private static final List<String> RIGHT_TO_LEFT = List.of("ar", "he", "fa", "ur");
     private static final java.time.format.DateTimeFormatter PLACED_AT =
             java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm").withZone(java.time.ZoneId.systemDefault());
@@ -598,7 +622,7 @@ class SiteController {
         String language = shop.ownerLanguage() == null ? "en" : shop.ownerLanguage().toLowerCase();
         SiteLabels labels = labelService.labelsFor(language);
         String layout = shop.layout() == null ? "classic" : shop.layout();
-        String[] fonts = FONTS.getOrDefault(language, LATIN_FONTS);
+        String[] fonts = FONTS.getOrDefault(language, SCRIPT_FONTS.getOrDefault(language, LATIN_FONTS));
         if (fonts == LATIN_FONTS) {
             // Latin-script sites get a heading face that suits the layout.
             fonts = new String[] {switch (layout) {

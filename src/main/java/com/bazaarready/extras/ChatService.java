@@ -26,8 +26,10 @@ public class ChatService {
     public static final Map<String, String> LANGUAGES = new java.util.LinkedHashMap<>();
 
     static {
-        for (String code : List.of("en", "hi", "bn", "mr", "ta", "te", "kn", "gu", "ml", "pa", "ur", "or",
-                "ar", "es", "fr", "de", "pt", "zh", "ja", "id", "sw")) {
+        for (String code : List.of("en", "hi", "bn", "mr", "ta", "te", "kn", "gu", "ml", "pa", "ur", "or", "as", "ne",
+                "si", "ar", "es", "fr", "pt", "de", "it", "nl", "ru", "uk", "pl", "tr", "el", "ro", "sv", "cs", "hu",
+                "fa", "he", "zh", "ja", "ko", "vi", "th", "id", "ms", "fil", "my", "km", "sw", "am", "ha", "yo",
+                "ig", "zu", "so", "az", "kk", "uz")) {
             Locale locale = Locale.forLanguageTag(code);
             String own = locale.getDisplayLanguage(locale);
             own = own.isEmpty() ? nameOf(code) : own.substring(0, 1).toUpperCase(locale) + own.substring(1);

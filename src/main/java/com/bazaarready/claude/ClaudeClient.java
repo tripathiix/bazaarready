@@ -46,7 +46,8 @@ public class ClaudeClient {
         HAGGLE("Haggle mode", true),
         CHAT_TRANSLATE("Two-language chat", false),
         SHUTTER_VOICE("Shutter voice notes", false),
-        FOCUS_GROUP("AI focus group", false);
+        FOCUS_GROUP("AI focus group", false),
+        UI_TRANSLATE("Translating builder screens", false);
 
         private final String label;
         private final boolean conversation;

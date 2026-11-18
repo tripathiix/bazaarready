@@ -1,7 +1,8 @@
 // Every word on the owner's screen, in each supported language and its own script.
 // To add a language: add its code here, in Languages.java and in ShopLabels.java.
 
-export type LanguageCode = "en" | "hi" | "kn" | "ta" | "te" | "mr" | "bn" | "gu";
+/** A language code. The eight in STRINGS are hand-checked; any other is translated on demand (globalLang.ts). */
+export type LanguageCode = string;
 
 export interface Strings {
   name: string; // the language's own name, shown in the picker

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { LanguageCode } from "./i18n";
 import { RecentSite } from "./showcase";
+import { registerTable } from "./globalLang";
 
 /** Icons for every kind of business, drifting up the empty sides of wide screens. */
 const ICONS = ["🧁", "📚", "📷", "🪔", "🧵", "☕", "🎨", "🌿", "✂️", "🎧", "🧶", "🍜", "💐", "🏺", "🚲", "🎸"];
@@ -15,6 +16,7 @@ const LABELS: Record<LanguageCode, { live: string; justLaunched: string; locale:
   bn: { live: "লাইভ", justLaunched: "এইমাত্র চালু", locale: "bn-IN" },
   gu: { live: "લાઇવ", justLaunched: "હમણાં જ શરૂ", locale: "gu-IN" },
 };
+registerTable("SIDE", LABELS);
 
 function stillMotion() {
   return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;

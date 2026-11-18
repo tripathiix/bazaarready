@@ -42,7 +42,7 @@ class RateLimitFilter extends OncePerRequestFilter {
 
     private static boolean ai(HttpServletRequest r) {
         String uri = r.getRequestURI();
-        return post(r) && (uri.startsWith("/api/agent/") || uri.startsWith("/api/coach") || OWNER_AI.matcher(uri).matches()
+        return post(r) && (uri.startsWith("/api/agent/") || uri.startsWith("/api/coach") || uri.startsWith("/api/ui-strings/") || OWNER_AI.matcher(uri).matches()
                 || SHOPPER_AI.matcher(uri).matches());
     }
 

@@ -12,6 +12,7 @@ import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } fro
 import { CHATS, EXTRA, HEAR_QUESTION, ORDERS_LINK } from "./i18nExtra";
 import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
 import { NOTES, useShowcase } from "./showcase";
+import { BUILT_IN, CHIPS, MORE, RTL, loadLanguage, nativeName, pickerName, registerTable, savedExtraLanguage } from "./globalLang";
 
 /** One activity-log line in the owner's language, built from what the agent did. */
 function actionText(action: ActionView, t: Strings, readChats: string): string {
@@ -54,8 +55,12 @@ const OTHER_LABEL: Record<LanguageCode, string> = {
   gu: "અન્ય…",
 };
 
+registerTable("OTHER_LABEL", OTHER_LABEL);
+
 export default function App() {
   const [language, setLanguage] = useState<LanguageCode>(initialLanguage);
+  const [translating, setTranslating] = useState<string | null>(null);
+  const [languageError, setLanguageError] = useState<string | null>(null);
   const t = STRINGS[language];
   const extra = EXTRA[language];
   const notes = NOTES[language];
@@ -157,8 +162,30 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.lang = language;
+    document.documentElement.dir = RTL.includes(language) ? "rtl" : "ltr";
     applyFonts(language);
   }, [language]);
+
+  // A language beyond the built-in eight, chosen on an earlier visit: load its words again.
+  useEffect(() => {
+    const saved = savedExtraLanguage();
+    if (saved) void pickMore(saved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function pickMore(code: string) {
+    if (!code) return;
+    setLanguageError(null);
+    setTranslating(code);
+    try {
+      await loadLanguage(code);
+      chooseLanguage(code);
+    } catch (e) {
+      setLanguageError(e instanceof Error ? e.message : "This language isn't available right now.");
+    } finally {
+      setTranslating(null);
+    }
+  }
 
   function chooseLanguage(code: LanguageCode) {
     if (speech.listening) speech.stop();
@@ -278,18 +305,38 @@ export default function App() {
 
         <div className="wrap">
           <div className="chips" role="group" aria-label={t.language}>
-            {(Object.keys(STRINGS) as LanguageCode[]).map((code) => (
+            {CHIPS.map((code) => (
               <button
                 key={code}
                 type="button"
                 lang={code}
                 className={`chip ${code === language ? "is-on" : ""}`}
                 aria-pressed={code === language}
-                onClick={() => chooseLanguage(code)}
+                disabled={!!translating}
+                onClick={() => void pickMore(code)}
               >
-                {STRINGS[code].name}
+                {STRINGS[code]?.name ?? nativeName(code)}
               </button>
             ))}
+            <label className={`chip more-languages ${CHIPS.includes(language) ? "" : "is-on"}`}>
+              <span aria-hidden="true">🌐</span>
+              <select
+                aria-label="More languages"
+                value={CHIPS.includes(language) ? "" : language}
+                disabled={!!translating}
+                onChange={(e) => void pickMore(e.target.value)}
+              >
+                <option value="">{translating ? `${pickerName(translating)}…` : "More languages"}</option>
+                {MORE.map((code) => (
+                  <option key={code} value={code} lang={code}>
+                    {pickerName(code)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {translating && <span className="lang-note" role="status">Translating the page into {pickerName(translating)}… (only the first time)</span>}
+            {!translating && !BUILT_IN.includes(language) && <span className="lang-note">Auto-translated by AI</span>}
+            {languageError && <span className="lang-note" role="alert">{languageError}</span>}
           </div>
         </div>
 
