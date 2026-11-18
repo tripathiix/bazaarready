@@ -149,7 +149,7 @@ public class TestRunService {
                 LocalDate.now(), TEST_NAME_PREFIX + " " + person.name());
         try {
             for (int call = 0; call < MAX_STEPS; call++) {
-                JsonNode response = claude.createMessage(ClaudeClient.AGENT_MODEL, 1500, system, tools, messages);
+                JsonNode response = claude.createMessage(ClaudeClient.Feature.TEST_CUSTOMERS, ClaudeClient.AGENT_MODEL, 1500, system, tools, messages);
                 JsonNode content = response.path("content");
                 messages.addObject().put("role", "assistant").set("content", content);
                 JsonNode use = null;
@@ -369,7 +369,7 @@ public class TestRunService {
             report.append("- (").append(rs.getString(1)).append(") ").append(rs.getString(2))
                     .append(rs.getString(3) == null ? "" : " Suggestion: " + rs.getString(3)).append('\n');
         }, runId);
-        String reply = claude.createText(ClaudeClient.AGENT_MODEL, 3000, SUMMARY_SYSTEM, report.toString());
+        String reply = claude.createText(ClaudeClient.Feature.TEST_SUMMARY, ClaudeClient.AGENT_MODEL, 3000, SUMMARY_SYSTEM, report.toString());
         int start = reply.indexOf('{');
         int end = reply.lastIndexOf('}');
         if (start < 0 || end <= start) {

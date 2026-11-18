@@ -92,7 +92,7 @@ public class SiteLabelService {
                 language word their buttons. Keep placeholders such as {name}, {amount} and {days} unchanged. \
                 Keep the word WhatsApp as it is.
                 """.formatted(languageName, code);
-        String reply = claude.createText(ClaudeClient.FAST_MODEL, 4000, system, json.writeValueAsString(SiteLabels.ENGLISH));
+        String reply = claude.createText(ClaudeClient.Feature.LABELS, ClaudeClient.FAST_MODEL, 4000, system, json.writeValueAsString(SiteLabels.ENGLISH));
         int start = reply.indexOf('{');
         int end = reply.lastIndexOf('}');
         if (start < 0 || end <= start) {

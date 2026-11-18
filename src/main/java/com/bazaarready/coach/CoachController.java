@@ -82,7 +82,7 @@ class CoachController {
         if (!"user".equals(messages.get(0).path("role").asText())) {
             messages.remove(0);
         }
-        JsonNode response = claude.createMessage(ClaudeClient.AGENT_MODEL, maxTokens, system, null, messages);
+        JsonNode response = claude.createMessage(ClaudeClient.Feature.COACH, ClaudeClient.AGENT_MODEL, maxTokens, system, null, messages);
         StringBuilder text = new StringBuilder();
         for (JsonNode block : response.path("content")) {
             if ("text".equals(block.path("type").asText())) {
