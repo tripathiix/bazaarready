@@ -31,6 +31,8 @@ public class ProfileService {
     private final ProductRepository products;
     private final FaqRepository faqs;
     private final com.fasterxml.jackson.databind.ObjectMapper json;
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     ProfileService(BusinessRepository businesses, ProductRepository products, FaqRepository faqs,
                    com.fasterxml.jackson.databind.ObjectMapper json) {
@@ -46,7 +48,11 @@ public class ProfileService {
         String slug = uniqueSlug(request.addressName(), request.name());
         Business business = new Business(request.name().trim(), slug, source);
         applyDetails(business, request);
-        businesses.save(business);
+        businesses.saveAndFlush(business);
+        // New sites start with haggle mode on (at most 10% off, any quantity). It only shows on shop
+        // sites, and the owner can switch it off on their dashboard.
+        jdbc.update("insert into site_extras (business_id, haggle_on, haggle_max_off, haggle_min_qty) values (?, true, 10, 1) on conflict do nothing",
+                business.getId());
         replaceItems(business.getId(), request);
         return toResponse(business);
     }
