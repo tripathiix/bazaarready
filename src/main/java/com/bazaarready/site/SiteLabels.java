@@ -89,8 +89,10 @@ public final class SiteLabels {
         put("browse_anyway", "Look around anyway");
         put("closed_bar", "Closed now. Orders placed now are pre-orders.");
         put("reopened", "We're open again!");
+        put("open_now", "Open now");
         // Haggle mode
         put("make_offer", "Make an offer");
+        put("haggle_banner", "This shop bargains! Tap \"Make an offer\" on anything and name your price.");
         put("haggle_title", "Let's bargain");
         put("haggle_hint", "Say your price, like at a real market. Write in any language.");
         put("haggle_placeholder", "Can you do it for less?");

@@ -35,7 +35,7 @@
         .draft { background: #fff1d6; color: #5c3a00; padding: 0.5rem 1rem; text-align: center; font-size: 0.95rem; }
         .top { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); }
         .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.5rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
-        .brand { font-weight: 800; font-size: 1.35rem; line-height: 1.2; text-decoration: none; color: var(--brand); margin-inline-end: auto; }
+        .brand { font-weight: 800; font-size: 1.35rem; line-height: 1.2; text-decoration: none; color: var(--brand); order: -2; }
         .links { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 1.1rem; }
         .links a { text-decoration: none; color: var(--ink); font-weight: 600; padding: 0.25rem 0; border-bottom: 3px solid transparent; }
         .links a.on, .links a:hover { border-bottom-color: var(--accent); }
@@ -332,8 +332,19 @@
             padding: 0.7rem 1.3rem; border-radius: 999px; font-weight: 700; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25); }
 
         /* ---- Haggle mode ---- */
-        .btn.haggle { background: var(--surface); color: var(--brand); border-color: var(--accent); }
-        .btn.haggle::before { content: "🪙 "; }
+        .btn.haggle { background: var(--accent); color: #1c1d22; border-color: var(--accent); box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18); }
+        .btn.haggle::before { content: "🪙 "; display: inline-block; }
+        .btn.haggle:hover::before { animation: coin 0.6s ease; }
+        @keyframes coin { 50% { transform: rotateY(180deg) translateY(-3px); } }
+        .haggle-ribbon { background: var(--accent); color: #1c1d22; text-align: center; font-weight: 700; padding: 0.45rem 1rem; font-size: 0.95rem; }
+        .haggle-ribbon::before { content: "🪙 "; }
+        .open-pill { order: -1; margin-inline-end: auto; margin-inline-start: -0.8rem; align-self: center; font: 700 0.8rem/1 system-ui, sans-serif;
+            letter-spacing: 0.04em; text-transform: uppercase; border-radius: 999px; padding: 0.35rem 0.7rem; white-space: nowrap; }
+        .open-pill::before { content: ""; display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; margin-inline-end: 0.4rem; background: currentColor; vertical-align: 0.02rem; }
+        .open-pill.is-open { background: #dcf3e7; color: #155d3b; }
+        .open-pill.is-closed { background: #fde3e1; color: #9b1c1c; }
+        @media (prefers-reduced-motion: no-preference) { .open-pill.is-open::before { animation: blink 2s ease-in-out infinite; } }
+        @keyframes blink { 50% { opacity: 0.35; } }
         dialog.haggle { border: 0; border-radius: 22px; padding: 0; width: min(30rem, calc(100vw - 1.5rem)); color: var(--ink);
             background: var(--surface); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
         dialog.haggle::backdrop { background: rgba(15, 12, 30, 0.55); }
@@ -402,6 +413,9 @@
         <a href="/templates" target="_top">All templates</a> · <a th:href="${'/?design=' + layout}" target="_top">Use this design →</a></div>
     <nav class="bar wrap" aria-label="Main">
         <a class="brand" th:href="${base}" th:text="${shop.name()}">Name</a>
+        <span class="open-pill" data-open-pill th:unless="${comingSoon}" th:classappend="${openNow} ? 'is-open' : 'is-closed'"
+              th:attr="data-open-text=${L.of('open_now')},data-closed-text=${L.of('closed_sign')}"
+              th:text="${openNow} ? ${L.of('open_now')} : ${L.of('closed_sign')}">Open now</span>
         <div class="links">
             <a th:href="${base}" th:classappend="${page == 'home'} ? 'on'" th:text="${L.of('nav_home')}">Home</a>
             <a th:href="${base + '/catalogue'}" th:classappend="${page == 'catalogue'} ? 'on'" th:text="${offeringsTitle}">Catalogue</a>
@@ -413,6 +427,7 @@
             <a class="pill" th:if="${store}" th:href="${base + '/cart'}"><span th:text="${L.of('nav_cart')}">Cart</span><b data-cart-count hidden>0</b></a>
         </div>
     </nav>
+    <div class="haggle-ribbon" th:if="${haggleOn and (page == 'home' or page == 'catalogue')}" th:text="${L.of('haggle_banner')}">This shop bargains!</div>
 </header>
 
 <li th:fragment="card(p)" class="card"
@@ -608,6 +623,11 @@
                     open = s.open;
                     if (!open) { setSeen(false); down(s.note || ''); }
                     else { up(); if (bar) bar.hidden = true; toast(shutter.dataset.reopened); }
+                    var pill = document.querySelector('[data-open-pill]');
+                    if (pill) {
+                        pill.className = 'open-pill ' + (open ? 'is-open' : 'is-closed');
+                        pill.textContent = open ? pill.dataset.openText : pill.dataset.closedText;
+                    }
                 }).catch(function () { /* try again later */ });
             }, 12000);
         })();

@@ -46,9 +46,28 @@
         .persona .chip { margin-bottom: 0.3rem; }
         .bar-row { display: grid; grid-template-columns: 6rem 1fr 3rem; gap: 0.6rem; align-items: center; margin: 0.4rem 0; }
         .bar-row .meter span { background: var(--brand); }
+        .whats-new { background: linear-gradient(120deg, var(--tint), var(--surface)); border: 2px solid var(--accent); border-radius: 20px; padding: 1.2rem 1.3rem; }
+        .whats-new h2 { font-size: 1.3rem; }
+        .new-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.7rem; }
+        .new-grid a { display: flex; flex-direction: column; gap: 0.25rem; text-decoration: none; color: var(--ink); background: var(--surface);
+            border: 1px solid var(--line); border-radius: 14px; padding: 0.8rem 0.9rem; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .new-grid a:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(20, 20, 40, 0.12); }
+        .new-grid span { color: var(--muted); font-size: 0.92rem; }
         .kit-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.5rem; }
     </style>
 </th:block>
+
+<!-- ============ What's new ============ -->
+<section th:fragment="whatsnew" class="whats-new" aria-labelledby="new-title">
+    <h2 id="new-title">✨ New: your site now works for you after launch</h2>
+    <div class="new-grid">
+        <a href="#shutter"><strong>🏪 Open / closed</strong><span>Pull a shutter down over your site, live. Or just say "closed till Monday".</span></a>
+        <a href="#haggle"><strong>🪙 Haggle mode</strong><span th:text="${ex.haggleOn()} ? 'On. Customers can bargain; your lowest price is safe.' : 'Let customers bargain, like at a market stall.'">Bargain</span></a>
+        <a href="#chats"><strong>💬 Chat in any language</strong><span>They write in theirs, you read and reply in yours.</span></a>
+        <a href="#launch"><strong>🚀 Test my idea</strong><span>An AI focus group, a waitlist and a price test.</span></a>
+        <a href="#mediakit"><strong>🎤 Media kit</strong><span>For creators: your numbers, rates and safe collab requests.</span></a>
+    </div>
+</section>
 
 <!-- ============ Living shutter ============ -->
 <section th:fragment="shutter" aria-labelledby="shutter-title" id="shutter">
