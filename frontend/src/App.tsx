@@ -836,6 +836,14 @@ export default function App() {
                   </span>
                 )}
                 {session.finalMessage && <p className="final">{session.finalMessage}</p>}
+                {session.published && session.ownerPath && (
+                  <p className="hint own-domain">
+                    🌐 {u.ownDomain}{" "}
+                    <a href={`${session.ownerPath}#domain`} target="_blank" rel="noreferrer">
+                      {u.ownDomainLink}
+                    </a>
+                  </p>
+                )}
                 <div className="row">
                   {session.shopPath && (
                     <a className="button primary" href={session.shopPath} target="_blank" rel="noreferrer">

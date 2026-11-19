@@ -20,6 +20,8 @@ export interface UxStrings {
   coachUse: string;
   coachClose: string;
   collabCheck: string;
+  ownDomain: string;
+  ownDomainLink: string;
   howItWorks: string;
   dashboard: string;
   dashboardHint: string;
@@ -55,6 +57,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "Build my website from this",
     coachClose: "Close",
     collabCheck: "Is this collab real?",
+    ownDomain: "Your site runs free on bazaarready.com. Want your own name like yourshop.com?",
+    ownDomainLink: "See what it costs →",
     howItWorks: "How it works",
     dashboard: "Your private dashboard",
     dashboardHint: "Orders, messages, AI tests, collab checks, photos and changes, all in one place. Save this link and keep it private.",
@@ -88,6 +92,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "इसी से मेरी वेबसाइट बनाइए",
     coachClose: "बंद करें",
     collabCheck: "क्या यह कोलैब असली है?",
+    ownDomain: "आपकी साइट bazaarready.com पर मुफ़्त चलती है। अपना नाम चाहिए, जैसे yourshop.com?",
+    ownDomainLink: "कितना खर्च होगा, देखें →",
     howItWorks: "यह कैसे काम करता है",
     dashboard: "आपका निजी डैशबोर्ड",
     dashboardHint: "ऑर्डर, मैसेज, AI टेस्ट, कोलैब जाँच, फ़ोटो और बदलाव, सब एक जगह। यह लिंक सेव करें और किसी से साझा न करें।",
@@ -121,6 +127,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "ಇದರಿಂದ ನನ್ನ ವೆಬ್‌ಸೈಟ್ ಮಾಡಿ",
     coachClose: "ಮುಚ್ಚಿ",
     collabCheck: "ಈ ಕೊಲ್ಯಾಬ್ ನಿಜವೇ?",
+    ownDomain: "ನಿಮ್ಮ ಸೈಟ್ bazaarready.com ನಲ್ಲಿ ಉಚಿತವಾಗಿ ನಡೆಯುತ್ತದೆ. yourshop.com ನಂತಹ ಸ್ವಂತ ಹೆಸರು ಬೇಕೇ?",
+    ownDomainLink: "ಎಷ್ಟು ಖರ್ಚಾಗುತ್ತದೆ ನೋಡಿ →",
     howItWorks: "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
     dashboard: "ನಿಮ್ಮ ಖಾಸಗಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     dashboardHint: "ಆರ್ಡರ್‌ಗಳು, ಸಂದೇಶಗಳು, AI ಪರೀಕ್ಷೆ, ಕೊಲ್ಯಾಬ್ ಪರಿಶೀಲನೆ, ಫೋಟೋಗಳು ಮತ್ತು ಬದಲಾವಣೆಗಳು, ಎಲ್ಲವೂ ಒಂದೇ ಕಡೆ. ಈ ಲಿಂಕ್ ಉಳಿಸಿ, ಯಾರಿಗೂ ಹಂಚಬೇಡಿ.",
@@ -154,6 +162,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "இதிலிருந்து என் இணையதளத்தை உருவாக்கு",
     coachClose: "மூடு",
     collabCheck: "இந்த கொலாப் உண்மையா?",
+    ownDomain: "உங்கள் தளம் bazaarready.com-இல் இலவசமாக இயங்குகிறது. yourshop.com போன்ற சொந்தப் பெயர் வேண்டுமா?",
+    ownDomainLink: "செலவைப் பாருங்கள் →",
     howItWorks: "இது எப்படி வேலை செய்கிறது",
     dashboard: "உங்கள் தனிப்பட்ட டாஷ்போர்டு",
     dashboardHint: "ஆர்டர்கள், செய்திகள், AI சோதனை, கொலாப் சரிபார்ப்பு, புகைப்படங்கள், மாற்றங்கள் எல்லாம் ஒரே இடத்தில். இந்த இணைப்பைச் சேமித்து யாரிடமும் பகிர வேண்டாம்.",
@@ -187,6 +197,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "దీనితో నా వెబ్‌సైట్ తయారు చేయండి",
     coachClose: "మూసివేయండి",
     collabCheck: "ఈ కొలాబ్ నిజమేనా?",
+    ownDomain: "మీ సైట్ bazaarready.com లో ఉచితంగా నడుస్తుంది. yourshop.com లాంటి సొంత పేరు కావాలా?",
+    ownDomainLink: "ఖర్చు ఎంతో చూడండి →",
     howItWorks: "ఇది ఎలా పనిచేస్తుంది",
     dashboard: "మీ ప్రైవేట్ డాష్‌బోర్డ్",
     dashboardHint: "ఆర్డర్లు, సందేశాలు, AI పరీక్షలు, కొలాబ్ తనిఖీ, ఫోటోలు, మార్పులు అన్నీ ఒకేచోట. ఈ లింక్ సేవ్ చేసుకోండి, ఎవరితోనూ పంచుకోకండి.",
@@ -220,6 +232,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "यावरून माझी वेबसाइट बनवा",
     coachClose: "बंद करा",
     collabCheck: "हे कोलॅब खरे आहे का?",
+    ownDomain: "तुमची साइट bazaarready.com वर मोफत चालते. yourshop.com सारखे स्वतःचे नाव हवे आहे?",
+    ownDomainLink: "किती खर्च येईल ते पहा →",
     howItWorks: "हे कसे काम करते",
     dashboard: "तुमचा खाजगी डॅशबोर्ड",
     dashboardHint: "ऑर्डर, मेसेज, AI चाचणी, कोलॅब तपासणी, फोटो आणि बदल, सगळे एका ठिकाणी. ही लिंक सेव्ह करा आणि कोणाला देऊ नका.",
@@ -253,6 +267,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "এটা থেকে আমার ওয়েবসাইট বানান",
     coachClose: "বন্ধ করুন",
     collabCheck: "এই কোলাব কি আসল?",
+    ownDomain: "আপনার সাইট bazaarready.com-এ বিনামূল্যে চলে। yourshop.com-এর মতো নিজের নাম চান?",
+    ownDomainLink: "খরচ কত দেখুন →",
     howItWorks: "এটা কীভাবে কাজ করে",
     dashboard: "আপনার ব্যক্তিগত ড্যাশবোর্ড",
     dashboardHint: "অর্ডার, মেসেজ, AI পরীক্ষা, কোলাব যাচাই, ছবি আর পরিবর্তন, সব এক জায়গায়। এই লিংকটি সেভ করুন, কাউকে দেবেন না।",
@@ -286,6 +302,8 @@ export const UX: Record<LanguageCode, UxStrings> = {
     coachUse: "આના પરથી મારી વેબસાઇટ બનાવો",
     coachClose: "બંધ કરો",
     collabCheck: "શું આ કોલેબ સાચું છે?",
+    ownDomain: "તમારી સાઇટ bazaarready.com પર મફત ચાલે છે. yourshop.com જેવું પોતાનું નામ જોઈએ છે?",
+    ownDomainLink: "કેટલો ખર્ચ થશે તે જુઓ →",
     howItWorks: "આ કેવી રીતે કામ કરે છે",
     dashboard: "તમારું ખાનગી ડેશબોર્ડ",
     dashboardHint: "ઓર્ડર, મેસેજ, AI ટેસ્ટ, કોલેબ તપાસ, ફોટા અને ફેરફારો, બધું એક જગ્યાએ. આ લિંક સેવ કરો અને કોઈને ન આપો.",

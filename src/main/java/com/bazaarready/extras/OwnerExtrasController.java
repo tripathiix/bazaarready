@@ -59,6 +59,12 @@ public class OwnerExtrasController {
     public void addTo(Model model, ProfileResponse shop) {
         ExtrasService.Extras ex = extras.get(shop.id());
         model.addAttribute("ex", ex);
+        try {
+            model.addAttribute("domainPricesJson", new ObjectMapper().writeValueAsString(DomainPrices.table()));
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            model.addAttribute("domainPricesJson", "{}");
+        }
+        model.addAttribute("domainCurrency", DomainPrices.codeFor(shop.currency()));
         model.addAttribute("openNow", ex.openNow());
         model.addAttribute("chats", chat.threads(shop.id()));
         model.addAttribute("chatUnread", chat.unread(shop.id()));
