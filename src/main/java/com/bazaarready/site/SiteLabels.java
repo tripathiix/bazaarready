@@ -103,6 +103,7 @@ public final class SiteLabels {
         put("go_to_cart", "Go to cart");
         put("close", "Close");
         put("thinking", "Thinking…");
+        put("try_again", "Sorry, that didn't go through. Please send it again.");
         // Two-language chat
         put("chat_open", "Chat with us");
         put("chat_hint", "Write in your own language. We translate both ways, so the owner reads it in theirs.");

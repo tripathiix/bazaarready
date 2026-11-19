@@ -494,7 +494,7 @@
     </div>
 
     <dialog class="haggle" th:if="${haggleOn}" data-haggle-dialog aria-labelledby="hg-title"
-            th:attr="data-currency=${shop.currency()},data-thinking=${L.of('thinking')}">
+            th:attr="data-currency=${shop.currency()},data-thinking=${L.of('thinking')},data-retry=${L.of('try_again')}">
         <div class="hg-head">
             <h2 id="hg-title" th:text="${L.of('haggle_title')}">Let's bargain</h2>
             <p><strong data-product>Item</strong> · <span th:text="${L.of('haggle_hint')}">Hint</span></p>
@@ -694,7 +694,7 @@
                         form.hidden = true;
                         deal.hidden = false;
                     }
-                }).catch(function () { wait.remove(); bubble('…', false); })
+                }).catch(function () { wait.remove(); bubble(dlg.dataset.retry, false); })
                   .then(function () { state.busy = false; });
             });
         })();

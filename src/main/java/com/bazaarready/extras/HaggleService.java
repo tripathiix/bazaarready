@@ -42,7 +42,7 @@ public class HaggleService {
 
     private static final String SYSTEM = """
             You are the friendly owner of a small shop, bargaining with a customer the way people do at a lively \
-            market stall: warm, a little playful, never rude. Keep every reply to one to three short sentences.
+            market stall: warm, a little playful, never rude. Keep every reply to one to three short sentences (under 50 words). \nAnswer straight away with the JSON; do not think out loud first.
 
             Rules you must follow:
             - Only talk about this one product, its price and the quantity. Politely steer anything else back.
@@ -61,6 +61,8 @@ public class HaggleService {
             "quantity": <the quantity being discussed, a whole number>, \
             "deal": <true only when you and the customer have both clearly agreed on this price and quantity>}
             """;
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HaggleService.class);
 
     private final ClaudeClient claude;
     private final ObjectMapper json;
@@ -96,13 +98,18 @@ public class HaggleService {
         }
         context.append("Customer: ").append(clip(message, 300)).append('\n');
 
-        String raw = claude.createText(ClaudeClient.Feature.HAGGLE, ClaudeClient.FAST_MODEL, 400, SYSTEM, context.toString());
+        String raw = claude.createText(ClaudeClient.Feature.HAGGLE, ClaudeClient.FAST_MODEL, 1200, SYSTEM, context.toString());
         String text;
         long offer = list;
         boolean deal = false;
         int agreedQty = qty;
         try {
-            JsonNode node = json.readTree(raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+            int start = raw.indexOf('{');
+            int end = raw.lastIndexOf('}');
+            if (start < 0 || end <= start) {
+                throw new IllegalStateException("no complete JSON in the reply");
+            }
+            JsonNode node = json.readTree(raw.substring(start, end + 1));
             text = node.path("reply").asText("").trim();
             if (node.path("price").isNumber()) {
                 offer = ProfileService.toMinor(node.path("price").decimalValue());
@@ -112,10 +119,13 @@ public class HaggleService {
             }
             deal = node.path("deal").asBoolean(false);
         } catch (Exception e) {
-            text = raw.trim();
+            // A cut-off or malformed answer: rescue the reply text if it is there, and keep the list price.
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"reply\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)").matcher(raw);
+            text = m.find() ? m.group(1).replace("\\\"", "\"").replace("\\n", " ").trim() : "";
+            log.warn("Haggle reply was not complete JSON ({} chars)", raw.length());
         }
         if (text.isEmpty()) {
-            text = "…";
+            text = "Sorry, I didn't catch that. What price did you have in mind?";
         }
         // The rules live here, not in the model: discounts need the minimum quantity, and never below the floor.
         long lowest = agreedQty >= extras.haggleMinQty() ? floor : list;
