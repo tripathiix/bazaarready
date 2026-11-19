@@ -67,6 +67,15 @@
         .lang-pick option { color: #111; }
         .pagelang-note { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; padding: .45rem 1rem; border-radius: 999px;
             background: var(--amber); color: #22140a; font-weight: 700; font-size: .95rem; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+        /* 3D tilt for cards on BazaarReady's own pages (see the script in "pagelang"). */
+        .card { position: relative; }
+        .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s ease;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.16), transparent 55%); }
+        .card.tilting { transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px) !important; transition: transform .08s linear !important;
+            box-shadow: 0 30px 50px -18px rgba(0,0,0,.7); }
+        .card.tilting::after { opacity: 1; }
+        .cta, .cta-small { box-shadow: 0 4px 0 rgba(0,0,0,.35), 0 10px 20px rgba(0,0,0,.25); }
+        .cta:active, .cta-small:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.35); }
     </style>
 </head>
 <body>
@@ -141,6 +150,29 @@
   names) stay as they are.
 -->
 <script th:fragment="pagelang" th:attr="nonce=${cspNonce}">
+    // ---- 3D tilt: cards lean toward the mouse with a soft light under the pointer.
+        // Mouse devices only, and never when motion is turned off. ----
+        (function () {
+            if (!window.matchMedia || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+            var SEL = '.card';
+            var current = null;
+            function reset(el) { el.classList.remove('tilting'); el.style.removeProperty('--rx'); el.style.removeProperty('--ry'); }
+            document.addEventListener('pointermove', function (e) {
+                var el = e.target && e.target.closest ? e.target.closest(SEL) : null;
+                if (current && current !== el) reset(current);
+                current = el;
+                if (!el) return;
+                var r = el.getBoundingClientRect();
+                var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+                el.style.setProperty('--ry', ((x - 0.5) * 12).toFixed(2) + 'deg');
+                el.style.setProperty('--rx', ((0.5 - y) * 9).toFixed(2) + 'deg');
+                el.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+                el.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+                el.classList.add('tilting');
+            }, { passive: true });
+            document.addEventListener('pointerleave', function () { if (current) reset(current); });
+        })();
 (function () {
     var KEY = "bazaarready.language";
     var RTL = ["ar", "fa", "ur", "he", "ps", "sd", "ug", "yi"];

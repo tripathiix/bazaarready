@@ -1893,3 +1893,47 @@ details.guide[open] summary {
 .picked-size { color: var(--muted, #b9b2c9); font-size: 0.9rem; flex: none; }
 .picked-x { flex: none; width: 1.9rem; height: 1.9rem; border-radius: 999px; border: 0; background: rgba(255, 255, 255, 0.1); color: inherit; font-size: 1.1rem; cursor: pointer; }
 .picked-x:hover { background: rgba(255, 120, 120, 0.3); }
+
+/* ---- 3D ---------------------------------------------------------------------------------------
+   The featured sample site leans back like a screen on a stall; cards tilt toward the mouse with a
+   soft light where the pointer is (tilt.ts); buttons have depth and press down. Motion is skipped for
+   people who turn it off. */
+.featured { perspective: 1800px; }
+.browser {
+  transform: rotateY(-10deg) rotateX(7deg);
+  transform-origin: center;
+  box-shadow: -30px 50px 90px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.browser:hover,
+.browser:focus-visible { transform: rotateY(-4deg) rotateX(3deg) translateY(-4px); }
+.browser.tilting { transform: perspective(1800px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-4px); transition: transform 0.08s linear; }
+.browser { position: relative; }
+.browser::after, .strip-card::after, .polaroid a::after, .panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.22), transparent 55%);
+}
+.strip-card, .polaroid a, .panel { position: relative; }
+.tilting::after { opacity: 1 !important; }
+.strip-card.tilting, .polaroid a.tilting {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px);
+  transition: transform 0.08s linear;
+  box-shadow: 0 26px 40px -14px rgba(0, 0, 0, 0.6);
+}
+.panel.tilting {
+  transform: perspective(1400px) rotateX(calc(var(--rx) * 0.35)) rotateY(calc(var(--ry) * 0.35));
+  transition: transform 0.1s linear;
+}
+.button { box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35), 0 8px 18px rgba(0, 0, 0, 0.2); transition: transform 0.1s ease, box-shadow 0.1s ease; }
+.button:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 3px 8px rgba(0, 0, 0, 0.2); }
+@media (prefers-reduced-motion: reduce) {
+  .browser, .browser:hover { transform: none; }
+}
+@media (max-width: 760px) {
+  .browser { transform: rotateX(6deg); }
+}
