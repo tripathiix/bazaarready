@@ -11,6 +11,7 @@ import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
 import { CHATS, EXTRA, HEAR_QUESTION, ORDERS_LINK } from "./i18nExtra";
 import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
+import { InstagramZipError, canOpenZips, instagramFiles } from "./igZip";
 import { NOTES, useShowcase } from "./showcase";
 import { BUILT_IN, CHIPS, MORE, RTL, loadLanguage, nativeName, pickerName, registerTable, savedExtraLanguage } from "./globalLang";
 
@@ -221,6 +222,40 @@ export default function App() {
     if (answerSpeech.listening) answerSpeech.stop();
     setLanguage(code);
     rememberLanguage(code);
+  }
+
+  // What happened to the chats just chosen, shown right under the upload buttons.
+  const [importNote, setImportNote] = useState<{ kind: "working" | "error"; text: string } | null>(null);
+
+  async function importChats(chosen: File[], instagram: boolean) {
+    if (!chosen.length) return;
+    const first = chosen.length === 1 ? chosen[0].name : `${chosen.length} files`;
+    let files = chosen;
+    if (instagram && canOpenZips() && chosen.some((f) => f.name.toLowerCase().endsWith(".zip"))) {
+      setImportNote({ kind: "working", text: chatWords.opening.replace("{name}", first) });
+      try {
+        const opened = await instagramFiles(chosen);
+        files = opened.files;
+        setImportNote({ kind: "working", text: chatWords.found.replace("{n}", String(opened.conversations)) });
+      } catch (e) {
+        if (e instanceof InstagramZipError) {
+          setImportNote({ kind: "error", text: e.code === "html" ? chatWords.igHtml : chatWords.igNone });
+          return;
+        }
+        files = chosen; // couldn't open it here; let the server try the whole zip
+      }
+    }
+    setImportNote({ kind: "working", text: chatWords.received.replace("{name}", first) });
+    let failed: string | null = null;
+    await run(async () => {
+      try {
+        return await startFromChats(files, language, ownerName);
+      } catch (e) {
+        failed = e instanceof Error ? e.message : "Something went wrong. Please try again.";
+        throw e;
+      }
+    });
+    setImportNote(failed ? { kind: "error", text: failed } : null);
   }
 
   async function run(work: () => Promise<SessionView>) {
@@ -487,7 +522,7 @@ export default function App() {
                   onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
                     e.target.value = "";
-                    if (files.length) void run(() => startFromChats(files, language, ownerName));
+                    void importChats(files, false);
                   }}
                 />
                 <label className="button" htmlFor="ig-files">
@@ -503,10 +538,16 @@ export default function App() {
                   onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
                     e.target.value = "";
-                    if (files.length) void run(() => startFromChats(files, language, ownerName));
+                    void importChats(files, true);
                   }}
                 />
               </div>
+              {importNote && (
+                <p className={`import-note ${importNote.kind}`} role={importNote.kind === "error" ? "alert" : "status"}>
+                  {importNote.kind === "working" && <span className="spinner" aria-hidden="true" />}
+                  {importNote.text}
+                </p>
+              )}
               <p className="hint">{chatWords.igHow}</p>
             </div>
           </form>
