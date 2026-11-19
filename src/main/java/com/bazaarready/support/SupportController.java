@@ -14,7 +14,7 @@ import java.util.List;
 @Controller
 class SupportController {
 
-    static final List<String> TOPICS = List.of("General question", "Help with my website", "Report a problem", "Partnership or press");
+    static final List<String> TOPICS = List.of("General question", "Help with my website", "Report a problem", "Own domain and hosting", "Partnership or press");
 
     private final SupportMailer mailer;
 
@@ -23,8 +23,15 @@ class SupportController {
     }
 
     @GetMapping("/contact")
-    String page(Model model) {
+    String page(@RequestParam(required = false) String topic, @RequestParam(required = false) String message, Model model) {
         model.addAttribute("topics", TOPICS);
+        // A link can pick the topic and start the message, e.g. "Request my own domain" on the dashboard.
+        if (topic != null && TOPICS.contains(topic)) {
+            model.addAttribute("topic", topic);
+        }
+        if (message != null && !message.isBlank()) {
+            model.addAttribute("message", message.length() > 1500 ? message.substring(0, 1500) : message);
+        }
         return "contact-us";
     }
 

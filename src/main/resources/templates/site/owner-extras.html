@@ -53,6 +53,23 @@
             border: 1px solid var(--line); border-radius: 14px; padding: 0.8rem 0.9rem; transition: transform 0.15s ease, box-shadow 0.15s ease; }
         .new-grid a:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(20, 20, 40, 0.12); }
         .new-grid span { color: var(--muted); font-size: 0.92rem; }
+        .dom-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.8rem 1rem; align-items: end; }
+        .dom-form label { display: grid; gap: 0.3rem; font-weight: 600; }
+        .dom-form .inline { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+        .dom-form .inline input { width: auto; transform: scale(1.25); }
+        .dom-now { background: var(--tint); border-radius: 14px; padding: 0.8rem 1rem; margin: 0 0 1rem; }
+        .dom-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .dom-table th, .dom-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--line); text-align: start; vertical-align: top; }
+        .dom-table td.num, .dom-table th.num { text-align: end; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .dom-table small { display: block; color: var(--muted); font-weight: 400; }
+        .dom-table tfoot td { font-weight: 800; border-bottom: 0; font-size: 1.05rem; }
+        .dom-table .free { color: #1e7a4f; font-weight: 700; }
+        .dom-split { display: flex; height: 1.1rem; border-radius: 999px; overflow: hidden; margin: 1rem 0 0.4rem; border: 2px solid var(--line); }
+        .dom-split span { display: block; height: 100%; }
+        .dom-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-size: 0.9rem; color: var(--muted); margin: 0; padding: 0; list-style: none; }
+        .dom-legend i { display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: 3px; margin-inline-end: 0.35rem; vertical-align: -1px; }
+        .dom-month { font-size: 1.15rem; margin: 0.8rem 0 0; }
+        @media (max-width: 640px) { .dom-table .who { display: none; } }
         .kit-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.5rem; }
     </style>
 </th:block>
@@ -66,6 +83,55 @@
         <a href="#chats"><strong>💬 Chat in any language</strong><span>They write in theirs, you read and reply in yours.</span></a>
         <a href="#launch"><strong>🚀 Test my idea</strong><span>An AI focus group, a waitlist and a price test.</span></a>
         <a href="#mediakit"><strong>🎤 Media kit</strong><span>For creators: your numbers, rates and safe collab requests.</span></a>
+        <a href="#domain"><strong>🌐 Your own domain</strong><span>See what yourshop.com, your own server and business email would cost.</span></a>
+    </div>
+</section>
+
+<!-- ============ Your own domain: what it costs to move off bazaarready.com ============ -->
+<section th:fragment="domain" aria-labelledby="domain-title" id="domain"
+         th:attr="data-prices=${domainPricesJson},data-currency=${domainCurrency},data-slug=${shop.slug()},data-name=${shop.name()}">
+    <h2 id="domain-title">🌐 Your own domain</h2>
+    <p class="dom-now">Your website runs for free at <strong th:text="'bazaarready.com/s/' + ${shop.slug()}">bazaarready.com/s/name</strong>.
+        Want your own name, like <strong data-dom-example>yourshop.com</strong>, on your own server? Here is what it would cost each year, and where every part of the money goes.</p>
+    <div class="panel">
+        <div class="dom-form">
+            <label>Domain name
+                <input data-dom-name maxlength="63" autocomplete="off" spellcheck="false">
+            </label>
+            <label>Ending
+                <select data-dom-tld><option value="com">.com</option></select>
+            </label>
+            <label>Your currency
+                <select data-dom-currency></select>
+            </label>
+            <label class="inline"><input type="checkbox" data-dom-privacy> Hide my name and address from public domain records (privacy)</label>
+            <fieldset style="border:0;padding:0;margin:0;display:grid;gap:0.3rem">
+                <legend style="font-weight:600;padding:0">Titan business email (you@yourshop.com)?</legend>
+                <label class="inline"><input type="radio" name="dom-mail" value="no" checked data-dom-mail> No</label>
+                <label class="inline"><input type="radio" name="dom-mail" value="yes" data-dom-mail> Yes</label>
+            </fieldset>
+            <label data-dom-boxes-wrap hidden>How many mailboxes?
+                <input type="number" min="1" max="20" value="1" data-dom-boxes>
+            </label>
+        </div>
+
+        <table class="dom-table" aria-live="polite">
+            <thead><tr><th>What you pay for</th><th class="who">Who gets the money</th><th class="num">First year</th><th class="num">Each year after</th></tr></thead>
+            <tbody data-dom-rows></tbody>
+            <tfoot>
+            <tr><td>Total</td><td class="who"></td><td class="num" data-dom-total1>0</td><td class="num" data-dom-total2>0</td></tr>
+            </tfoot>
+        </table>
+        <div class="dom-split" data-dom-split aria-hidden="true"></div>
+        <ul class="dom-legend" data-dom-legend></ul>
+        <p class="dom-month">That is about <strong data-dom-month>0</strong> a month in the first year.</p>
+        <p class="ox-note" style="margin-top:0.8rem">These are estimates, checked <span data-dom-checked>recently</span>. Registrars change prices with every offer, and the exact price is shown when you pay.
+            <span data-dom-taxnote></span></p>
+        <div class="cta" style="margin-top:1rem">
+            <a class="btn" data-dom-request href="/contact">Request my own domain</a>
+            <a class="btn outline" data-dom-check href="https://www.godaddy.com/domainsearch/find" target="_blank" rel="noopener">Check the name and price at GoDaddy ↗</a>
+        </div>
+        <p class="ox-note" style="margin-top:0.6rem">After you ask, the BazaarReady team sets it up with you: buys nothing without your OK, connects your name, moves your site and sets up email. Setup help is free.</p>
     </div>
 </section>
 
@@ -377,6 +443,113 @@
     var first = box.querySelector('[data-thread]');
     if (first && location.hash === '#chats') first.click();
 })();
+
+    // Your own domain: a cost estimate with a line for everyone who gets a share of the money.
+    (function () {
+        var box = document.querySelector('#domain[data-prices]');
+        if (!box) return;
+        var table;
+        try { table = JSON.parse(box.dataset.prices); } catch (e) { return; }
+        var $ = function (s) { return box.querySelector(s); };
+        var name = $('[data-dom-name]'), tld = $('[data-dom-tld]'), cur = $('[data-dom-currency]'), privacy = $('[data-dom-privacy]');
+        var boxesWrap = $('[data-dom-boxes-wrap]'), boxes = $('[data-dom-boxes]');
+        var COLOURS = { GoDaddy: '#ff7a2f', ICANN: '#9b7bf0', Titan: '#2fb67a', Tax: '#6b6b6b' };
+        $('[data-dom-checked]').textContent = table.checked;
+        table.currencies.forEach(function (c) {
+            var o = document.createElement('option');
+            o.value = c.code; o.textContent = c.code + ' · ' + c.place;
+            cur.appendChild(o);
+        });
+        cur.value = box.dataset.currency || 'USD';
+        name.value = (box.dataset.slug || 'yourshop').replace(/-[0-9]+$/, '').replace(/[^a-z0-9]/g, '');
+
+        function currency() { return table.currencies.filter(function (c) { return c.code === cur.value; })[0] || table.currencies[1]; }
+        function price(key) {
+            var c = currency();
+            if (c.code === 'INR' && table.india[key] != null) return table.india[key];
+            return (table.usd[key] || 0) * c.perUsd;
+        }
+        function fmt(n) {
+            var c = currency();
+            return c.symbol + Number(n).toLocaleString(undefined, { minimumFractionDigits: c.decimals, maximumFractionDigits: c.decimals });
+        }
+        function syncTld() {
+            var c = currency(), keep = tld.value;
+            tld.innerHTML = '<option value="com">.com</option>' + (c.local ? '<option value="local">' + c.local + '</option>' : '');
+            tld.value = keep === 'local' && c.local ? 'local' : 'com';
+        }
+        function render() {
+            var c = currency();
+            var local = tld.value === 'local';
+            var ending = local ? c.local : '.com';
+            var domain = (name.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') || 'yourshop') + ending;
+            $('[data-dom-example]').textContent = domain;
+            var mail = box.querySelector('[data-dom-mail]:checked').value === 'yes';
+            boxesWrap.hidden = !mail;
+            var n = Math.max(1, Math.min(20, parseInt(boxes.value, 10) || 1));
+            var rows = [
+                { what: 'Domain name', note: domain + ', registered for one year', who: 'GoDaddy (domain registrar)', group: 'GoDaddy',
+                  first: price(local ? 'localFirst' : 'comFirst'), after: price(local ? 'localRenew' : 'comRenew') }
+            ];
+            if (!local) rows.push({ what: 'ICANN fee', note: 'The body that runs domain names worldwide', who: 'ICANN', group: 'ICANN', first: price('icann'), after: price('icann') });
+            if (privacy.checked) rows.push({ what: 'Domain privacy', note: 'Keeps your name and address out of public records', who: 'GoDaddy', group: 'GoDaddy', first: price('privacy'), after: price('privacy') });
+            rows.push({ what: 'Your own server', note: 'GoDaddy VPS, 1 CPU and 2 GB memory, 12 months (cheapest price needs a 3-year term)', who: 'GoDaddy (hosting)', group: 'GoDaddy',
+                first: price('serverFirst') * 12, after: price('serverRenew') * 12 });
+            rows.push({ what: 'Security certificate (the padlock)', note: 'Keeps payments and forms private', who: "Let's Encrypt", group: null, first: 0, after: 0 });
+            if (mail) rows.push({ what: 'Titan business email', note: n + ' mailbox' + (n > 1 ? 'es' : '') + ' × 12 months, e.g. hello@' + domain, who: 'Titan, sold through GoDaddy', group: 'Titan',
+                first: price('mailbox') * 12 * n, after: price('mailbox') * 12 * n });
+            rows.push({ what: 'Moving your site and setting it up', note: 'Connecting your name, deploying your site, email setup', who: 'BazaarReady', group: null, first: 0, after: 0 });
+            var t1 = 0, t2 = 0;
+            rows.forEach(function (r) { t1 += r.first; t2 += r.after; });
+            if (c.tax) {
+                rows.push({ what: 'GST (' + c.tax + '%)', note: 'Tax on everything above', who: 'Government', group: 'Tax', first: t1 * c.tax / 100, after: t2 * c.tax / 100 });
+                t1 += t1 * c.tax / 100; t2 += t2 * c.tax / 100;
+            }
+            var body = $('[data-dom-rows]');
+            body.textContent = '';
+            rows.forEach(function (r) {
+                var tr = document.createElement('tr');
+                var a = document.createElement('td'); a.textContent = r.what;
+                var small = document.createElement('small'); small.textContent = r.note; a.appendChild(small);
+                var w = document.createElement('td'); w.className = 'who'; w.textContent = r.who;
+                var f = document.createElement('td'); f.className = 'num';
+                var s = document.createElement('td'); s.className = 'num';
+                if (r.first === 0 && r.after === 0) { f.innerHTML = '<span class="free">Free</span>'; s.innerHTML = '<span class="free">Free</span>'; }
+                else { f.textContent = fmt(r.first); s.textContent = fmt(r.after); }
+                tr.appendChild(a); tr.appendChild(w); tr.appendChild(f); tr.appendChild(s);
+                body.appendChild(tr);
+            });
+            $('[data-dom-total1]').textContent = fmt(t1);
+            $('[data-dom-total2]').textContent = fmt(t2);
+            $('[data-dom-month]').textContent = fmt(t1 / 12);
+            $('[data-dom-taxnote]').textContent = c.tax ? 'GST is included above.' : 'Local sales tax or VAT is not included. Prices outside India and the US are converted from US dollars at an approximate rate.';
+            // Where the money goes, as one bar.
+            var groups = {};
+            rows.forEach(function (r) { if (r.group) groups[r.group] = (groups[r.group] || 0) + r.first; });
+            var split = $('[data-dom-split]'), legend = $('[data-dom-legend]');
+            split.textContent = ''; legend.textContent = '';
+            Object.keys(groups).forEach(function (g) {
+                var share = t1 ? groups[g] / t1 * 100 : 0;
+                var bar = document.createElement('span'); bar.style.width = share + '%'; bar.style.background = COLOURS[g]; split.appendChild(bar);
+                var li = document.createElement('li'); var dot = document.createElement('i'); dot.style.background = COLOURS[g];
+                li.appendChild(dot); li.appendChild(document.createTextNode(g + ' ' + Math.round(share) + '%')); legend.appendChild(li);
+            });
+            // The two buttons carry the choices along.
+            $('[data-dom-check]').href = 'https://www.godaddy.com/domainsearch/find?domainToCheck=' + encodeURIComponent(domain);
+            var summary = 'I would like my own domain for ' + (box.dataset.name || 'my site') + ' (bazaarready.com/s/' + box.dataset.slug + ').\n'
+                + 'Domain: ' + domain + (privacy.checked ? ' with privacy' : '') + '\n'
+                + 'Own server: yes\n'
+                + 'Titan email: ' + (mail ? n + ' mailbox' + (n > 1 ? 'es' : '') : 'no') + '\n'
+                + 'Estimate: ' + fmt(t1) + ' first year, ' + fmt(t2) + ' each year after (' + c.code + ').';
+            $('[data-dom-request]').href = '/contact?topic=' + encodeURIComponent('Own domain and hosting') + '&message=' + encodeURIComponent(summary);
+        }
+        syncTld();
+        [name, privacy, boxes].forEach(function (el) { el.addEventListener('input', render); });
+        tld.addEventListener('change', render);
+        cur.addEventListener('change', function () { syncTld(); render(); });
+        Array.prototype.forEach.call(box.querySelectorAll('[data-dom-mail]'), function (r) { r.addEventListener('change', render); });
+        render();
+    })();
 </script>
 </th:block>
 
