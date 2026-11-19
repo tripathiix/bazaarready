@@ -1852,3 +1852,26 @@ details.guide[open] summary {
 [dir="rtl"] .hero { flex-direction: column-reverse; gap: 1rem; }
 [dir="rtl"] .hero-side { position: static; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; max-width: none; }
 [dir="rtl"] .hero-side .open-sign { margin-top: 0; }
+
+/* Microphone beside each text box in the agent's question form. */
+.qfield { position: relative; }
+.qfield:has(.field-mic) input,
+.qfield:has(.field-mic) textarea { padding-inline-end: 2.8rem; }
+.field-mic {
+  position: absolute;
+  inset-inline-end: 0.45rem;
+  bottom: 0.45rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  cursor: pointer;
+}
+.field-mic:hover { background: rgba(255, 255, 255, 0.16); }
+.field-mic.is-listening { background: #e5484d; border-color: #e5484d; color: #fff; animation: mic-pulse 1.2s ease-in-out infinite; }
+@keyframes mic-pulse { 50% { box-shadow: 0 0 0 6px rgba(229, 72, 77, 0.25); } }
+@media (prefers-reduced-motion: reduce) { .field-mic.is-listening { animation: none; } }

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { ActionView, Me, SessionView, csrfToken, getMe, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
 import { Coach, OPEN_COACH } from "./Coach";
 import { DESIGNS, HOME } from "./home";
@@ -125,6 +125,35 @@ export default function App() {
   const speech = useSpeech((text) => setDescription((current) => (current ? current + " " + text : text)));
   const answerSpeech = useSpeech((text) => setAnswer((current) => (current ? current + " " + text : text)));
   const live = session?.status === "DONE" && session.published;
+  // Voice for the question form: one microphone, pointed at whichever field's mic was tapped.
+  const [micField, setMicField] = useState<number | null>(null);
+  const micFieldRef = useRef<number | null>(null);
+  const fieldSpeech = useSpeech((text) => {
+    const i = micFieldRef.current;
+    if (i === null) return;
+    const numeric = session?.fields?.[i]?.kind === "number";
+    setFormAnswers((current) => {
+      if (numeric) {
+        const digits = text.replace(/[^0-9.]/g, "");
+        return digits ? { ...current, [i]: digits } : current;
+      }
+      const before = current[i] ?? "";
+      return { ...current, [i]: before ? before + " " + text : text };
+    });
+  });
+  function toggleFieldMic(i: number) {
+    const same = micFieldRef.current === i && fieldSpeech.listening;
+    if (fieldSpeech.listening) fieldSpeech.stop();
+    if (same) {
+      setMicField(null);
+      micFieldRef.current = null;
+      return;
+    }
+    micFieldRef.current = i;
+    setMicField(i);
+    // Starting straight after stopping can fail in some browsers; give the old session a moment to close.
+    window.setTimeout(() => fieldSpeech.start(t.speech), fieldSpeech.listening ? 250 : 0);
+  }
   const changeSpeech = useSpeech((text) => setChangeText((current) => (current ? current + " " + text : text)));
   const changeKey = changeKeyFromUrl ?? (session?.ownerPath && session.published ? session.ownerPath.split("/").pop() ?? null : null);
   const TEST_LINE = `${u.testFirst}. ${u.testHint}`;
@@ -233,6 +262,9 @@ export default function App() {
         })
         .filter((l): l is string => l !== null);
       const text = lines.length ? lines.join("\n") : "(left these empty)";
+      if (fieldSpeech.listening) fieldSpeech.stop();
+      setMicField(null);
+      micFieldRef.current = null;
       setFormAnswers({});
       setFormOther({});
       void run(() => sendReply(session.id, text));
@@ -586,6 +618,19 @@ export default function App() {
                             onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}
                             maxLength={300}
                           />
+                        )}
+                        {fieldSpeech.supported && (f.kind === "long" || f.kind === "text" || f.kind === "number") && (
+                          <button
+                            type="button"
+                            className={`field-mic ${micField === i && fieldSpeech.listening ? "is-listening" : ""}`}
+                            aria-label={`${micField === i && fieldSpeech.listening ? t.stopListening : t.speak}: ${f.label}`}
+                            aria-pressed={micField === i && fieldSpeech.listening}
+                            onClick={() => toggleFieldMic(i)}
+                          >
+                            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                              <path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z" />
+                            </svg>
+                          </button>
                         )}
                       </div>
                     ))}
