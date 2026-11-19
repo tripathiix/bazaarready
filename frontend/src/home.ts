@@ -6,6 +6,7 @@ export interface HomeStrings {
   templates: string;
   features: string;
   contact: string;
+  usage: string;
   myDashboard: string;
   importChats: string;
   speak: string;
@@ -29,6 +30,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "Templates",
     features: "Features",
     contact: "Contact",
+    usage: "How we use AI",
     myDashboard: "My dashboard",
     speak: "Speak",
     importChats: "Import WhatsApp or Instagram chats",
@@ -48,10 +50,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "Design: {name}",
     removeDesign: "Let the agent choose",
     strip: [
-      { big: "7 designs", small: "picked for your business", link: "See templates" },
+      { big: "11 designs", small: "picked for your business", link: "See templates" },
       { big: "10 AI customers", small: "test it before launch", link: "How it works" },
       { big: "Scam check", small: "for every collab offer", link: "Features" },
-      { big: "8 languages", small: "type or speak", link: "Features" },
+      { big: "50+ languages", small: "type or speak", link: "Features" },
     ],
   },
   hi: {
@@ -59,6 +61,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "डिज़ाइन",
     features: "खूबियाँ",
     contact: "संपर्क",
+    usage: "हम AI का उपयोग कैसे करते हैं",
     myDashboard: "मेरा डैशबोर्ड",
     speak: "बोलिए",
     importChats: "WhatsApp या Instagram चैट लाएँ",
@@ -78,10 +81,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "डिज़ाइन: {name}",
     removeDesign: "एजेंट को चुनने दें",
     strip: [
-      { big: "7 डिज़ाइन", small: "आपके काम के हिसाब से", link: "डिज़ाइन देखें" },
+      { big: "11 डिज़ाइन", small: "आपके काम के हिसाब से", link: "डिज़ाइन देखें" },
       { big: "10 AI ग्राहक", small: "लॉन्च से पहले जाँच", link: "यह कैसे काम करता है" },
       { big: "धोखे की जाँच", small: "हर कोलैब ऑफ़र के लिए", link: "खूबियाँ" },
-      { big: "8 भाषाएँ", small: "लिखें या बोलें", link: "खूबियाँ" },
+      { big: "50+ भाषाएँ", small: "लिखें या बोलें", link: "खूबियाँ" },
     ],
   },
   kn: {
@@ -89,6 +92,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "ವಿನ್ಯಾಸಗಳು",
     features: "ವೈಶಿಷ್ಟ್ಯಗಳು",
     contact: "ಸಂಪರ್ಕ",
+    usage: "ನಾವು AI ಅನ್ನು ಹೇಗೆ ಬಳಸುತ್ತೇವೆ",
     myDashboard: "ನನ್ನ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     speak: "ಮಾತನಾಡಿ",
     importChats: "WhatsApp ಅಥವಾ Instagram ಚಾಟ್ ತನ್ನಿ",
@@ -108,10 +112,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "ವಿನ್ಯಾಸ: {name}",
     removeDesign: "ಏಜೆಂಟ್ ಆಯ್ಕೆ ಮಾಡಲಿ",
     strip: [
-      { big: "7 ವಿನ್ಯಾಸಗಳು", small: "ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ತಕ್ಕಂತೆ", link: "ವಿನ್ಯಾಸಗಳನ್ನು ನೋಡಿ" },
+      { big: "11 ವಿನ್ಯಾಸಗಳು", small: "ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ತಕ್ಕಂತೆ", link: "ವಿನ್ಯಾಸಗಳನ್ನು ನೋಡಿ" },
       { big: "10 AI ಗ್ರಾಹಕರು", small: "ಆರಂಭಕ್ಕೂ ಮುನ್ನ ಪರೀಕ್ಷೆ", link: "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ" },
       { big: "ಮೋಸ ಪರಿಶೀಲನೆ", small: "ಪ್ರತಿ ಕೊಲ್ಯಾಬ್ ಆಫರ್‌ಗೆ", link: "ವೈಶಿಷ್ಟ್ಯಗಳು" },
-      { big: "8 ಭಾಷೆಗಳು", small: "ಬರೆಯಿರಿ ಅಥವಾ ಮಾತನಾಡಿ", link: "ವೈಶಿಷ್ಟ್ಯಗಳು" },
+      { big: "50+ ಭಾಷೆಗಳು", small: "ಬರೆಯಿರಿ ಅಥವಾ ಮಾತನಾಡಿ", link: "ವೈಶಿಷ್ಟ್ಯಗಳು" },
     ],
   },
   ta: {
@@ -119,6 +123,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "வடிவமைப்புகள்",
     features: "அம்சங்கள்",
     contact: "தொடர்பு",
+    usage: "நாங்கள் AI-ஐ எப்படிப் பயன்படுத்துகிறோம்",
     myDashboard: "என் டாஷ்போர்டு",
     speak: "பேசுங்கள்",
     importChats: "WhatsApp அல்லது Instagram உரையாடல்களைக் கொண்டு வா",
@@ -138,10 +143,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "வடிவமைப்பு: {name}",
     removeDesign: "ஏஜென்ட் தேர்வு செய்யட்டும்",
     strip: [
-      { big: "7 வடிவமைப்புகள்", small: "உங்கள் தொழிலுக்கு ஏற்றவை", link: "வடிவமைப்புகளைப் பார்" },
+      { big: "11 வடிவமைப்புகள்", small: "உங்கள் தொழிலுக்கு ஏற்றவை", link: "வடிவமைப்புகளைப் பார்" },
       { big: "10 AI வாடிக்கையாளர்கள்", small: "தொடங்கும் முன் சோதனை", link: "இது எப்படி வேலை செய்கிறது" },
       { big: "மோசடி சோதனை", small: "ஒவ்வொரு கொலாப் சலுகைக்கும்", link: "அம்சங்கள்" },
-      { big: "8 மொழிகள்", small: "எழுதுங்கள் அல்லது பேசுங்கள்", link: "அம்சங்கள்" },
+      { big: "50+ மொழிகள்", small: "எழுதுங்கள் அல்லது பேசுங்கள்", link: "அம்சங்கள்" },
     ],
   },
   te: {
@@ -149,6 +154,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "డిజైన్లు",
     features: "ప్రత్యేకతలు",
     contact: "సంప్రదించండి",
+    usage: "మేము AI ని ఎలా ఉపయోగిస్తాం",
     myDashboard: "నా డాష్‌బోర్డ్",
     speak: "మాట్లాడండి",
     importChats: "WhatsApp లేదా Instagram చాట్‌లు తీసుకురండి",
@@ -168,10 +174,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "డిజైన్: {name}",
     removeDesign: "ఏజెంట్ ఎంచుకోనివ్వండి",
     strip: [
-      { big: "7 డిజైన్లు", small: "మీ వ్యాపారానికి తగినవి", link: "డిజైన్లు చూడండి" },
+      { big: "11 డిజైన్లు", small: "మీ వ్యాపారానికి తగినవి", link: "డిజైన్లు చూడండి" },
       { big: "10 AI కస్టమర్లు", small: "ప్రారంభానికి ముందే పరీక్ష", link: "ఇది ఎలా పనిచేస్తుంది" },
       { big: "మోసం తనిఖీ", small: "ప్రతి కొలాబ్ ఆఫర్‌కు", link: "ప్రత్యేకతలు" },
-      { big: "8 భాషలు", small: "రాయండి లేదా మాట్లాడండి", link: "ప్రత్యేకతలు" },
+      { big: "50+ భాషలు", small: "రాయండి లేదా మాట్లాడండి", link: "ప్రత్యేకతలు" },
     ],
   },
   mr: {
@@ -179,6 +185,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "डिझाइन",
     features: "वैशिष्ट्ये",
     contact: "संपर्क",
+    usage: "आम्ही AI कसे वापरतो",
     myDashboard: "माझा डॅशबोर्ड",
     speak: "बोला",
     importChats: "WhatsApp किंवा Instagram चॅट आणा",
@@ -198,10 +205,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "डिझाइन: {name}",
     removeDesign: "एजंटला निवडू द्या",
     strip: [
-      { big: "7 डिझाइन", small: "तुमच्या व्यवसायानुसार", link: "डिझाइन पहा" },
+      { big: "11 डिझाइन", small: "तुमच्या व्यवसायानुसार", link: "डिझाइन पहा" },
       { big: "10 AI ग्राहक", small: "सुरू करण्याआधी तपासणी", link: "हे कसं काम करतं" },
       { big: "फसवणूक तपासणी", small: "प्रत्येक कोलॅब ऑफरसाठी", link: "वैशिष्ट्ये" },
-      { big: "8 भाषा", small: "लिहा किंवा बोला", link: "वैशिष्ट्ये" },
+      { big: "50+ भाषा", small: "लिहा किंवा बोला", link: "वैशिष्ट्ये" },
     ],
   },
   bn: {
@@ -209,6 +216,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "ডিজাইন",
     features: "বৈশিষ্ট্য",
     contact: "যোগাযোগ",
+    usage: "আমরা কীভাবে AI ব্যবহার করি",
     myDashboard: "আমার ড্যাশবোর্ড",
     speak: "বলুন",
     importChats: "WhatsApp বা Instagram চ্যাট আনুন",
@@ -228,10 +236,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "ডিজাইন: {name}",
     removeDesign: "এজেন্টকে বেছে নিতে দিন",
     strip: [
-      { big: "7টি ডিজাইন", small: "আপনার ব্যবসা অনুযায়ী", link: "ডিজাইন দেখুন" },
+      { big: "11টি ডিজাইন", small: "আপনার ব্যবসা অনুযায়ী", link: "ডিজাইন দেখুন" },
       { big: "10 জন AI ক্রেতা", small: "চালুর আগেই পরীক্ষা", link: "কীভাবে কাজ করে" },
       { big: "প্রতারণা যাচাই", small: "প্রতিটি কোলাব অফারের জন্য", link: "বৈশিষ্ট্য" },
-      { big: "8টি ভাষা", small: "লিখুন বা বলুন", link: "বৈশিষ্ট্য" },
+      { big: "50+ ভাষা", small: "লিখুন বা বলুন", link: "বৈশিষ্ট্য" },
     ],
   },
   gu: {
@@ -239,6 +247,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "ડિઝાઇન",
     features: "ખાસિયતો",
     contact: "સંપર્ક",
+    usage: "અમે AI નો ઉપયોગ કેવી રીતે કરીએ છીએ",
     myDashboard: "મારું ડેશબોર્ડ",
     speak: "બોલો",
     importChats: "WhatsApp અથવા Instagram ચેટ લાવો",
@@ -258,10 +267,10 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "ડિઝાઇન: {name}",
     removeDesign: "એજન્ટને પસંદ કરવા દો",
     strip: [
-      { big: "7 ડિઝાઇન", small: "તમારા વેપાર મુજબ", link: "ડિઝાઇન જુઓ" },
+      { big: "11 ડિઝાઇન", small: "તમારા વેપાર મુજબ", link: "ડિઝાઇન જુઓ" },
       { big: "10 AI ગ્રાહકો", small: "શરૂ કરતાં પહેલાં ચકાસણી", link: "આ કેવી રીતે કામ કરે છે" },
       { big: "છેતરપિંડી તપાસ", small: "દરેક કોલૅબ ઑફર માટે", link: "ખાસિયતો" },
-      { big: "8 ભાષાઓ", small: "લખો અથવા બોલો", link: "ખાસિયતો" },
+      { big: "50+ ભાષાઓ", small: "લખો અથવા બોલો", link: "ખાસિયતો" },
     ],
   },
 };
@@ -269,5 +278,5 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
 /** Where each card in the links strip goes. */
 export const STRIP_LINKS = ["/templates", "/guide", "/features#collab", "/features#languages"];
 
-/** The seven site designs, as the agent names them. */
-export const DESIGNS = ["classic", "boutique", "mart", "split", "bento", "magazine", "noir"] as const;
+/** The site designs, as the agent names them (seven classic ones and four 3D ones). */
+export const DESIGNS = ["classic", "boutique", "mart", "split", "bento", "magazine", "noir", "globe", "poppy", "gradient", "neon"] as const;

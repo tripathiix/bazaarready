@@ -1,0 +1,121 @@
+/*
+ * BazaarReady's own pages in the Poppy style (the same look as the home page and the "Poppy" shop design):
+ * lilac paper, ink outlines with offset shadows, a big condensed display face, orange accents.
+ * Linked from every page layout. Selectors start with "html body" so they win over each page's own styles,
+ * which only set layout; nothing is hidden or removed.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&display=swap");
+
+html body {
+  --night: #e4d7fc; --night-2: #dccdfb; --panel: #ffffff; --ivory: #222222; --ink: #222222; --muted: #4a4458;
+  --line: #222222; --amber: #ff7a2f; --rose: #e8578a; --jade: #2fb67a; --mint: #1f8f5c; --red: #b42318;
+  --bg: #e4d7fc;
+  color-scheme: light;
+  color: #222222;
+  background: #e4d7fc;
+}
+html body a { color: #b8440f; }
+html body :focus-visible { outline: 3px solid #ff7a2f; outline-offset: 3px; }
+
+/* Headings: tall condensed capitals, like the home page */
+html body h1, html body h2, html body h3 { color: #222222; }
+html body h1 {
+  font-family: "Big Shoulders Display", "Bricolage Grotesque", sans-serif; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0; line-height: 0.92;
+}
+html body h1 .accent { color: #ff7a2f; text-shadow: 3px 3px 0 #222222; }
+html body .lead, html body .lead * { color: #333333; }
+html body .hand { color: #222222; }
+
+/* Top bar */
+html body .lights circle { fill: #ff7a2f; stroke: #222222; stroke-width: 1.4px; filter: none; }
+html body .lights path { stroke: rgba(34, 34, 34, 0.35); }
+html body .brand { color: #222222; font-family: "Big Shoulders Display", sans-serif; font-weight: 800; text-transform: uppercase; font-size: 1.7rem; letter-spacing: 0; }
+html body .brand span { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: #ff7a2f; }
+html body .top nav a { color: #222222; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.04em; }
+html body .top nav a:hover, html body .top nav a.on { color: #222222; border-bottom-color: #ff7a2f; }
+html body .top nav a.cta-small { background: #222222; color: #ffffff; border-radius: 0; box-shadow: none; }
+html body .lang-pick { color: #222222; background: #ffffff; border: 2px solid #222222; }
+html body .pagelang-note { background: #ff7a2f; color: #1d1d1d; border: 2px solid #222222; box-shadow: 4px 4px 0 #222222; }
+
+/* Cards and panels: white with an ink outline and an offset 3D shadow */
+html body .card {
+  background: #ffffff; color: #222222; border: 2.5px solid #222222; border-radius: 22px; box-shadow: 6px 6px 0 #222222;
+}
+html body .card.tilting { box-shadow: 10px 12px 0 #222222 !important; }
+html body .card::after { background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 122, 47, 0.12), transparent 55%); }
+html body .card p, html body .card dt, html body .card td small { color: #4a4458; }
+
+/* Buttons */
+html body .cta, html body .btn {
+  background: #ff7a2f; color: #1d1d1d; border: 2px solid #222222; box-shadow: 4px 4px 0 #222222; text-decoration: none;
+}
+html body .cta:active, html body .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 #222222; }
+html body .btn.ghost, html body .tpl .btn { background: #ffffff; color: #222222; }
+html body .btn.google { background: #ffffff; color: #1f1f1f; }
+
+/* Small labels */
+html body .tag, html body .where, html body .stat h2 { color: #b8440f; }
+html body .where { font-weight: 600; }
+
+/* Templates page */
+html body .chips button { background: #ffffff; color: #222222; border: 2px solid #222222; }
+html body .chips button:hover { background: #fff3ea; color: #222222; }
+html body .chips button[aria-pressed="true"] { background: #222222; color: #ffffff; border-color: #222222; }
+html body .tpl:hover { border-color: #222222; }
+html body .shot { background: #f6f1ff; border: 2px solid #222222; }
+html body .shot .browser { background: #222222; }
+html body .use { color: #b8440f; }
+html body .credit { color: #4a4458; }
+
+/* How it works */
+html body .num { color: #1d1d1d; background: #ff7a2f; border: 2px solid #222222; box-shadow: 3px 3px 0 #222222; }
+html body details { background: #ffffff; border: 2px solid #222222; box-shadow: 4px 4px 0 #222222; color: #222222; }
+html body details p, html body .tips span { color: #4a4458; }
+
+/* Features */
+html body .feature:target { border-color: #222222; box-shadow: 8px 8px 0 #ff7a2f; }
+
+/* Contact form and sign-in forms */
+html body input, html body select, html body textarea,
+html body .form input, html body .form select, html body .form textarea {
+  color: #222222; background: #ffffff; border: 2px solid #222222; border-radius: 12px;
+}
+html body .form input:focus, html body .form select:focus, html body .form textarea:focus { border-color: #ff7a2f; box-shadow: 3px 3px 0 #222222; }
+html body .hint, html body .safe, html body .switch, html body .or { color: #4a4458; }
+html body .or::before, html body .or::after { background: #222222; }
+html body .error { color: #8a1c12; background: #ffe1e1; border: 2px solid #222222; }
+html body .ok { color: #1f8f5c; }
+html body .sent { border-color: #222222; }
+
+/* AI usage */
+html body .meter { background: #ece4ff; border: 1.5px solid #222222; }
+html body .meter span { background: #2fb67a; }
+html body .bar .other { background: #ff7a2f; }
+html body .bar .cached, html body .legend .c::before { background: #2fb67a; }
+html body .legend, html body .daylabels { color: #4a4458; }
+html body th, html body td { border-bottom-color: rgba(34, 34, 34, 0.25); }
+html body th { color: #4a4458; }
+html body .stat .saved { color: #1f8f5c; }
+
+/* My sites */
+html body .pill { border: 1.5px solid #222222; color: #222222; }
+html body .pill.live { background: #b8f0d0; color: #222222; border-color: #222222; }
+
+/* Template preview bar */
+html body .pbar { background: #ffffff; border-bottom: 3px solid #222222; }
+html body .pbar .back { color: #222222; }
+html body .pbar h1 { font-size: 1.5rem; line-height: 1.1; }
+html body .pbar h1 small { color: #4a4458; text-transform: none; }
+html body .views { border: 2px solid #222222; }
+html body .views button { color: #222222; }
+html body .views button[aria-pressed="true"] { background: #222222; color: #ffffff; }
+html body .frame { border: 3px solid #222222; box-shadow: 6px 6px 0 #222222; }
+html body .stage.phone .frame { border-color: #222222; }
+
+/* Footer: a black band, like the home page */
+html body .foot { background: #222222; color: #ff7a2f; margin-top: 3rem; padding-top: 2.6rem; font-family: "Big Shoulders Display", sans-serif; text-transform: uppercase; }
+html body .foot .foot-mail { color: #e9e2f5; text-transform: none; font-family: "Anek Latin", system-ui, sans-serif; }
+html body .foot .foot-mail:hover { color: #ffffff; }
+html body .holo { color: #ffffff; border-color: rgba(255, 255, 255, 0.35); text-transform: none; font-family: "Anek Latin", system-ui, sans-serif; }
+html body section.block > p, html body .step p, html body .side p, html body .sent p, html body .body p { color: #4a4458; }

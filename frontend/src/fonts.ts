@@ -35,7 +35,7 @@ const FALLBACK = '"Segoe UI", "Nirmala UI", "Noto Sans", system-ui, sans-serif';
 export function applyFonts(language: LanguageCode) {
   const { display, body } = fontsFor(language);
   // The wordmark is always Bricolage Grotesque, so it and Anek Latin are always loaded.
-  const families = Array.from(new Set(["Bricolage Grotesque", "Anek Latin", display, body])).map(
+  const families = Array.from(new Set(["Bricolage Grotesque", "Big Shoulders Display", "Anek Latin", display, body])).map(
     (f) => `family=${f.replace(/ /g, "+")}:wght@400;600;800`
   );
   const bodies: string[] = [];

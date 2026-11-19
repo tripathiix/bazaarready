@@ -4,6 +4,103 @@
 <body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
+<!-- Globe (3D): light and elegant, the shop's photo inside a glossy blue globe with a shopping bag. -->
+<section class="hero-globe" th:if="${layout == 'globe'}">
+    <div class="wrap g-grid">
+        <div>
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn" th:if="${!booking and !shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Offerings</a>
+                <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+            </div>
+            <ul class="facts">
+                <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+                <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">offerings</span></li>
+            </ul>
+        </div>
+        <div class="art3d g-art" aria-hidden="true">
+            <div class="g-ball"><img th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high"></div>
+            <span class="g-ring a"></span><span class="g-ring b"></span>
+            <div class="g-bag"><b></b></div>
+        </div>
+    </div>
+</section>
+
+<!-- Poppy (3D): lilac, huge bold type, the photo in an outlined frame with orange 3D bubbles. -->
+<section class="hero-poppy" th:if="${layout == 'poppy'}">
+    <div class="wrap p-grid">
+        <div>
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn" th:if="${!booking and !shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Offerings</a>
+                <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+            </div>
+            <ul class="facts">
+                <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+                <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">offerings</span></li>
+            </ul>
+        </div>
+        <div class="art3d p-art" aria-hidden="true">
+            <div class="p-frame"><img th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high"></div>
+            <span class="p-bub a"></span><span class="p-bub b"></span><span class="p-bub c"></span><span class="p-bub d"></span>
+        </div>
+    </div>
+</section>
+
+<!-- Gradient (3D): pink to purple, light type, the photo on a glass card with a 3D spiral. -->
+<section class="hero-gradient" th:if="${layout == 'gradient'}">
+    <div class="wrap gr-grid">
+        <div>
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn" th:if="${!booking and !shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Offerings</a>
+                <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+            </div>
+            <ul class="facts">
+                <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+                <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">offerings</span></li>
+            </ul>
+        </div>
+        <div class="art3d gr-art" aria-hidden="true">
+            <div class="gr-card"><img th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high"></div>
+            <div class="gr-spiral"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+    </div>
+</section>
+
+<!-- Neon (3D): night-market purple, a glowing name, the photo in a neon frame with 3D shapes. -->
+<section class="hero-neon" th:if="${layout == 'neon'}">
+    <div class="wrap n-grid">
+        <div>
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn" th:if="${!booking and !shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Offerings</a>
+                <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+            </div>
+            <ul class="facts">
+                <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+                <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">offerings</span></li>
+            </ul>
+        </div>
+        <div class="art3d n-art" aria-hidden="true">
+            <div class="n-card"><img th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high"></div>
+            <span class="n-dots"></span><span class="n-gem"></span><span class="n-ring"></span>
+        </div>
+    </div>
+</section>
+
 <!-- Bento: a grid of tiles with the name, the photo, facts and two offerings. -->
 <section class="hero-bento" th:if="${layout == 'bento'}">
     <div class="wrap bento">

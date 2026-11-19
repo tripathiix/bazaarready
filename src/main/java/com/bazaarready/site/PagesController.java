@@ -29,11 +29,15 @@ class PagesController {
     record Group(String key, String label) {
     }
 
-    static final List<Group> GROUPS = List.of(new Group("shops", "Shops"), new Group("food", "Food"),
+    static final List<Group> GROUPS = List.of(new Group("3d", "3D"), new Group("shops", "Shops"), new Group("food", "Food"),
             new Group("services", "Services and classes"), new Group("portfolio", "Portfolio"), new Group("premium", "Premium"));
 
     // key, name, blurb, good for, filter group
     private static final List<String[]> DESIGNS = List.of(
+            new String[] {"globe", "Globe", "A glossy 3D globe for a shop open to the world.", "exporters and businesses that sell abroad", "3d"},
+            new String[] {"poppy", "Poppy", "Bold type, bright colours and bouncy 3D bubbles.", "cupcakes, gifts and fun brands", "3d"},
+            new String[] {"gradient", "Gradient", "Soft pink-to-purple glass with a 3D spiral.", "skin care, wellness and beauty", "3d"},
+            new String[] {"neon", "Neon", "Glowing signs and 3D shapes on a night-market purple.", "music, gaming and nightlife", "3d"},
             new String[] {"classic", "Classic", "Clean and familiar, with your products front and centre.", "farms and general shops", "shops"},
             new String[] {"boutique", "Boutique", "Soft, photo-led and personal.", "food, handmade goods and fashion", "food"},
             new String[] {"mart", "Mart", "Search, categories and a big catalogue.", "shops with many products", "shops"},

@@ -384,6 +384,14 @@ export default function App() {
               )}
             </nav>
             <OpenSign />
+            <div className="poppy-art" aria-hidden="true">
+              <span className="frame" />
+              <i className="a" />
+              <i className="d" />
+              <i className="core" />
+              <i className="b" />
+              <i className="c" />
+            </div>
           </div>
         </div>
 
@@ -921,6 +929,12 @@ export default function App() {
 
       <footer className="foot">
         <span>BazaarReady</span>
+        <a className="foot-mail" href="/contact">
+          {h.contact} · support@bazaarready.com
+        </a>
+        <a className="foot-mail" href="/usage">
+          {h.usage}
+        </a>
         <span className="holo">
           Crafted with <span aria-label="love">♥</span> by Yashi Tripathi
         </span>
