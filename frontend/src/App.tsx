@@ -384,6 +384,14 @@ export default function App() {
               )}
             </nav>
             <OpenSign />
+            <div className="poppy-art" aria-hidden="true">
+              <span className="frame" />
+              <i className="a" />
+              <i className="d" />
+              <i className="core" />
+              <i className="b" />
+              <i className="c" />
+            </div>
           </div>
         </div>
 

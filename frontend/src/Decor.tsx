@@ -82,6 +82,12 @@ export function Shutters({
   };
   return (
     <section className="shutters" aria-label={hint}>
+      <p className="shutter-hint hand">
+        <svg className="arrow" viewBox="0 0 60 40" aria-hidden="true">
+          <path d="M4 34 C 18 30, 34 22, 46 8 M46 8 L 36 10 M46 8 L 46 19" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+        {hint}
+      </p>
       <div className="shutter-row">
         {labels.map((label, i) => {
           const isOpen = allOpen || open[i];
@@ -114,12 +120,6 @@ export function Shutters({
           );
         })}
       </div>
-      <p className="shutter-hint hand">
-        <svg className="arrow" viewBox="0 0 60 40" aria-hidden="true">
-          <path d="M4 34 C 18 30, 34 22, 46 8 M46 8 L 36 10 M46 8 L 46 19" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-        {hint}
-      </p>
     </section>
   );
 }
