@@ -44,8 +44,8 @@ class AgentController {
     SessionView startFromChats(@org.springframework.web.bind.annotation.RequestParam("files") java.util.List<org.springframework.web.multipart.MultipartFile> files,
                                @org.springframework.web.bind.annotation.RequestParam(defaultValue = "en") String language,
                                @org.springframework.web.bind.annotation.RequestParam(defaultValue = "") String ownerName) throws java.io.IOException {
-        if (files.isEmpty() || files.size() > 20) {
-            throw new IllegalArgumentException("Upload between 1 and 20 chat files.");
+        if (files.isEmpty() || files.size() > 300) {
+            throw new IllegalArgumentException("Upload between 1 and 300 chat files.");
         }
         java.util.List<byte[]> data = new java.util.ArrayList<>();
         java.util.List<String> names = new java.util.ArrayList<>();
@@ -53,18 +53,30 @@ class AgentController {
             data.add(file.getBytes());
             names.add(file.getOriginalFilename());
         }
-        boolean instagram = com.bazaarready.intake.InstagramChat.looksLikeInstagram(data, names);
-        var messages = instagram
-                ? com.bazaarready.intake.InstagramChat.read(data, names)
-                : com.bazaarready.intake.WhatsAppChat.parse(com.bazaarready.intake.WhatsAppChat.readFiles(data, names));
+        // One upload can mix WhatsApp exports and Instagram downloads; each file is read the right way.
+        java.util.List<byte[]> igData = new java.util.ArrayList<>(), waData = new java.util.ArrayList<>();
+        java.util.List<String> igNames = new java.util.ArrayList<>(), waNames = new java.util.ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            boolean ig = com.bazaarready.intake.InstagramChat.isInstagram(data.get(i), names.get(i));
+            (ig ? igData : waData).add(data.get(i));
+            (ig ? igNames : waNames).add(names.get(i));
+        }
+        boolean instagram = !igData.isEmpty();
+        var messages = new java.util.ArrayList<com.bazaarready.intake.WhatsAppChat.Message>();
+        if (instagram) {
+            messages.addAll(com.bazaarready.intake.InstagramChat.read(igData, igNames));
+        }
+        if (!waData.isEmpty()) {
+            messages.addAll(com.bazaarready.intake.WhatsAppChat.parse(com.bazaarready.intake.WhatsAppChat.readFiles(waData, waNames)));
+        }
         if (messages.size() < 3) {
             throw new IllegalArgumentException(instagram
-                    ? "We couldn't find messages in this Instagram download. Download your information again, choose Messages and the JSON format, and upload the zip."
+                    ? "We couldn't find messages in this Instagram download. Download your information again, choose Messages, and upload the zip."
                     : "These files don't look like WhatsApp chat exports. In WhatsApp, open a chat, choose Export chat, then Without media.");
         }
         String language2 = language.matches(com.bazaarready.common.Languages.CODE_PATTERN) ? language : "en";
         return agent.startFromChats(com.bazaarready.intake.WhatsAppChat.clean(messages, ownerName), language2,
-                instagram ? "Instagram" : "WhatsApp");
+                instagram && waData.isEmpty() ? "Instagram" : instagram ? "WhatsApp and Instagram" : "WhatsApp");
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

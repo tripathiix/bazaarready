@@ -227,35 +227,52 @@ export default function App() {
   // What happened to the chats just chosen, shown right under the upload buttons.
   const [importNote, setImportNote] = useState<{ kind: "working" | "error"; text: string } | null>(null);
 
-  async function importChats(chosen: File[], instagram: boolean) {
+  // Chat files chosen so far: owners can add several WhatsApp exports and Instagram downloads, then build.
+  const [picked, setPicked] = useState<{ file: File; instagram: boolean }[]>([]);
+
+  function addPicked(chosen: File[], instagram: boolean) {
     if (!chosen.length) return;
-    const first = chosen.length === 1 ? chosen[0].name : `${chosen.length} files`;
-    let files = chosen;
-    if (instagram && canOpenZips() && chosen.some((f) => f.name.toLowerCase().endsWith(".zip"))) {
+    setImportNote(null);
+    setPicked((current) => {
+      const next = [...current];
+      for (const file of chosen) {
+        if (!next.some((p) => p.file.name === file.name && p.file.size === file.size)) next.push({ file, instagram });
+      }
+      return next.slice(0, 20);
+    });
+  }
+
+  async function importChats() {
+    if (!picked.length) return;
+    const first = picked.length === 1 ? picked[0].file.name : `${picked.length} files`;
+    const whatsapp = picked.filter((p) => !p.instagram).map((p) => p.file);
+    let instagram = picked.filter((p) => p.instagram).map((p) => p.file);
+    if (instagram.length && canOpenZips() && instagram.some((f) => /\.(zip|html?)$/i.test(f.name))) {
       setImportNote({ kind: "working", text: chatWords.opening.replace("{name}", first) });
       try {
-        const opened = await instagramFiles(chosen);
-        files = opened.files;
+        const opened = await instagramFiles(instagram);
+        instagram = opened.files;
         setImportNote({ kind: "working", text: chatWords.found.replace("{n}", String(opened.conversations)) });
       } catch (e) {
         if (e instanceof InstagramZipError) {
           setImportNote({ kind: "error", text: e.code === "html" ? chatWords.igHtml : chatWords.igNone });
           return;
         }
-        files = chosen; // couldn't open it here; let the server try the whole zip
+        // couldn't open it here; let the server try the whole zip
       }
     }
     setImportNote({ kind: "working", text: chatWords.received.replace("{name}", first) });
     let failed: string | null = null;
     await run(async () => {
       try {
-        return await startFromChats(files, language, ownerName);
+        return await startFromChats([...whatsapp, ...instagram], language, ownerName);
       } catch (e) {
         failed = e instanceof Error ? e.message : "Something went wrong. Please try again.";
         throw e;
       }
     });
     setImportNote(failed ? { kind: "error", text: failed } : null);
+    if (!failed) setPicked([]);
   }
 
   async function run(work: () => Promise<SessionView>) {
@@ -522,7 +539,7 @@ export default function App() {
                   onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
                     e.target.value = "";
-                    void importChats(files, false);
+                    addPicked(files, false);
                   }}
                 />
                 <label className="button" htmlFor="ig-files">
@@ -538,10 +555,36 @@ export default function App() {
                   onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
                     e.target.value = "";
-                    void importChats(files, true);
+                    addPicked(files, true);
                   }}
                 />
               </div>
+              {picked.length > 0 && (
+                <div className="picked">
+                  <ul>
+                    {picked.map((p, i) => (
+                      <li key={`${p.file.name}-${p.file.size}`}>
+                        <span aria-hidden="true">{p.instagram ? "📷" : "💬"}</span>
+                        <span className="picked-name">{p.file.name}</span>
+                        <span className="picked-size">{p.file.size >= 1048576 ? `${(p.file.size / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(p.file.size / 1024))} KB`}</span>
+                        <button
+                          type="button"
+                          className="picked-x"
+                          aria-label={`${chatWords.remove}: ${p.file.name}`}
+                          disabled={busy}
+                          onClick={() => setPicked(picked.filter((_, j) => j !== i))}
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="hint">{chatWords.addMore}</p>
+                  <button type="button" className="button primary" disabled={busy} onClick={() => void importChats()}>
+                    {chatWords.buildFrom.replace("{n}", String(picked.length))}
+                  </button>
+                </div>
+              )}
               {importNote && (
                 <p className={`import-note ${importNote.kind}`} role={importNote.kind === "error" ? "alert" : "status"}>
                   {importNote.kind === "working" && <span className="spinner" aria-hidden="true" />}

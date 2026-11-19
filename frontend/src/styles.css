@@ -1883,3 +1883,13 @@ details.guide[open] summary {
 .import-note .spinner { flex: none; width: 1rem; height: 1rem; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .import-note .spinner { animation: none; } }
+
+/* Chat files chosen so far, before building. */
+.picked { margin-top: 0.9rem; display: grid; gap: 0.6rem; justify-items: start; }
+.picked ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; width: 100%; }
+.picked li { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0.5rem 0.45rem 0.8rem; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); }
+.picked-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.picked-size { color: var(--muted, #b9b2c9); font-size: 0.9rem; flex: none; }
+.picked-x { flex: none; width: 1.9rem; height: 1.9rem; border-radius: 999px; border: 0; background: rgba(255, 255, 255, 0.1); color: inherit; font-size: 1.1rem; cursor: pointer; }
+.picked-x:hover { background: rgba(255, 120, 120, 0.3); }
