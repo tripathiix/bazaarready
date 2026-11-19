@@ -632,6 +632,10 @@ class SiteController {
                 case "bento" -> "Manrope";
                 case "noir" -> "DM Serif Display";
                 case "mart" -> "Figtree";
+                case "globe" -> "Playfair Display";
+                case "poppy" -> "Big Shoulders Display";
+                case "gradient" -> "Outfit";
+                case "neon" -> "Nunito";
                 default -> "Baloo 2";
             }, "Anek Latin"};
         }

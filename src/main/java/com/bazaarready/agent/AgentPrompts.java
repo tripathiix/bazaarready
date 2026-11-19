@@ -54,7 +54,11 @@ final class AgentPrompts {
             food, handmade goods and fashion; noir for premium or evening businesses (beauty salons, \
             fine dining, jewellery, wedding photography); bento for freelancers, agencies, coaches and \
             modern services; split for services, classes, transport and health; magazine for creators, \
-            artists and events; classic for farms, general shops and everything else.
+            artists and events; classic for farms, general shops and everything else. Four bold 3D designs \
+            suit owners who want to stand out: globe for exporters and businesses selling abroad or \
+            to tourists; poppy for bright, fun food and gift shops (cupcakes, toys, kids); gradient for \
+            calm wellness, skin care, yoga and beauty services; neon for music, gaming, nightlife and \
+            youth brands. Use one of these when the owner asks for something bold, modern or 3D.
               * about: two or three warm sentences on what this business is and who it is for, using \
             only what the owner said.
               * offeringsTitle: a short heading for the list of offerings that fits the kind, such as \
@@ -147,7 +151,7 @@ final class AgentPrompts {
                     "heroImageQuery": { "type": "string", "description": "2 to 4 English words for a stock photo that suits the whole business." },
                     "kind": { "type": "string", "enum": ["shop", "food", "services", "classes", "transport", "portfolio", "events", "organisation", "other"] },
                     "theme": { "type": "string", "enum": ["marigold", "indigo", "forest", "rose", "ocean", "slate"] },
-                    "layout": { "type": "string", "enum": ["classic", "split", "boutique", "magazine", "bento", "noir", "mart"] },
+                    "layout": { "type": "string", "enum": ["classic", "split", "boutique", "magazine", "bento", "noir", "mart", "globe", "poppy", "gradient", "neon"] },
                     "currency": { "type": "string", "description": "Currency symbol for the prices, up to 4 characters: ₹, $, €, £, Rp." },
                     "tagline": { "type": "string", "description": "One line under the name, up to 160 characters." },
                     "about": { "type": "string", "description": "Two or three sentences about the business, up to 700 characters." },

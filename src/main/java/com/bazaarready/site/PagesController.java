@@ -30,7 +30,7 @@ class PagesController {
     }
 
     static final List<Group> GROUPS = List.of(new Group("shops", "Shops"), new Group("food", "Food"),
-            new Group("services", "Services and classes"), new Group("portfolio", "Portfolio"), new Group("premium", "Premium"));
+            new Group("services", "Services and classes"), new Group("portfolio", "Portfolio"), new Group("premium", "Premium"), new Group("3d", "3D"));
 
     // key, name, blurb, good for, filter group
     private static final List<String[]> DESIGNS = List.of(
@@ -40,7 +40,11 @@ class PagesController {
             new String[] {"split", "Split", "Clear services, prices and booking side by side.", "classes, services and health", "services"},
             new String[] {"bento", "Bento", "Modern tiles that show off what you do.", "freelancers, coaches and agencies", "services"},
             new String[] {"magazine", "Magazine", "Editorial and bold, built around your story.", "creators, artists and events", "portfolio"},
-            new String[] {"noir", "Noir", "Dark, premium and calm.", "salons, fine dining and jewellery", "premium"});
+            new String[] {"noir", "Noir", "Dark, premium and calm.", "salons, fine dining and jewellery", "premium"},
+            new String[] {"globe", "Globe", "A glossy 3D globe for a shop open to the world.", "exporters and businesses that sell abroad", "3d"},
+            new String[] {"poppy", "Poppy", "Bold type, bright colours and bouncy 3D bubbles.", "cupcakes, gifts and fun brands", "3d"},
+            new String[] {"gradient", "Gradient", "Soft pink-to-purple glass with a 3D spiral.", "skin care, wellness and beauty", "3d"},
+            new String[] {"neon", "Neon", "Glowing signs and 3D shapes on a night-market purple.", "music, gaming and nightlife", "3d"});
 
     private final JdbcTemplate jdbc;
     private final ImageService images;

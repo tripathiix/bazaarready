@@ -283,7 +283,7 @@
         @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.45); } 100% { transform: scale(1); } }
         @keyframes sheen { from { transform: translateX(-120%); } to { transform: translateX(220%); } }
         @media (prefers-reduced-motion: no-preference) {
-            :is(.hero, .hero-split, .hero-boutique, .hero-magazine, .hero-noir, .hero-mart, .b-main) :is(.eyebrow, h1, .rule, .tagline, .cta, .facts, .mart-search, .mart-strip, .magazine-foot) {
+            :is(.hero, .hero-split, .hero-boutique, .hero-magazine, .hero-noir, .hero-mart, .b-main, .hero-globe, .hero-poppy, .hero-gradient, .hero-neon) :is(.eyebrow, h1, .rule, .tagline, .cta, .facts, .mart-search, .mart-strip, .magazine-foot) {
                 animation: site-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
             }
             :is(.hero, .hero-split, .hero-boutique, .hero-magazine, .hero-noir, .hero-mart, .b-main) h1 { animation-delay: 0.1s; }
@@ -432,6 +432,127 @@
             .hero:not(.has-photo)::after { animation: float3d 9s ease-in-out infinite; }
             .hero:not(.has-photo)::before { animation: float3d 11s ease-in-out infinite reverse; }
             @keyframes float3d { 50% { transform: translateY(-14px) rotate(8deg); } }
+        }
+
+        /* ================= Four 3D designs: globe, poppy, gradient, neon =================
+           Each sets its own colours for every page of the site, and has its own home-page hero with
+           3D shapes drawn in CSS (no extra downloads). The shop's photo sits inside the 3D art. */
+        .art3d { position: relative; aspect-ratio: 1; width: min(100%, 30rem); margin-inline: auto; }
+        .art3d img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .g-grid, .p-grid, .gr-grid, .n-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 2.5rem; align-items: center;
+            padding-top: 3.5rem; padding-bottom: 3.5rem; }
+        @media (max-width: 760px) { .g-grid, .p-grid, .gr-grid, .n-grid { grid-template-columns: 1fr; padding-top: 2rem; } .art3d { width: min(100%, 22rem); } }
+
+        /* ---- Globe: light, elegant serif, a glossy blue globe with a shopping bag ---- */
+        .layout-globe { --bg: #eeeff3; --surface: #ffffff; --ink: #121318; --muted: #575c6b; --line: #dde0ea; --tint: #e7ecff; --brand: #2a55f5; --accent: #2a55f5; }
+        .layout-globe h1, .layout-globe h2 { font-weight: 600; letter-spacing: -0.01em; }
+        .layout-globe .card, .layout-globe .panel, .layout-globe .info div { border-radius: 22px; }
+        .layout-globe .btn { box-shadow: 0 4px 0 #1530a8, 0 10px 20px rgba(42, 85, 245, 0.25); }
+        .layout-globe .btn.outline { box-shadow: none; }
+        .hero-globe { background: radial-gradient(60rem 30rem at 85% 30%, #dfe5ff, transparent 60%), var(--bg); color: var(--ink); overflow: hidden; }
+        .hero-globe h1 { font-size: clamp(2.6rem, 7vw, 4.8rem); line-height: 1.02; }
+        .hero-globe .eyebrow { color: var(--brand); }
+        .hero-globe .facts li { background: #ffffff; border: 1px solid var(--line); }
+        .g-ball { position: absolute; inset: 6% 12% 12% 4%; border-radius: 50%; overflow: hidden;
+            background: linear-gradient(145deg, #8f8cff, #4f5bff 40%, #2a3bd8 75%, #2a7bff);
+            box-shadow: inset -2rem -2.5rem 4rem rgba(10, 10, 90, 0.55), 0 3rem 4rem -2rem rgba(40, 40, 160, 0.55); }
+        .g-ball img { mix-blend-mode: luminosity; opacity: 0.45; }
+        .g-ball::before { content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: 1;
+            background: radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.8), transparent 24%),
+                        radial-gradient(circle at 72% 78%, rgba(10, 10, 100, 0.55), transparent 55%),
+                        linear-gradient(145deg, rgba(143, 140, 255, 0.55), rgba(42, 59, 216, 0.45)); }
+        .g-ball::after { content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: 2;
+            background: repeating-linear-gradient(180deg, transparent 0 13%, rgba(255, 255, 255, 0.5) 13% 14.5%); }
+        .g-ring { position: absolute; z-index: 3; top: 6%; bottom: 12%; border-radius: 50%; border: 0.45rem solid rgba(255, 255, 255, 0.55); }
+        .g-ring.a { left: 28%; right: 36%; } .g-ring.b { left: 13%; right: 21%; border-color: rgba(255, 255, 255, 0.35); }
+        .g-bag { position: absolute; z-index: 4; right: 0; bottom: 4%; width: 36%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+            background: radial-gradient(circle at 35% 30%, #c3c1ff, #5f63ff 45%, #3340e0 80%);
+            box-shadow: inset -0.8rem -1rem 1.8rem rgba(10, 10, 90, 0.5), inset 0.5rem 0.5rem 1.2rem rgba(255, 255, 255, 0.45), 0 1.4rem 2rem -0.6rem rgba(30, 30, 140, 0.5); }
+        .g-bag b { width: 40%; height: 36%; margin-top: 14%; border: 0.5rem solid rgba(255, 255, 255, 0.9); border-radius: 0.6rem 0.6rem 1rem 1rem; position: relative; }
+        .g-bag b::before { content: ""; position: absolute; left: 14%; right: 14%; top: -70%; height: 70%; border: 0.5rem solid rgba(255, 255, 255, 0.9); border-bottom: 0; border-radius: 3rem 3rem 0 0; }
+
+        /* ---- Poppy: lilac, huge condensed type, orange 3D bubbles in an outlined frame ---- */
+        .layout-poppy { --bg: #e4d7fc; --surface: #ffffff; --ink: #222222; --muted: #4a4458; --line: #222222; --tint: #f4eeff; --brand: #222222; --accent: #ff7a2f; }
+        .layout-poppy h1, .layout-poppy h2 { text-transform: uppercase; letter-spacing: 0.01em; }
+        .layout-poppy .top { border-bottom: 3px solid #222222; }
+        .layout-poppy .card, .layout-poppy .panel, .layout-poppy .info div, .layout-poppy .band { border: 2.5px solid #222222; border-radius: 24px; box-shadow: 6px 6px 0 #222222; }
+        .layout-poppy .card.tilting { box-shadow: 10px 12px 0 #222222; }
+        .layout-poppy .btn { background: #ff7a2f; color: #1d1d1d; border: 2px solid #222222; box-shadow: 4px 4px 0 #222222; }
+        .layout-poppy .btn:active { box-shadow: 1px 1px 0 #222222; transform: translate(3px, 3px); }
+        .layout-poppy .btn.outline, .layout-poppy .btn.ghost, .layout-poppy .btn.light { background: #ffffff; color: #222222; }
+        .layout-poppy .btn.haggle { background: #b8f0d0; }
+        .layout-poppy .links a.pill { background: #222222; }
+        .hero-poppy { background: var(--bg); color: var(--ink); overflow: hidden; border-bottom: 3px solid #222222; }
+        .hero-poppy h1 { font-size: clamp(3rem, 10vw, 7rem); line-height: 0.9; font-weight: 800; max-width: none; }
+        .hero-poppy .eyebrow { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; letter-spacing: 0.14em; text-transform: uppercase; }
+        .hero-poppy .tagline { font-weight: 600; }
+        .hero-poppy .facts li { background: #ffffff; border: 2px solid #222222; }
+        .p-frame { position: absolute; inset: 8%; border: 3px solid #222222; border-radius: 3rem; overflow: hidden; background: #ffffff; }
+        .p-bub { position: absolute; border-radius: 50%; z-index: 2;
+            background: radial-gradient(circle at 32% 28%, #ffd8bb, #ff8a3d 36%, #f06a1e 70%, #c4510f);
+            box-shadow: inset -0.7rem -0.9rem 1.5rem rgba(120, 40, 0, 0.35), 0 1.2rem 1.5rem -0.6rem rgba(90, 30, 0, 0.45); }
+        .p-bub.a { width: 28%; aspect-ratio: 1; left: -2%; top: -1%; } .p-bub.b { width: 22%; aspect-ratio: 1; right: -1%; top: 22%; }
+        .p-bub.c { width: 30%; aspect-ratio: 1; right: 6%; bottom: -3%; } .p-bub.d { width: 15%; aspect-ratio: 1; left: 4%; bottom: 14%; }
+
+        /* ---- Gradient: pink to purple, thin modern type, a glass 3D spiral ---- */
+        .layout-gradient { --bg: #fbf3fa; --surface: #ffffff; --ink: #2b2340; --muted: #6d6380; --line: #f0dff0; --tint: #f6ecff; --brand: #8a4fd8; --accent: #f07aa8; }
+        .layout-gradient h1, .layout-gradient h2 { font-weight: 600; letter-spacing: -0.03em; }
+        .layout-gradient .card, .layout-gradient .panel, .layout-gradient .info div { border-radius: 24px; border-color: #f0dff0; background: linear-gradient(160deg, #ffffff, #fbf2ff); }
+        .layout-gradient .btn { background: linear-gradient(100deg, #f07aa8, #8a4fd8); border-color: transparent; box-shadow: 0 10px 22px rgba(138, 79, 216, 0.3); }
+        .layout-gradient .btn.outline { background: transparent; color: var(--brand); border-color: var(--brand); box-shadow: none; }
+        .hero-gradient { background: linear-gradient(115deg, #ffb3c7 0%, #f07aa8 28%, #a777e3 62%, #6d63d8 100%); color: #ffffff; overflow: hidden; }
+        .hero-gradient h1 { font-weight: 300; font-size: clamp(2.6rem, 8vw, 5.4rem); line-height: 1; }
+        .hero-gradient .btn { background: #ffffff; color: #8a4fd8; border-color: #ffffff; }
+        .hero-gradient .btn.outline { background: transparent; color: #ffffff; border-color: rgba(255, 255, 255, 0.8); }
+        .gr-card { position: absolute; inset: 14% 10% 10% 16%; border-radius: 2rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2.5rem 4rem -1.5rem rgba(70, 20, 120, 0.55); background: rgba(255, 255, 255, 0.2); }
+        .gr-spiral { position: absolute; z-index: 2; right: -4%; top: -4%; width: 50%; height: 80%; transform: rotate(-18deg); }
+        .gr-spiral i { position: absolute; left: 0; width: 100%; height: 22%; border-radius: 50%; border: 0.9rem solid transparent;
+            background: linear-gradient(#0000, #0000) padding-box, linear-gradient(100deg, #ffe0ef, #ff9fd0 30%, #c9a5ff 55%, #ffffff 70%, #8fd0ff) border-box;
+            -webkit-mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+            filter: drop-shadow(0 0.8rem 0.7rem rgba(80, 20, 120, 0.35)); }
+        .gr-spiral i:nth-child(1) { top: 0; } .gr-spiral i:nth-child(2) { top: 19%; } .gr-spiral i:nth-child(3) { top: 38%; } .gr-spiral i:nth-child(4) { top: 57%; } .gr-spiral i:nth-child(5) { top: 76%; }
+
+        /* ---- Neon: night-market purple, glowing sign letters, glossy 3D shapes ---- */
+        .layout-neon { --bg: #24133f; --surface: #2e1a50; --ink: #ffffff; --muted: #cdbfe6; --line: rgba(255, 255, 255, 0.14); --tint: #341d5c; --brand: #ff4fd8; --accent: #ff4fd8; }
+        .layout-neon .top { background: rgba(36, 19, 63, 0.92); backdrop-filter: blur(8px); }
+        .layout-neon .links a, .layout-neon .card h3 a { color: var(--ink); }
+        .layout-neon a { color: #ff9ae6; }
+        .layout-neon .brand, .layout-neon h1, .layout-neon h2 { color: #ffffff; text-shadow: 0 0 6px rgba(255, 255, 255, 0.8), 0 0 22px rgba(220, 160, 255, 0.7); }
+        .layout-neon .amount { color: #ffd6f5; }
+        .layout-neon .btn { background: linear-gradient(90deg, #9b3dff, #ff4fd8); border-color: transparent; color: #ffffff; box-shadow: 0 0 18px rgba(255, 79, 216, 0.45), 0 4px 0 #5d1b86; }
+        .layout-neon .btn.outline, .layout-neon .btn.ghost { background: transparent; border-color: #ff4fd8; color: #ffffff; box-shadow: none; }
+        .layout-neon .btn.haggle { background: #ffae3a; color: #2a1748; }
+        .layout-neon .card, .layout-neon .panel, .layout-neon .info div, .layout-neon .band { border-radius: 28px; background: linear-gradient(160deg, #3a2266, #2a1748); border-color: rgba(255, 255, 255, 0.12); }
+        .layout-neon .chip { background: #3a2266; color: #ffd6f5; }
+        .layout-neon input, .layout-neon textarea, .layout-neon select { background: #2a1748; color: var(--ink); border-color: rgba(255, 255, 255, 0.2); }
+        .layout-neon .links a.pill { background: linear-gradient(90deg, #9b3dff, #ff4fd8); }
+        .hero-neon { background: radial-gradient(40rem 26rem at 80% 30%, rgba(155, 61, 255, 0.35), transparent 60%), var(--bg); color: #ffffff; overflow: hidden; }
+        .hero-neon h1 { font-size: clamp(2.6rem, 8vw, 5.4rem); line-height: 1; text-transform: uppercase;
+            text-shadow: 0 0 6px #ffffff, 0 0 18px rgba(255, 255, 255, 0.75), 0 0 44px rgba(220, 160, 255, 0.85); }
+        .hero-neon .tagline { color: #ff7fe3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; text-shadow: 0 0 14px rgba(255, 79, 216, 0.6); }
+        .hero-neon .facts li { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); }
+        .n-card { position: absolute; inset: 16% 14% 12% 8%; border-radius: 2.2rem; overflow: hidden; border: 3px solid #ff4fd8;
+            box-shadow: 0 0 24px rgba(255, 79, 216, 0.6), inset 0 0 18px rgba(255, 79, 216, 0.35); background: #341d5c; }
+        .n-dots { position: absolute; z-index: 2; left: -2%; top: 0; width: 34%; aspect-ratio: 1;
+            background: radial-gradient(circle at 35% 30%, #ffe2a8, #ffae3a 50%, #e07a10) 0 0 / 33.3% 33.3%; border-radius: 50%;
+            -webkit-mask: radial-gradient(circle, #000 64%, transparent 66%) 0 0 / 33.3% 33.3%; mask: radial-gradient(circle, #000 64%, transparent 66%) 0 0 / 33.3% 33.3%;
+            filter: drop-shadow(0 0.6rem 0.8rem rgba(0, 0, 0, 0.4)); }
+        .n-gem { position: absolute; z-index: 2; right: 2%; top: 6%; width: 22%; aspect-ratio: 1; border-radius: 30%; transform: rotate(20deg);
+            background: conic-gradient(from 30deg, #ff7ad9, #ff3fb8, #d42b95, #ff9ae6, #ff7ad9); box-shadow: inset -0.6rem -0.8rem 1.2rem rgba(80, 0, 50, 0.45), 0 0 1.8rem rgba(255, 79, 216, 0.45); }
+        .n-ring { position: absolute; z-index: 2; right: 0; bottom: 0; width: 34%; aspect-ratio: 1; border-radius: 50%;
+            background: repeating-conic-gradient(#ff8ad9 0 12deg, #ff4fc4 12deg 24deg);
+            -webkit-mask: radial-gradient(circle, transparent 38%, #000 39%); mask: radial-gradient(circle, transparent 38%, #000 39%); box-shadow: 0 0 2rem rgba(255, 79, 216, 0.4); }
+
+        :is(.hero-globe, .hero-poppy, .hero-gradient, .hero-neon) .facts { background: none; padding: 0; white-space: normal; font-size: inherit; margin: 1.6rem 0 0; border-radius: 0; }
+        .hero-gradient .eyebrow { color: #ffffff; opacity: 0.9; }
+        .hero-gradient .facts li { background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.5); }
+        .layout-globe .btn.haggle { background: #e7ecff; color: #1d3fd0; border-color: #c9d4ff; box-shadow: none; }
+        .hero-neon .eyebrow { color: #ffae3a; }
+        @media (prefers-reduced-motion: no-preference) {
+            .g-art, .p-art .p-bub, .n-gem, .gr-spiral { animation: bob3d 8s ease-in-out infinite; }
+            @keyframes bob3d { 50% { translate: 0 -12px; } }
+            .p-art .p-bub.b, .p-art .p-bub.d { animation-duration: 10s; animation-direction: reverse; }
         }
     </style>
 </head>
