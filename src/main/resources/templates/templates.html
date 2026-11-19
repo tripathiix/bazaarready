@@ -59,7 +59,7 @@
                 <span class="tag" th:text="${t.groupLabel()}">Shops</span>
                 <h2 th:text="${t.name()}">Classic</h2>
                 <p th:text="${t.blurb()}">Blurb</p>
-                <p class="example" th:if="${t.siteName() != null}" th:text="${'Example: ' + t.siteName()}">Example</p>
+                <p class="example" th:if="${t.siteName() != null}">Example: <span translate="no" th:text="${t.siteName()}">Name</span></p>
                 <p class="for" th:text="${'Great for ' + t.goodFor()}">Great for</p>
                 <div class="actions">
                     <a class="btn" th:if="${t.sitePath() != null}" th:href="${'/templates/' + t.key()}"
