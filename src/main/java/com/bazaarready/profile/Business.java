@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(name = "business")
 public class Business {
 
-    public enum Source { DESCRIPTION, WHATSAPP, PHOTO }
+    public enum Source { DESCRIPTION, WHATSAPP, INSTAGRAM, PHOTO }
 
     public enum Status { DRAFT, PUBLISHED }
 

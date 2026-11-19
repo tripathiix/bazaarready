@@ -240,7 +240,7 @@ public class ProfileService {
         }
 
         List<FaqRequest> faqRequests = request.faqs() != null ? request.faqs() : List.of();
-        Faq.Source faqSource = request.source() == Business.Source.WHATSAPP ? Faq.Source.CHAT : Faq.Source.OWNER;
+        Faq.Source faqSource = request.source() == Business.Source.WHATSAPP || request.source() == Business.Source.INSTAGRAM ? Faq.Source.CHAT : Faq.Source.OWNER;
         for (int i = 0; i < faqRequests.size(); i++) {
             FaqRequest f = faqRequests.get(i);
             int timesAsked = f.timesAsked() != null ? f.timesAsked() : 0;

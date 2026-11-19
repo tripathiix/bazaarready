@@ -31,7 +31,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "Contact",
     myDashboard: "My dashboard",
     speak: "Speak",
-    importChats: "Import WhatsApp chats",
+    importChats: "Import WhatsApp or Instagram chats",
     tryLabel: "Try:",
     examples: [
       { label: "Home bakery in Pune", text: "I bake cakes at home in Pune. Chocolate cake ₹900 per kg, cupcakes ₹60 each. I deliver in Kothrud on weekends." },
@@ -61,7 +61,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "संपर्क",
     myDashboard: "मेरा डैशबोर्ड",
     speak: "बोलिए",
-    importChats: "WhatsApp चैट लाएँ",
+    importChats: "WhatsApp या Instagram चैट लाएँ",
     tryLabel: "आज़माएँ:",
     examples: [
       { label: "पुणे में घर की बेकरी", text: "मैं पुणे में घर पर केक बनाती हूँ। चॉकलेट केक ₹900 प्रति किलो, कपकेक ₹60 का एक। कोथरूड में शनिवार-रविवार डिलीवरी।" },
@@ -91,7 +91,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "ಸಂಪರ್ಕ",
     myDashboard: "ನನ್ನ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     speak: "ಮಾತನಾಡಿ",
-    importChats: "WhatsApp ಚಾಟ್ ತನ್ನಿ",
+    importChats: "WhatsApp ಅಥವಾ Instagram ಚಾಟ್ ತನ್ನಿ",
     tryLabel: "ಪ್ರಯತ್ನಿಸಿ:",
     examples: [
       { label: "ಪುಣೆಯಲ್ಲಿ ಮನೆ ಬೇಕರಿ", text: "ನಾನು ಪುಣೆಯಲ್ಲಿ ಮನೆಯಲ್ಲೇ ಕೇಕ್ ಮಾಡುತ್ತೇನೆ. ಚಾಕೊಲೇಟ್ ಕೇಕ್ ಕೆಜಿಗೆ ₹900, ಕಪ್‌ಕೇಕ್ ಒಂದಕ್ಕೆ ₹60. ವಾರಾಂತ್ಯದಲ್ಲಿ ಕೋಥ್ರೂಡ್‌ಗೆ ಡೆಲಿವರಿ." },
@@ -121,7 +121,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "தொடர்பு",
     myDashboard: "என் டாஷ்போர்டு",
     speak: "பேசுங்கள்",
-    importChats: "WhatsApp உரையாடல்களைக் கொண்டு வா",
+    importChats: "WhatsApp அல்லது Instagram உரையாடல்களைக் கொண்டு வா",
     tryLabel: "முயற்சிக்கவும்:",
     examples: [
       { label: "புனேயில் வீட்டு பேக்கரி", text: "நான் புனேயில் வீட்டிலேயே கேக் செய்கிறேன். சாக்லேட் கேக் கிலோ ₹900, கப்கேக் ஒன்று ₹60. வார இறுதியில் கோத்ருடில் டெலிவரி." },
@@ -151,7 +151,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "సంప్రదించండి",
     myDashboard: "నా డాష్‌బోర్డ్",
     speak: "మాట్లాడండి",
-    importChats: "WhatsApp చాట్‌లు తీసుకురండి",
+    importChats: "WhatsApp లేదా Instagram చాట్‌లు తీసుకురండి",
     tryLabel: "ప్రయత్నించండి:",
     examples: [
       { label: "పుణెలో ఇంటి బేకరీ", text: "నేను పుణెలో ఇంట్లోనే కేకులు చేస్తాను. చాక్లెట్ కేక్ కిలో ₹900, కప్‌కేక్ ఒక్కటి ₹60. వారాంతాల్లో కోత్రుడ్‌లో డెలివరీ." },
@@ -181,7 +181,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "संपर्क",
     myDashboard: "माझा डॅशबोर्ड",
     speak: "बोला",
-    importChats: "WhatsApp चॅट आणा",
+    importChats: "WhatsApp किंवा Instagram चॅट आणा",
     tryLabel: "करून पहा:",
     examples: [
       { label: "पुण्यात घरची बेकरी", text: "मी पुण्यात घरी केक बनवते. चॉकलेट केक ₹900 किलो, कपकेक ₹60 एक. शनिवार-रविवार कोथरूडमध्ये डिलिव्हरी." },
@@ -211,7 +211,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "যোগাযোগ",
     myDashboard: "আমার ড্যাশবোর্ড",
     speak: "বলুন",
-    importChats: "WhatsApp চ্যাট আনুন",
+    importChats: "WhatsApp বা Instagram চ্যাট আনুন",
     tryLabel: "চেষ্টা করুন:",
     examples: [
       { label: "পুনেতে ঘরোয়া বেকারি", text: "আমি পুনেতে বাড়িতে কেক বানাই। চকলেট কেক কেজি ₹900, কাপকেক একটা ₹60। সপ্তাহান্তে কোথরুডে ডেলিভারি।" },
@@ -241,7 +241,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     contact: "સંપર્ક",
     myDashboard: "મારું ડેશબોર્ડ",
     speak: "બોલો",
-    importChats: "WhatsApp ચેટ લાવો",
+    importChats: "WhatsApp અથવા Instagram ચેટ લાવો",
     tryLabel: "અજમાવો:",
     examples: [
       { label: "પુણેમાં ઘરની બેકરી", text: "હું પુણેમાં ઘરે કેક બનાવું છું. ચોકલેટ કેક ₹900 કિલો, કપકેક ₹60 એક. શનિ-રવિ કોથરૂડમાં ડિલિવરી." },

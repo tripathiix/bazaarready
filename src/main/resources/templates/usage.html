@@ -115,11 +115,11 @@
 
     <section class="block">
         <div class="card cap">
-            <p><strong th:text="${#numbers.formatInteger(capUsed, 1, 'COMMA') + ' of ' + #numbers.formatInteger(cap, 1, 'COMMA')}">0 of 3,000</strong> AI calls used today.</p>
+            <p><strong translate="no" th:text="${#numbers.formatInteger(capUsed, 1, 'COMMA') + ' of ' + #numbers.formatInteger(cap, 1, 'COMMA')}">0 of 3,000</strong> AI calls used today.</p>
             <div class="meter" role="img" th:attr="aria-label=${capPct + '% of today''s limit used'}"><span th:style="${'width:' + capPct + '%'}"></span></div>
         </div>
         <p style="margin-top:1rem;color:var(--muted);font-size:.9rem">
-            <span th:if="${since != null}" th:text="${'Tracking since ' + since + '. '}"></span>Costs are estimates from Claude's published prices and the token counts in each reply. Days are in UTC.
+            <span translate="no" th:if="${since != null}" th:text="${'Tracking since ' + since + '. '}"></span>Costs are estimates from Claude's published prices and the token counts in each reply. Days are in UTC.
         </p>
     </section>
 </main>

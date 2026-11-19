@@ -17,7 +17,7 @@
             <thead><tr><th>Website</th><th>Status</th><th></th></tr></thead>
             <tbody>
             <tr th:each="s : ${sites}">
-                <td><strong th:text="${s.name}">Name</strong></td>
+                <td><strong translate="no" th:text="${s.name}">Name</strong></td>
                 <td><span class="pill" th:classappend="${s.status == 'PUBLISHED'} ? 'live'" th:text="${s.status == 'PUBLISHED'} ? 'Live' : 'Draft'">Live</span></td>
                 <td>
                     <div class="links">
@@ -31,5 +31,6 @@
     </div>
     <p class="switch"><a href="/">+ Build another website</a></p>
 </main>
+<script th:replace="~{pages/parts :: pagelang}"></script>
 </body>
 </html>

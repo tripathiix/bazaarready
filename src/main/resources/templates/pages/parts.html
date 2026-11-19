@@ -62,6 +62,11 @@
             h1 { margin-top: 1.8rem; }
         }
         @media (prefers-reduced-motion: reduce) { .lights circle, .holo { animation: none; } }
+        .lang-pick { font: inherit; font-size: .9rem; color: var(--ivory); background: rgba(255,255,255,.06); border: 1px solid var(--line);
+            border-radius: 999px; padding: .3rem .7rem; }
+        .lang-pick option { color: #111; }
+        .pagelang-note { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; padding: .45rem 1rem; border-radius: 999px;
+            background: var(--amber); color: #22140a; font-weight: 700; font-size: .95rem; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
     </style>
 </head>
 <body>
@@ -112,6 +117,11 @@
             <a href="/contact" th:classappend="${active == 'contact'} ? 'on'" th:attr="aria-current=${active == 'contact'} ? 'page'">Contact</a>
             <a href="/account">My dashboard</a>
             <a class="cta-small" href="/">Build my website</a>
+            <select class="lang-pick" aria-label="Language" data-pagelang-pick translate="no">
+                <option value="en">English</option><option value="es">Español</option><option value="fr">Français</option>
+                <option value="ar">العربية</option><option value="zh">中文</option><option value="pt">Português</option>
+                <option value="hi">हिन्दी</option><option value="id">Bahasa Indonesia</option>
+            </select>
         </nav>
     </header>
 </div>
@@ -121,7 +131,102 @@
     <a class="foot-mail" href="/contact">Contact us · support@bazaarready.com</a>
     <a class="foot-mail" href="/usage">How we use AI</a>
     <span class="holo">Crafted with <span aria-label="love">♥</span> by Yashi Tripathi</span>
+    <script th:replace="~{pages/parts :: pagelang}"></script>
 </footer>
+
+<!--
+  BazaarReady's own pages are written in English. The language picked on the home page (saved in this browser)
+  is applied here too: the page's words go to /api/ui-strings, are translated once per language and page
+  version, and are cached on the server and in this browser. Elements marked translate="no" (live numbers,
+  names) stay as they are.
+-->
+<script th:fragment="pagelang" th:attr="nonce=${cspNonce}">
+(function () {
+    var KEY = "bazaarready.language";
+    var RTL = ["ar", "fa", "ur", "he", "ps", "sd", "ug", "yi"];
+    function saved() {
+        var link = new URLSearchParams(location.search).get("lang");
+        if (link && /^[a-z]{2,3}$/.test(link)) { try { localStorage.setItem(KEY, link); } catch (e) {} return link; }
+        try { var v = localStorage.getItem(KEY); if (v && /^(hinglish|[a-z]{2,3})$/.test(v)) return v; } catch (e) {}
+        return "en";
+    }
+    function nameOf(c) { try { return new Intl.DisplayNames([c], { type: "language" }).of(c) || c; } catch (e) { return c; } }
+    var code = saved();
+    var pick = document.querySelector("[data-pagelang-pick]");
+    if (pick) {
+        if (!pick.querySelector('option[value="' + code + '"]')) {
+            var o = document.createElement("option");
+            o.value = code; o.textContent = nameOf(code);
+            pick.appendChild(o);
+        }
+        pick.value = code;
+        pick.addEventListener("change", function () {
+            try { localStorage.setItem(KEY, pick.value); } catch (e) {}
+            var url = new URL(location.href); url.searchParams.delete("lang"); location.href = url.toString();
+        });
+    }
+    if (code === "en") return;
+    document.documentElement.lang = code;
+    if (RTL.indexOf(code) >= 0) document.documentElement.dir = "rtl";
+
+    // Collect the words: text nodes and a few attributes, skipping code, hidden decor and translate="no".
+    var nodes = [], attrs = [], texts = [], seen = {};
+    function add(t) { if (!Object.prototype.hasOwnProperty.call(seen, t)) { seen[t] = texts.length; texts.push(t); } }
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) {
+            var el = n.parentElement;
+            if (!el || el.closest('script,style,svg,noscript,select,[translate="no"],[aria-hidden="true"],.brand')) return NodeFilter.FILTER_REJECT;
+            return /\p{L}/u.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+    });
+    while (walker.nextNode()) { nodes.push(walker.currentNode); add(walker.currentNode.nodeValue.trim()); }
+    document.querySelectorAll("[placeholder],[aria-label],[title],input[type=submit][value]").forEach(function (el) {
+        if (el.closest('[translate="no"]')) return;
+        ["placeholder", "aria-label", "title", "value"].forEach(function (a) {
+            if (a === "value" && el.type !== "submit") return;
+            var v = el.getAttribute(a);
+            if (v && /\p{L}/u.test(v)) { attrs.push([el, a, v]); add(v.trim()); }
+        });
+    });
+    add(document.title.trim());
+    if (!texts.length) return;
+
+    var parts = {};
+    for (var i = 0; i < texts.length; i += 30) parts["p" + (i / 30)] = texts.slice(i, i + 30);
+    var body = JSON.stringify(parts);
+    var h = 0; for (var j = 0; j < body.length; j++) h = (h * 31 + body.charCodeAt(j)) | 0;
+    var cacheKey = "pagelang:" + code + ":" + h;
+
+    function apply(result) {
+        var out = [];
+        Object.keys(parts).forEach(function (k) {
+            var got = Array.isArray(result[k]) ? result[k] : parts[k];
+            parts[k].forEach(function (t, n) { out.push(typeof got[n] === "string" && got[n] ? got[n] : t); });
+        });
+        function tr(t) { var k = t.trim(); return Object.prototype.hasOwnProperty.call(seen, k) ? out[seen[k]] : t; }
+        nodes.forEach(function (n) {
+            var m = n.nodeValue.match(/^(\s*)([\s\S]*?)(\s*)$/);
+            n.nodeValue = m[1] + tr(m[2]) + m[3];
+        });
+        attrs.forEach(function (a) { a[0].setAttribute(a[1], tr(a[2])); });
+        document.title = tr(document.title);
+    }
+    try { var kept = localStorage.getItem(cacheKey); if (kept) { apply(JSON.parse(kept)); return; } } catch (e) {}
+
+    var note = document.createElement("div");
+    note.className = "pagelang-note"; note.setAttribute("role", "status"); note.setAttribute("translate", "no");
+    note.textContent = "Translating into " + nameOf(code) + "… (first visit only, a few seconds)";
+    document.body.appendChild(note);
+    var token = (document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/) || [])[1] || "";
+    fetch("/api/ui-strings/" + code, {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-XSRF-TOKEN": decodeURIComponent(token) }, body: body
+    }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (result) { apply(result); try { localStorage.setItem(cacheKey, JSON.stringify(result)); } catch (e) {} })
+      .catch(function () {})
+      .finally(function () { note.remove(); });
+})();
+</script>
 
 </body>
 </html>

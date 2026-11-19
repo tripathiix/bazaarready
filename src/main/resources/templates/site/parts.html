@@ -332,7 +332,9 @@
             padding: 0.7rem 1.3rem; border-radius: 999px; font-weight: 700; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25); }
 
         /* ---- Haggle mode ---- */
-        .btn.haggle { background: var(--accent); color: #1c1d22; border-color: var(--accent); box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18); }
+        /* A small coin pill: easy to spot, but Add to cart stays the main button. */
+        .btn.haggle, .btn.small.haggle { background: var(--accent); color: #1c1d22; border: 1px solid var(--accent); box-shadow: none;
+            font-size: 0.78rem; font-weight: 700; padding: 0.22rem 0.7rem; vertical-align: middle; }
         .btn.haggle::before { content: "🪙 "; display: inline-block; }
         .btn.haggle:hover::before { animation: coin 0.6s ease; }
         @keyframes coin { 50% { transform: rotateY(180deg) translateY(-3px); } }
