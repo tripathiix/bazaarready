@@ -532,7 +532,7 @@ export default function App() {
                   id="ig-files"
                   className="visually-hidden"
                   type="file"
-                  accept=".zip,.json,application/zip,application/json"
+                  accept=".zip,.json,.html,application/zip,application/json,text/html"
                   multiple
                   disabled={busy}
                   onChange={(e) => {
