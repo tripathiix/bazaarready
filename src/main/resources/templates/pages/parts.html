@@ -65,8 +65,8 @@
         .lang-pick { font: inherit; font-size: .9rem; color: var(--ivory); background: rgba(255,255,255,.06); border: 1px solid var(--line);
             border-radius: 999px; padding: .3rem .7rem; }
         .lang-pick option { color: #111; }
-        .pagelang-note { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; padding: .45rem 1rem; border-radius: 999px;
-            background: var(--panel); border: 1px solid var(--line); color: var(--ivory); font-size: .9rem; }
+        .pagelang-note { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; padding: .45rem 1rem; border-radius: 999px;
+            background: var(--amber); color: #22140a; font-weight: 700; font-size: .95rem; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
     </style>
 </head>
 <body>
@@ -215,7 +215,7 @@
 
     var note = document.createElement("div");
     note.className = "pagelang-note"; note.setAttribute("role", "status"); note.setAttribute("translate", "no");
-    note.textContent = "… " + nameOf(code);
+    note.textContent = "Translating into " + nameOf(code) + "… (first visit only, a few seconds)";
     document.body.appendChild(note);
     var token = (document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/) || [])[1] || "";
     fetch("/api/ui-strings/" + code, {
