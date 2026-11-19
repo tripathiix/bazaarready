@@ -48,7 +48,13 @@ public class OrderService {
      */
     @Transactional
     public ShopOrder placeOrder(ProfileResponse shop, Map<UUID, Integer> cart, Customer customer, LocalDate deliveryDate) {
-        List<OrderLine> lines = new ArrayList<>();
+        return placeOrder(shop, cart, List.of(), customer, deliveryDate);
+    }
+
+    /** As above, plus lines already priced on the server, such as bargained deals from haggle mode. */
+    @Transactional
+    public ShopOrder placeOrder(ProfileResponse shop, Map<UUID, Integer> cart, List<OrderLine> priced, Customer customer, LocalDate deliveryDate) {
+        List<OrderLine> lines = new ArrayList<>(priced);
         for (ProductResponse product : shop.products()) {
             Integer quantity = cart.get(product.id());
             if (quantity == null || quantity < 1 || product.priceRupees() == null) {

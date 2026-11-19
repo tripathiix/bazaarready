@@ -5,7 +5,7 @@
 <header th:replace="~{site/parts :: nav}"></header>
 
 <main class="wrap">
-    <section aria-labelledby="title" data-cart th:attr="data-currency=${shop.currency()},data-remove=${L.of('remove')}">
+    <section aria-labelledby="title" data-cart th:attr="data-currency=${shop.currency()},data-remove=${L.of('remove')},data-bargained=${L.of('bargained')}">
         <h1 id="title" style="color:var(--brand)" th:text="${L.of('cart_title')}">Your cart</h1>
 
         <div data-empty hidden style="margin-top:1.5rem">
@@ -60,6 +60,7 @@
             <input id="note" name="note" maxlength="300" th:value="${form != null ? form.get('note') : ''}">
         </div>
         <input type="hidden" name="cart" value="{}">
+        <input type="hidden" name="deals" value="">
         <button type="submit" class="btn" th:text="${L.of('checkout')}">Checkout</button>
     </form>
 

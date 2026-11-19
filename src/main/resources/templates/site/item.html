@@ -29,6 +29,8 @@
             <div class="cta" style="margin-top:0">
                 <button type="button" class="btn" th:if="${store and item.priceRupees() != null}"
                         th:attr="data-add=${item.id()},data-label=${L.of('add_to_cart')},data-added=${L.of('added')}" th:text="${L.of('add_to_cart')}">Add to cart</button>
+                <button type="button" class="btn haggle" th:if="${haggleOn and item.priceRupees() != null}"
+                        th:attr="data-haggle=${item.id()},data-name=${item.name()},data-price=${item.priceRupees()}" th:text="${L.of('make_offer')}">Make an offer</button>
                 <a class="btn outline" th:if="${store and item.priceRupees() != null}" th:href="${base + '/cart'}" th:text="${L.of('nav_cart')}">Cart</a>
                 <a class="btn" th:if="${booking}" th:href="${base + '/book?item=' + item.id()}" th:text="${L.of('book_title')}">Request a booking</a>
                 <a class="btn wa" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">Message on WhatsApp</a>

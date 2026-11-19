@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${htmlLang}" th:dir="${dir}">
+<head th:replace="~{site/parts :: head(${L.of('nav_media_kit') + ' · ' + shop.name()})}"></head>
+<body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<header th:replace="~{site/parts :: nav}"></header>
+
+<!-- A creator's media kit: audience numbers, rates and a collab form. Every request is checked for scams. -->
+<section class="hero" th:classappend="${hero != null} ? 'has-photo'">
+    <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="">
+    <div class="wrap">
+        <p class="eyebrow" style="color:#ffffff;opacity:0.8" th:text="${L.of('nav_media_kit')}">Media kit</p>
+        <h1 th:text="${shop.name()}">Name</h1>
+        <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+        <div class="cta"><a class="btn light" href="#collab" th:text="${L.of('kit_title')}">Work with me</a></div>
+    </div>
+</section>
+
+<main class="wrap">
+    <section aria-labelledby="audience">
+        <h2 id="audience" th:text="${L.of('kit_audience')}">My audience</h2>
+        <ul class="kit-stats">
+            <li th:each="p : ${ex.platforms()}">
+                <span class="platform" th:text="${p.name()}">Instagram</span>
+                <span class="handle" th:if="${p.handle()}" th:text="${' ' + p.handle()}">@handle</span>
+                <span class="big" th:if="${p.followers()}" th:text="${p.followers()}">12K</span>
+                <span class="unit" th:if="${p.followers()}" th:text="${L.of('kit_followers')}">Followers</span>
+                <span class="big" style="font-size:1.4rem" th:if="${p.views()}" th:text="${p.views()}">4K</span>
+                <span class="unit" th:if="${p.views()}" th:text="${L.of('kit_views')}">Average views</span>
+            </li>
+        </ul>
+        <p class="lead" style="margin-top:1.2rem" th:if="${ex.audience()}" th:text="${ex.audience()}">Audience</p>
+    </section>
+
+    <section aria-labelledby="rates" th:if="${!shop.products().isEmpty()}">
+        <h2 id="rates" th:text="${L.of('kit_rates')}">Rates</h2>
+        <div class="panel">
+            <table>
+                <tbody>
+                <tr th:each="p : ${shop.products()}">
+                    <td><strong th:text="${p.name()}">Reel</strong><br><span class="unit" th:if="${p.description()}" th:text="${p.description()}">Description</span></td>
+                    <td class="num">
+                        <span class="amount" style="font-size:1.2rem" th:if="${p.priceRupees() != null}" th:text="${money.format(p.priceRupees())}">0</span>
+                        <span class="unit" th:if="${p.priceRupees() == null}" th:text="${p.priceNote() ?: L.of('price_on_request')}">On request</span>
+                        <span class="unit" th:if="${p.unit()}" th:text="${p.unit()}">per post</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="collab" aria-labelledby="collab-title">
+        <h2 id="collab-title" th:text="${L.of('collab_title')}">Send a collab request</h2>
+        <form class="panel form" method="post" th:action="${base + '/collab'}">
+            <p class="error" role="alert" th:if="${error}" th:text="${L.of('fill_all')}">Please fill in all fields.</p>
+            <div class="two">
+                <div><label for="brand" th:text="${L.of('brand')}">Brand</label>
+                    <input id="brand" name="brand" maxlength="80" required th:value="${form.get('brand')}"></div>
+                <div><label for="contact" th:text="${L.of('your_contact')}">Phone or email</label>
+                    <input id="contact" name="contact" maxlength="120" required th:value="${form.get('contact')}"></div>
+            </div>
+            <div><label for="budget" th:text="${L.of('budget')}">Budget</label>
+                <input id="budget" name="budget" maxlength="60" th:value="${form.get('budget')}"></div>
+            <div><label for="message" th:text="${L.of('collab_message')}">What do you have in mind?</label>
+                <textarea id="message" name="message" rows="5" maxlength="2000" required th:text="${form.get('message')}"></textarea></div>
+            <div class="trap" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+            <button class="btn" th:text="${L.of('send_request')}">Send request</button>
+        </form>
+    </section>
+</main>
+
+<footer th:replace="~{site/parts :: foot}"></footer>
+</body>
+</html>

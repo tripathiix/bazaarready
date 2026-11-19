@@ -14,6 +14,11 @@
         <h1 id="title" style="color:var(--brand)" th:text="${shop.name()}">Name</h1>
         <p class="demo" role="note" style="margin-top:1rem">This page is private. Anyone with this link can see your orders, so do not share it.</p>
         <nav class="owner-tabs" aria-label="Owner tools">
+            <a href="#shutter" th:text="${openNow} ? '🏪 Open' : '🏪 Closed'">🏪 Open</a>
+            <a href="#chats">💬 Chats<span class="badge" th:if="${chatUnread > 0}" th:text="${chatUnread}">1</span></a>
+            <a href="#haggle">🪙 Haggle</a>
+            <a href="#launch">🚀 Test my idea</a>
+            <a href="#mediakit">🎤 Media kit</a>
             <a href="#tests">🤖 Test with AI customers</a>
             <a href="#collabs">🛡️ Is this collab real?</a>
             <a href="#change">✏️ Change my website</a>
@@ -36,6 +41,12 @@
         .product-edit .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
         .product-edit input, .product-edit textarea { width: 100%; }
     </style>
+    <th:block th:replace="~{site/owner-extras :: styles}"></th:block>
+
+    <section th:replace="~{site/owner-extras :: whatsnew}"></section>
+
+    <section th:replace="~{site/owner-extras :: shutter}"></section>
+    <section th:replace="~{site/owner-extras :: chats}"></section>
 
     <section aria-labelledby="orders" id="orders-section">
         <h2 id="orders">Orders and bookings (<span th:text="${orders.size()}">0</span>)</h2>
@@ -61,6 +72,10 @@
             <p style="margin:0.6rem 0 0;color:var(--muted);font-size:0.9rem" th:text="${placed.get(o.getId())}">time</p>
         </div>
     </section>
+
+    <section th:replace="~{site/owner-extras :: haggle}"></section>
+    <section th:replace="~{site/owner-extras :: launch}"></section>
+    <section th:replace="~{site/owner-extras :: mediakit}"></section>
 
     <section aria-labelledby="change-title" id="change">
         <h2 id="change-title">Change my website</h2>
@@ -257,6 +272,7 @@
         </div>
     </section>
 </main>
+<th:block th:replace="~{site/owner-extras :: script}"></th:block>
 <script th:if="${checksRunning}" th:attr="nonce=${cspNonce}">setTimeout(function () { location.reload(); }, 4000);</script>
 <script th:attr="nonce=${cspNonce}">
 document.addEventListener("submit", function (event) {

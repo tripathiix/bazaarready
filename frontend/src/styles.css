@@ -1839,3 +1839,16 @@ details.guide[open] summary {
   border-color: var(--amber);
   background: rgba(244, 168, 58, 0.08);
 }
+
+/* "More languages": a chip that holds a drop-down of every other language. */
+.chip.more-languages { display: inline-flex; align-items: center; gap: 0.35rem; padding-block: 0; }
+.chip.more-languages select { font: inherit; color: inherit; background: transparent; border: 0; padding: 0.45rem 0; cursor: pointer; max-width: 13rem; }
+.chip.more-languages select:focus { outline: none; }
+.chip.more-languages:focus-within { outline: 3px solid var(--accent, #e2a32b); outline-offset: 2px; }
+.chip.more-languages option { color: #1c1d22; }
+.lang-note { align-self: center; font-size: 0.85rem; opacity: 0.8; }
+
+/* Right-to-left languages (Arabic, Urdu, Persian, Hebrew): the side menu and open sign move to the left. */
+[dir="rtl"] .hero { flex-direction: column-reverse; gap: 1rem; }
+[dir="rtl"] .hero-side { position: static; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; max-width: none; }
+[dir="rtl"] .hero-side .open-sign { margin-top: 0; }
