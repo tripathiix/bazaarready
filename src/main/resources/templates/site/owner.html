@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{site/parts :: head(${'Orders · ' + shop.name()})}"></head>
-<body th:class="'theme-' + ${shop.theme()}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
+<body th:class="'theme-' + ${shop.theme()} + ' layout-poppy'" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 
 <!-- The owner's private page. It is in English for now; the public site is in the owner's language. -->
 <main class="wrap">

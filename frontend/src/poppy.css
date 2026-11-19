@@ -244,3 +244,5 @@ input, select, textarea { color: #222222; }
 .featured-badge, .featured-badge * { color: #222222 !important; }
 .poppy-art { width: 10.5rem; margin-top: 0.2rem; }
 @media (max-width: 760px) { .poppy-art { width: 8.5rem; margin: 0.4rem 0 0 auto; } }
+.foot .foot-mail { font-family: var(--body); font-weight: 400; letter-spacing: 0; font-size: 0.95rem; text-decoration: none; }
+.foot .foot-mail:hover, .foot .foot-mail:focus-visible { color: #ffffff; text-decoration: underline; }

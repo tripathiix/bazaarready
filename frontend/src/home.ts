@@ -6,6 +6,7 @@ export interface HomeStrings {
   templates: string;
   features: string;
   contact: string;
+  usage: string;
   myDashboard: string;
   importChats: string;
   speak: string;
@@ -29,6 +30,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "Templates",
     features: "Features",
     contact: "Contact",
+    usage: "How we use AI",
     myDashboard: "My dashboard",
     speak: "Speak",
     importChats: "Import WhatsApp or Instagram chats",
@@ -59,6 +61,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "डिज़ाइन",
     features: "खूबियाँ",
     contact: "संपर्क",
+    usage: "हम AI का उपयोग कैसे करते हैं",
     myDashboard: "मेरा डैशबोर्ड",
     speak: "बोलिए",
     importChats: "WhatsApp या Instagram चैट लाएँ",
@@ -89,6 +92,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "ವಿನ್ಯಾಸಗಳು",
     features: "ವೈಶಿಷ್ಟ್ಯಗಳು",
     contact: "ಸಂಪರ್ಕ",
+    usage: "ನಾವು AI ಅನ್ನು ಹೇಗೆ ಬಳಸುತ್ತೇವೆ",
     myDashboard: "ನನ್ನ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     speak: "ಮಾತನಾಡಿ",
     importChats: "WhatsApp ಅಥವಾ Instagram ಚಾಟ್ ತನ್ನಿ",
@@ -119,6 +123,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "வடிவமைப்புகள்",
     features: "அம்சங்கள்",
     contact: "தொடர்பு",
+    usage: "நாங்கள் AI-ஐ எப்படிப் பயன்படுத்துகிறோம்",
     myDashboard: "என் டாஷ்போர்டு",
     speak: "பேசுங்கள்",
     importChats: "WhatsApp அல்லது Instagram உரையாடல்களைக் கொண்டு வா",
@@ -149,6 +154,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "డిజైన్లు",
     features: "ప్రత్యేకతలు",
     contact: "సంప్రదించండి",
+    usage: "మేము AI ని ఎలా ఉపయోగిస్తాం",
     myDashboard: "నా డాష్‌బోర్డ్",
     speak: "మాట్లాడండి",
     importChats: "WhatsApp లేదా Instagram చాట్‌లు తీసుకురండి",
@@ -179,6 +185,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "डिझाइन",
     features: "वैशिष्ट्ये",
     contact: "संपर्क",
+    usage: "आम्ही AI कसे वापरतो",
     myDashboard: "माझा डॅशबोर्ड",
     speak: "बोला",
     importChats: "WhatsApp किंवा Instagram चॅट आणा",
@@ -209,6 +216,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "ডিজাইন",
     features: "বৈশিষ্ট্য",
     contact: "যোগাযোগ",
+    usage: "আমরা কীভাবে AI ব্যবহার করি",
     myDashboard: "আমার ড্যাশবোর্ড",
     speak: "বলুন",
     importChats: "WhatsApp বা Instagram চ্যাট আনুন",
@@ -239,6 +247,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     templates: "ડિઝાઇન",
     features: "ખાસિયતો",
     contact: "સંપર્ક",
+    usage: "અમે AI નો ઉપયોગ કેવી રીતે કરીએ છીએ",
     myDashboard: "મારું ડેશબોર્ડ",
     speak: "બોલો",
     importChats: "WhatsApp અથવા Instagram ચેટ લાવો",
