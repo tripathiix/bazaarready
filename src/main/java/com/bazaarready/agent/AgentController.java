@@ -35,7 +35,10 @@ class AgentController {
         return agent.start(request.description(), request.language());
     }
 
-    /** Upload WhatsApp chat exports (.txt or .zip). Files are read in memory and never stored. */
+    /**
+     * Upload WhatsApp chat exports (.txt or .zip) or Instagram's "Download your information" export (.zip or
+     * the message_N.json files). Files are read in memory and never stored.
+     */
     @PostMapping("/whatsapp")
     @ResponseStatus(HttpStatus.CREATED)
     SessionView startFromChats(@org.springframework.web.bind.annotation.RequestParam("files") java.util.List<org.springframework.web.multipart.MultipartFile> files,
@@ -50,13 +53,18 @@ class AgentController {
             data.add(file.getBytes());
             names.add(file.getOriginalFilename());
         }
-        var texts = com.bazaarready.intake.WhatsAppChat.readFiles(data, names);
-        var messages = com.bazaarready.intake.WhatsAppChat.parse(texts);
+        boolean instagram = com.bazaarready.intake.InstagramChat.looksLikeInstagram(data, names);
+        var messages = instagram
+                ? com.bazaarready.intake.InstagramChat.read(data, names)
+                : com.bazaarready.intake.WhatsAppChat.parse(com.bazaarready.intake.WhatsAppChat.readFiles(data, names));
         if (messages.size() < 3) {
-            throw new IllegalArgumentException("These files don't look like WhatsApp chat exports. In WhatsApp, open a chat, choose Export chat, then Without media.");
+            throw new IllegalArgumentException(instagram
+                    ? "We couldn't find messages in this Instagram download. Download your information again, choose Messages and the JSON format, and upload the zip."
+                    : "These files don't look like WhatsApp chat exports. In WhatsApp, open a chat, choose Export chat, then Without media.");
         }
         String language2 = language.matches(com.bazaarready.common.Languages.CODE_PATTERN) ? language : "en";
-        return agent.startFromChats(com.bazaarready.intake.WhatsAppChat.clean(messages, ownerName), language2);
+        return agent.startFromChats(com.bazaarready.intake.WhatsAppChat.clean(messages, ownerName), language2,
+                instagram ? "Instagram" : "WhatsApp");
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

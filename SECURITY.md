@@ -52,6 +52,7 @@ Set in `SecurityConfig` and `SecurityHeadersFilter`:
 ## Data handling
 
 - WhatsApp chat exports are read in memory. Customers' names and phone numbers are replaced before anything reaches the model, and the files are never stored.
+- Instagram "Download your information" exports are handled the same way: only the message files inside the zip are read (photos are skipped unread), names, numbers and emails are replaced, and nothing is stored. Uploads are limited to 60 MB, and at most 12 MB of messages are read.
 - Uploaded photos: 3 MB limit, file type checked from the content (not the name), served with `nosniff`.
 - All SQL uses bound parameters. Input lengths are limited on the server, not just in the browser.
 

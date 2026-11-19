@@ -458,7 +458,24 @@ export default function App() {
                     if (files.length) void run(() => startFromChats(files, language, ownerName));
                   }}
                 />
+                <label className="button" htmlFor="ig-files">
+                  {chatWords.igButton}
+                </label>
+                <input
+                  id="ig-files"
+                  className="visually-hidden"
+                  type="file"
+                  accept=".zip,.json,application/zip,application/json"
+                  multiple
+                  disabled={busy}
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files ?? []);
+                    e.target.value = "";
+                    if (files.length) void run(() => startFromChats(files, language, ownerName));
+                  }}
+                />
               </div>
+              <p className="hint">{chatWords.igHow}</p>
             </div>
           </form>
           <div className="try-row" data-reveal>

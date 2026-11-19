@@ -7,8 +7,9 @@ spring:
     password: ${DB_PASSWORD:}
   servlet:
     multipart:
-      max-file-size: 8MB
-      max-request-size: 10MB
+      # Instagram downloads can include photos; only the message files inside are read.
+      max-file-size: 60MB
+      max-request-size: 64MB
   jpa:
     hibernate:
       ddl-auto: validate
