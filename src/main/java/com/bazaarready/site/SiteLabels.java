@@ -98,6 +98,10 @@ public final class SiteLabels {
         put("haggle_placeholder", "Can you do it for less?");
         put("haggle_quantity", "How many?");
         put("send", "Send");
+        put("speak", "Speak");
+        put("stop_listening", "Stop listening");
+        put("read_aloud", "Read replies aloud");
+        put("hear_reply", "Hear this");
         put("deal_done", "Deal! This price is saved in your cart for 30 minutes.");
         put("bargained", "bargained");
         put("go_to_cart", "Go to cart");

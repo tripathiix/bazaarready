@@ -370,6 +370,15 @@
         .bubble summary { cursor: pointer; }
         .hg-form, .chat-form { display: flex; gap: 0.5rem; padding: 0.8rem 1.2rem 1.1rem; border-top: 1px solid var(--line); }
         .hg-form input, .chat-form input { flex: 1; }
+        .hg-mic, .hg-say { flex: none; display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 999px;
+            border: 1px solid var(--line); background: var(--tint); color: var(--ink); cursor: pointer; font-size: 1.1rem; }
+        .hg-mic.on { background: #e5484d; border-color: #e5484d; color: #ffffff; animation: hg-pulse 1.2s ease-in-out infinite; }
+        @keyframes hg-pulse { 50% { box-shadow: 0 0 0 6px rgba(229, 72, 77, 0.25); } }
+        .hg-aloud { position: absolute; top: 0.7rem; inset-inline-end: 2.9rem; background: rgba(255, 255, 255, 0.16); color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; padding: 0.2rem 0.65rem; font-size: 0.85rem; cursor: pointer; }
+        .hg-aloud[aria-pressed="true"] { background: #ffffff; color: var(--brand); font-weight: 700; }
+        .bubble .hg-say { width: 1.8rem; height: 1.8rem; font-size: 0.85rem; margin-inline-start: 0.4rem; vertical-align: middle; background: transparent; }
+        @media (prefers-reduced-motion: reduce) { .hg-mic.on { animation: none; } }
         .hg-deal { padding: 1rem 1.3rem 1.3rem; text-align: center; border-top: 1px solid var(--line); }
         .hg-deal p { margin: 0 0 0.8rem; font-weight: 700; color: var(--wa); }
 
@@ -403,6 +412,27 @@
         .soon-price { font-family: var(--display), sans-serif; font-weight: 800; font-size: 2.4rem; line-height: 1; margin: 0.6rem 0 0; }
         .soon form { background: var(--surface); color: var(--ink); border-radius: 18px; padding: 1.2rem; display: grid; gap: 0.8rem; }
         @media (prefers-reduced-motion: reduce) { .shutter { transition: none; } .shutter.down .shutter-sign { animation: none; } .hg-offer { transition: none; } }
+
+        /* ---- 3D: cards tilt toward the mouse with a light under the pointer, buttons have depth and
+           press down, and the hero's circles become glossy spheres and rings. ---- */
+        .card { position: relative; }
+        .card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.25s ease;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.35), transparent 55%); }
+        .card.tilting { transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px); transition: transform 0.08s linear, box-shadow 0.2s ease;
+            box-shadow: 0 28px 44px -16px rgba(20, 20, 40, 0.42); }
+        .card.tilting::after { opacity: 1; }
+        .layout-boutique .card.tilting { box-shadow: none; }
+        .btn { box-shadow: 0 4px 0 rgba(0, 0, 0, 0.22), 0 8px 16px rgba(0, 0, 0, 0.12); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12); }
+        .hero:not(.has-photo)::after { opacity: 0.55; box-shadow: inset -2.5rem -2.5rem 4rem rgba(0, 0, 0, 0.28), 0 2rem 4rem rgba(0, 0, 0, 0.18);
+            background: radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.7), var(--accent) 38%, var(--accent) 60%, rgba(0, 0, 0, 0.25) 100%); }
+        .hero:not(.has-photo)::before { opacity: 0.4; box-shadow: inset 0.6rem 0.6rem 1.2rem rgba(255, 255, 255, 0.45), inset -0.6rem -0.6rem 1.2rem rgba(0, 0, 0, 0.3),
+            0 1.5rem 2.5rem rgba(0, 0, 0, 0.2); }
+        @media (prefers-reduced-motion: no-preference) {
+            .hero:not(.has-photo)::after { animation: float3d 9s ease-in-out infinite; }
+            .hero:not(.has-photo)::before { animation: float3d 11s ease-in-out infinite reverse; }
+            @keyframes float3d { 50% { transform: translateY(-14px) rotate(8deg); } }
+        }
     </style>
 </head>
 
@@ -496,10 +526,11 @@
     </div>
 
     <dialog class="haggle" th:if="${haggleOn}" data-haggle-dialog aria-labelledby="hg-title"
-            th:attr="data-currency=${shop.currency()},data-thinking=${L.of('thinking')},data-retry=${L.of('try_again')}">
+            th:attr="data-currency=${shop.currency()},data-thinking=${L.of('thinking')},data-retry=${L.of('try_again')},data-hear=${L.of('hear_reply')}">
         <div class="hg-head">
             <h2 id="hg-title" th:text="${L.of('haggle_title')}">Let's bargain</h2>
             <p><strong data-product>Item</strong> · <span th:text="${L.of('haggle_hint')}">Hint</span></p>
+            <button type="button" class="hg-aloud" data-aloud aria-pressed="false" hidden th:attr="aria-label=${L.of('read_aloud')},title=${L.of('read_aloud')}">🔊</button>
             <button type="button" class="hg-x" data-close th:attr="aria-label=${L.of('close')}">×</button>
         </div>
         <div class="hg-bar">
@@ -509,6 +540,8 @@
         <div class="hg-log" data-log aria-live="polite"></div>
         <form class="hg-form" data-hg-form>
             <input name="msg" maxlength="300" autocomplete="off" th:placeholder="${L.of('haggle_placeholder')}" th:attr="aria-label=${L.of('haggle_placeholder')}">
+            <button type="button" class="hg-mic" data-mic hidden aria-pressed="false"
+                    th:attr="aria-label=${L.of('speak')},title=${L.of('speak')},data-stop=${L.of('stop_listening')}">🎤</button>
             <button class="btn small" th:text="${L.of('send')}">Send</button>
         </form>
         <div class="hg-deal" data-deal hidden>
@@ -562,6 +595,30 @@
                 el.classList.add('reveal');
                 io.observe(el);
             });
+        })();
+
+        // ---- 3D tilt: cards lean toward the mouse with a soft light under the pointer.
+        // Mouse devices only, and never when motion is turned off. ----
+        (function () {
+            if (!window.matchMedia || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+            var SEL = '.card';
+            var current = null;
+            function reset(el) { el.classList.remove('tilting'); el.style.removeProperty('--rx'); el.style.removeProperty('--ry'); }
+            document.addEventListener('pointermove', function (e) {
+                var el = e.target && e.target.closest ? e.target.closest(SEL) : null;
+                if (current && current !== el) reset(current);
+                current = el;
+                if (!el) return;
+                var r = el.getBoundingClientRect();
+                var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+                el.style.setProperty('--ry', ((x - 0.5) * 12).toFixed(2) + 'deg');
+                el.style.setProperty('--rx', ((0.5 - y) * 9).toFixed(2) + 'deg');
+                el.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+                el.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+                el.classList.add('tilting');
+            }, { passive: true });
+            document.addEventListener('pointerleave', function () { if (current) reset(current); });
         })();
         var slug = body.dataset.slug;
         var DEALS = 'deals:' + slug;
@@ -646,11 +703,103 @@
             var deal = dlg.querySelector('[data-deal]');
             var symbol = dlg.dataset.currency;
             var state = null;
+
+            // Voice: speak an offer instead of typing it, and hear the shopkeeper's replies.
+            // Both use the browser's own speech tools; only the typed text ever reaches the server.
+            var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            var canSay = 'speechSynthesis' in window;
+            var mic = dlg.querySelector('[data-mic]');
+            var aloud = dlg.querySelector('[data-aloud]');
+            var listening = null;
+            var pageLang = (document.documentElement.lang || 'en').toLowerCase();
+            var SCRIPTS = [ [/[\u0900-\u097F]/, 'hi-IN'], [ /[\u0B80-\u0BFF]/, 'ta-IN'], [ /[\u0C00-\u0C7F]/, 'te-IN'], [ /[\u0C80-\u0CFF]/, 'kn-IN'],
+                [/[\u0980-\u09FF]/, 'bn-IN'], [ /[\u0A80-\u0AFF]/, 'gu-IN'], [ /[\u0A00-\u0A7F]/, 'pa-IN'], [ /[\u0D00-\u0D7F]/, 'ml-IN'],
+                [/[\u0600-\u06FF]/, 'ar'], [ /[\u4E00-\u9FFF]/, 'zh-CN'], [ /[\u3040-\u30FF]/, 'ja-JP'], [ /[\uAC00-\uD7AF]/, 'ko-KR'],
+                [/[\u0E00-\u0E7F]/, 'th-TH'], [ /[\u0400-\u04FF]/, 'ru-RU'], [ /[\u0370-\u03FF]/, 'el-GR'], [ /[\u0590-\u05FF]/, 'he-IL'] ];
+            function listenLang() {
+                if (pageLang === 'hi-latn' || pageLang === 'hinglish') return 'hi-IN';
+                var nav = (navigator.language || '').toLowerCase();
+                return nav.split('-')[0] === pageLang.split('-')[0] ? navigator.language : pageLang;
+            }
+            function sayLang(text) {
+                for (var i = 0; i < SCRIPTS.length; i++) if (SCRIPTS[i][0].test(text)) return SCRIPTS[i][1];
+                return pageLang === 'hi-latn' ? 'en-IN' : pageLang;
+            }
+            function say(text) {
+                if (!canSay || !text) return;
+                window.speechSynthesis.cancel();
+                var u = new SpeechSynthesisUtterance(text);
+                u.lang = sayLang(text);
+                window.speechSynthesis.speak(u);
+            }
+            function setAloud(on) {
+                if (!aloud) return;
+                aloud.setAttribute('aria-pressed', on ? 'true' : 'false');
+                try { localStorage.setItem('hg-aloud', on ? '1' : '0'); } catch (e) { /* no storage */ }
+                if (!on && canSay) window.speechSynthesis.cancel();
+            }
+            if (canSay && aloud) {
+                aloud.hidden = false;
+                try { if (localStorage.getItem('hg-aloud') === '1') aloud.setAttribute('aria-pressed', 'true'); } catch (e) { /* no storage */ }
+                aloud.addEventListener('click', function () { setAloud(aloud.getAttribute('aria-pressed') !== 'true'); });
+            }
+            function stopMic() {
+                if (listening) { try { listening.stop(); } catch (e) { /* already stopped */ } }
+                listening = null;
+                mic.classList.remove('on');
+                mic.setAttribute('aria-pressed', 'false');
+                mic.setAttribute('aria-label', mic.title);
+            }
+            if (Recognition && mic) {
+                mic.hidden = false;
+                mic.addEventListener('click', function () {
+                    if (listening) { stopMic(); return; }
+                    var r = new Recognition();
+                    r.lang = listenLang();
+                    r.interimResults = true;
+                    r.continuous = false;
+                    var before = input.value ? input.value.trim() + ' ' : '';
+                    r.onresult = function (event) {
+                        var text = '';
+                        for (var i = 0; i < event.results.length; i++) text += event.results[i][0].transcript;
+                        input.value = before + text.trim();
+                        if (event.results[event.results.length - 1].isFinal) {
+                            stopMic();
+                            setAloud(true); // someone talking to the shop most likely wants to hear it back
+                            if (input.value.trim()) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+                        }
+                    };
+                    r.onerror = stopMic;
+                    r.onend = function () { if (listening === r) stopMic(); };
+                    listening = r;
+                    mic.classList.add('on');
+                    mic.setAttribute('aria-pressed', 'true');
+                    mic.setAttribute('aria-label', mic.dataset.stop);
+                    r.start();
+                });
+            }
+
             function bubble(text, me) {
                 var p = document.createElement('p');
                 p.className = 'bubble' + (me ? ' me' : '');
                 p.textContent = text;
                 log.appendChild(p);
+                log.scrollTop = log.scrollHeight;
+                return p;
+            }
+            function shopBubble(text) {
+                var p = bubble(text, false);
+                if (canSay) {
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'hg-say';
+                    b.textContent = '🔊';
+                    b.setAttribute('aria-label', dlg.dataset.hear);
+                    b.title = dlg.dataset.hear;
+                    b.addEventListener('click', function () { say(text); });
+                    p.appendChild(b);
+                }
+                if (aloud && aloud.getAttribute('aria-pressed') === 'true') say(text);
                 log.scrollTop = log.scrollHeight;
                 return p;
             }
@@ -669,6 +818,7 @@
                 input.focus();
             });
             dlg.querySelector('[data-close]').addEventListener('click', function () { dlg.close(); });
+            dlg.addEventListener('close', function () { if (mic) stopMic(); if (canSay) window.speechSynthesis.cancel(); });
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
                 var msg = input.value.trim();
@@ -685,7 +835,7 @@
                     wait.remove();
                     if (res.error) { bubble(res.error, false); return; }
                     state.history.push({ from: 'me', text: msg }, { from: 'shop', text: res.reply });
-                    bubble(res.reply, false);
+                    shopBubble(res.reply);
                     offer.textContent = fmt(symbol, Number(res.offer));
                     offer.classList.remove('moved'); void offer.offsetWidth; offer.classList.add('moved');
                     if (res.quantity) qty.value = res.quantity;

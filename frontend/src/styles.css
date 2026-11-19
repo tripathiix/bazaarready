@@ -1852,3 +1852,88 @@ details.guide[open] summary {
 [dir="rtl"] .hero { flex-direction: column-reverse; gap: 1rem; }
 [dir="rtl"] .hero-side { position: static; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; max-width: none; }
 [dir="rtl"] .hero-side .open-sign { margin-top: 0; }
+
+/* Microphone beside each text box in the agent's question form. */
+.qfield { position: relative; }
+.qfield:has(.field-mic) input,
+.qfield:has(.field-mic) textarea { padding-inline-end: 2.8rem; }
+.field-mic {
+  position: absolute;
+  inset-inline-end: 0.45rem;
+  bottom: 0.45rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  cursor: pointer;
+}
+.field-mic:hover { background: rgba(255, 255, 255, 0.16); }
+.field-mic.is-listening { background: #e5484d; border-color: #e5484d; color: #fff; animation: mic-pulse 1.2s ease-in-out infinite; }
+@keyframes mic-pulse { 50% { box-shadow: 0 0 0 6px rgba(229, 72, 77, 0.25); } }
+@media (prefers-reduced-motion: reduce) { .field-mic.is-listening { animation: none; } }
+
+/* Progress and problems for chat imports, right under the upload buttons. */
+.import-note { display: flex; align-items: center; gap: 0.6rem; margin: 0.8rem 0 0; padding: 0.7rem 0.9rem; border-radius: 12px; font-weight: 600; }
+.import-note.working { background: rgba(79, 195, 161, 0.14); border: 1px solid rgba(79, 195, 161, 0.45); }
+.import-note.error { background: rgba(255, 120, 120, 0.12); border: 1px solid rgba(255, 140, 140, 0.5); }
+.import-note .spinner { flex: none; width: 1rem; height: 1rem; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .import-note .spinner { animation: none; } }
+
+/* Chat files chosen so far, before building. */
+.picked { margin-top: 0.9rem; display: grid; gap: 0.6rem; justify-items: start; }
+.picked ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; width: 100%; }
+.picked li { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0.5rem 0.45rem 0.8rem; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); }
+.picked-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.picked-size { color: var(--muted, #b9b2c9); font-size: 0.9rem; flex: none; }
+.picked-x { flex: none; width: 1.9rem; height: 1.9rem; border-radius: 999px; border: 0; background: rgba(255, 255, 255, 0.1); color: inherit; font-size: 1.1rem; cursor: pointer; }
+.picked-x:hover { background: rgba(255, 120, 120, 0.3); }
+
+/* ---- 3D ---------------------------------------------------------------------------------------
+   The featured sample site leans back like a screen on a stall; cards tilt toward the mouse with a
+   soft light where the pointer is (tilt.ts); buttons have depth and press down. Motion is skipped for
+   people who turn it off. */
+.featured { perspective: 1800px; }
+.browser {
+  transform: rotateY(-10deg) rotateX(7deg);
+  transform-origin: center;
+  box-shadow: -30px 50px 90px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.browser:hover,
+.browser:focus-visible { transform: rotateY(-4deg) rotateX(3deg) translateY(-4px); }
+.browser.tilting { transform: perspective(1800px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-4px); transition: transform 0.08s linear; }
+.browser { position: relative; }
+.browser::after, .strip-card::after, .polaroid a::after, .panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.22), transparent 55%);
+}
+.strip-card, .polaroid a, .panel { position: relative; }
+.tilting::after { opacity: 1 !important; }
+.strip-card.tilting, .polaroid a.tilting {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px);
+  transition: transform 0.08s linear;
+  box-shadow: 0 26px 40px -14px rgba(0, 0, 0, 0.6);
+}
+.panel.tilting {
+  transform: perspective(1400px) rotateX(calc(var(--rx) * 0.35)) rotateY(calc(var(--ry) * 0.35));
+  transition: transform 0.1s linear;
+}
+.button { box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35), 0 8px 18px rgba(0, 0, 0, 0.2); transition: transform 0.1s ease, box-shadow 0.1s ease; }
+.button:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 3px 8px rgba(0, 0, 0, 0.2); }
+@media (prefers-reduced-motion: reduce) {
+  .browser, .browser:hover { transform: none; }
+}
+@media (max-width: 760px) {
+  .browser { transform: rotateX(6deg); }
+}

@@ -20,6 +20,8 @@ server:
   # Redirects carry only the path, so they work on any address: localhost, a tunnel or the real domain.
   tomcat:
     use-relative-redirects: true
+    # An Instagram download can hold hundreds of conversations, each sent as its own small file.
+    max-part-count: 320
   # Read the visitor's real address from the proxy in front (Caddy or the tunnel). Tomcat only trusts
   # these headers from private-network addresses, so they can't be faked from outside.
   forward-headers-strategy: native

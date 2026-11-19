@@ -40,18 +40,25 @@ public final class InstagramChat {
     /** Whether the uploaded files look like an Instagram export rather than WhatsApp text. */
     public static boolean looksLikeInstagram(List<byte[]> files, List<String> names) throws IOException {
         for (int i = 0; i < files.size(); i++) {
-            String name = names.get(i) == null ? "" : names.get(i).toLowerCase(Locale.ROOT);
-            if (name.endsWith(".json")) {
+            if (isInstagram(files.get(i), names.get(i))) {
                 return true;
             }
-            byte[] data = files.get(i);
-            if (data.length > 3 && data[0] == 'P' && data[1] == 'K') {
-                try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data))) {
-                    ZipEntry entry;
-                    while ((entry = zip.getNextEntry()) != null) {
-                        if (MESSAGE_FILE.matcher(entry.getName()).matches()) {
-                            return true;
-                        }
+        }
+        return false;
+    }
+
+    /** Whether one uploaded file is Instagram messages (a message JSON, or a zip holding them). */
+    public static boolean isInstagram(byte[] data, String fileName) throws IOException {
+        String name = fileName == null ? "" : fileName.toLowerCase(Locale.ROOT);
+        if (name.endsWith(".json")) {
+            return true;
+        }
+        if (data.length > 3 && data[0] == 'P' && data[1] == 'K') {
+            try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data))) {
+                ZipEntry entry;
+                while ((entry = zip.getNextEntry()) != null) {
+                    if (MESSAGE_FILE.matcher(entry.getName()).matches()) {
+                        return true;
                     }
                 }
             }
@@ -94,7 +101,7 @@ public final class InstagramChat {
         List<WhatsAppChat.Message> out = new ArrayList<>();
         int n = 0;
         for (List<byte[]> parts : byConversation.values()) {
-            String chat = "chat " + (++n);
+            String chat = "instagram chat " + (++n);
             List<long[]> order = new ArrayList<>();
             List<WhatsAppChat.Message> messages = new ArrayList<>();
             for (byte[] part : parts) {

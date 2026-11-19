@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { ActionView, Me, SessionView, csrfToken, getMe, getSession, sendApproval, sendReply, startFromChats, startSession, startUpdate } from "./api";
 import { Coach, OPEN_COACH } from "./Coach";
 import { DESIGNS, HOME } from "./home";
@@ -11,6 +11,7 @@ import { applyFonts } from "./fonts";
 import { LanguageCode, STRINGS, Strings, initialLanguage, rememberLanguage } from "./i18n";
 import { CHATS, EXTRA, HEAR_QUESTION, ORDERS_LINK } from "./i18nExtra";
 import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
+import { InstagramZipError, canOpenZips, instagramFiles } from "./igZip";
 import { NOTES, useShowcase } from "./showcase";
 import { BUILT_IN, CHIPS, MORE, RTL, loadLanguage, nativeName, pickerName, registerTable, savedExtraLanguage } from "./globalLang";
 
@@ -125,6 +126,35 @@ export default function App() {
   const speech = useSpeech((text) => setDescription((current) => (current ? current + " " + text : text)));
   const answerSpeech = useSpeech((text) => setAnswer((current) => (current ? current + " " + text : text)));
   const live = session?.status === "DONE" && session.published;
+  // Voice for the question form: one microphone, pointed at whichever field's mic was tapped.
+  const [micField, setMicField] = useState<number | null>(null);
+  const micFieldRef = useRef<number | null>(null);
+  const fieldSpeech = useSpeech((text) => {
+    const i = micFieldRef.current;
+    if (i === null) return;
+    const numeric = session?.fields?.[i]?.kind === "number";
+    setFormAnswers((current) => {
+      if (numeric) {
+        const digits = text.replace(/[^0-9.]/g, "");
+        return digits ? { ...current, [i]: digits } : current;
+      }
+      const before = current[i] ?? "";
+      return { ...current, [i]: before ? before + " " + text : text };
+    });
+  });
+  function toggleFieldMic(i: number) {
+    const same = micFieldRef.current === i && fieldSpeech.listening;
+    if (fieldSpeech.listening) fieldSpeech.stop();
+    if (same) {
+      setMicField(null);
+      micFieldRef.current = null;
+      return;
+    }
+    micFieldRef.current = i;
+    setMicField(i);
+    // Starting straight after stopping can fail in some browsers; give the old session a moment to close.
+    window.setTimeout(() => fieldSpeech.start(t.speech), fieldSpeech.listening ? 250 : 0);
+  }
   const changeSpeech = useSpeech((text) => setChangeText((current) => (current ? current + " " + text : text)));
   const changeKey = changeKeyFromUrl ?? (session?.ownerPath && session.published ? session.ownerPath.split("/").pop() ?? null : null);
   const TEST_LINE = `${u.testFirst}. ${u.testHint}`;
@@ -194,6 +224,57 @@ export default function App() {
     rememberLanguage(code);
   }
 
+  // What happened to the chats just chosen, shown right under the upload buttons.
+  const [importNote, setImportNote] = useState<{ kind: "working" | "error"; text: string } | null>(null);
+
+  // Chat files chosen so far: owners can add several WhatsApp exports and Instagram downloads, then build.
+  const [picked, setPicked] = useState<{ file: File; instagram: boolean }[]>([]);
+
+  function addPicked(chosen: File[], instagram: boolean) {
+    if (!chosen.length) return;
+    setImportNote(null);
+    setPicked((current) => {
+      const next = [...current];
+      for (const file of chosen) {
+        if (!next.some((p) => p.file.name === file.name && p.file.size === file.size)) next.push({ file, instagram });
+      }
+      return next.slice(0, 20);
+    });
+  }
+
+  async function importChats() {
+    if (!picked.length) return;
+    const first = picked.length === 1 ? picked[0].file.name : `${picked.length} files`;
+    const whatsapp = picked.filter((p) => !p.instagram).map((p) => p.file);
+    let instagram = picked.filter((p) => p.instagram).map((p) => p.file);
+    if (instagram.length && canOpenZips() && instagram.some((f) => /\.(zip|html?)$/i.test(f.name))) {
+      setImportNote({ kind: "working", text: chatWords.opening.replace("{name}", first) });
+      try {
+        const opened = await instagramFiles(instagram);
+        instagram = opened.files;
+        setImportNote({ kind: "working", text: chatWords.found.replace("{n}", String(opened.conversations)) });
+      } catch (e) {
+        if (e instanceof InstagramZipError) {
+          setImportNote({ kind: "error", text: e.code === "html" ? chatWords.igHtml : chatWords.igNone });
+          return;
+        }
+        // couldn't open it here; let the server try the whole zip
+      }
+    }
+    setImportNote({ kind: "working", text: chatWords.received.replace("{name}", first) });
+    let failed: string | null = null;
+    await run(async () => {
+      try {
+        return await startFromChats([...whatsapp, ...instagram], language, ownerName);
+      } catch (e) {
+        failed = e instanceof Error ? e.message : "Something went wrong. Please try again.";
+        throw e;
+      }
+    });
+    setImportNote(failed ? { kind: "error", text: failed } : null);
+    if (!failed) setPicked([]);
+  }
+
   async function run(work: () => Promise<SessionView>) {
     setBusy(true);
     setError(null);
@@ -233,6 +314,9 @@ export default function App() {
         })
         .filter((l): l is string => l !== null);
       const text = lines.length ? lines.join("\n") : "(left these empty)";
+      if (fieldSpeech.listening) fieldSpeech.stop();
+      setMicField(null);
+      micFieldRef.current = null;
       setFormAnswers({});
       setFormOther({});
       void run(() => sendReply(session.id, text));
@@ -455,7 +539,7 @@ export default function App() {
                   onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
                     e.target.value = "";
-                    if (files.length) void run(() => startFromChats(files, language, ownerName));
+                    addPicked(files, false);
                   }}
                 />
                 <label className="button" htmlFor="ig-files">
@@ -465,16 +549,48 @@ export default function App() {
                   id="ig-files"
                   className="visually-hidden"
                   type="file"
-                  accept=".zip,.json,application/zip,application/json"
+                  accept=".zip,.json,.html,application/zip,application/json,text/html"
                   multiple
                   disabled={busy}
                   onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
                     e.target.value = "";
-                    if (files.length) void run(() => startFromChats(files, language, ownerName));
+                    addPicked(files, true);
                   }}
                 />
               </div>
+              {picked.length > 0 && (
+                <div className="picked">
+                  <ul>
+                    {picked.map((p, i) => (
+                      <li key={`${p.file.name}-${p.file.size}`}>
+                        <span aria-hidden="true">{p.instagram ? "📷" : "💬"}</span>
+                        <span className="picked-name">{p.file.name}</span>
+                        <span className="picked-size">{p.file.size >= 1048576 ? `${(p.file.size / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(p.file.size / 1024))} KB`}</span>
+                        <button
+                          type="button"
+                          className="picked-x"
+                          aria-label={`${chatWords.remove}: ${p.file.name}`}
+                          disabled={busy}
+                          onClick={() => setPicked(picked.filter((_, j) => j !== i))}
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="hint">{chatWords.addMore}</p>
+                  <button type="button" className="button primary" disabled={busy} onClick={() => void importChats()}>
+                    {chatWords.buildFrom.replace("{n}", String(picked.length))}
+                  </button>
+                </div>
+              )}
+              {importNote && (
+                <p className={`import-note ${importNote.kind}`} role={importNote.kind === "error" ? "alert" : "status"}>
+                  {importNote.kind === "working" && <span className="spinner" aria-hidden="true" />}
+                  {importNote.text}
+                </p>
+              )}
               <p className="hint">{chatWords.igHow}</p>
             </div>
           </form>
@@ -586,6 +702,19 @@ export default function App() {
                             onChange={(e) => setFormAnswers({ ...formAnswers, [i]: e.target.value })}
                             maxLength={300}
                           />
+                        )}
+                        {fieldSpeech.supported && (f.kind === "long" || f.kind === "text" || f.kind === "number") && (
+                          <button
+                            type="button"
+                            className={`field-mic ${micField === i && fieldSpeech.listening ? "is-listening" : ""}`}
+                            aria-label={`${micField === i && fieldSpeech.listening ? t.stopListening : t.speak}: ${f.label}`}
+                            aria-pressed={micField === i && fieldSpeech.listening}
+                            onClick={() => toggleFieldMic(i)}
+                          >
+                            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                              <path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z" />
+                            </svg>
+                          </button>
                         )}
                       </div>
                     ))}
