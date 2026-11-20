@@ -1,6 +1,5 @@
 package com.bazaarready.intake;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -11,8 +10,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Reads WhatsApp "Export chat" files (Android and iPhone formats, as .txt or .zip) and removes
@@ -50,20 +47,12 @@ public final class WhatsAppChat {
         for (int i = 0; i < files.size(); i++) {
             byte[] data = files.get(i);
             String name = names.get(i) == null ? "" : names.get(i).toLowerCase(Locale.ROOT);
-            if (name.endsWith(".zip") || (data.length > 3 && data[0] == 'P' && data[1] == 'K')) {
-                try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data))) {
-                    ZipEntry entry;
-                    while ((entry = zip.getNextEntry()) != null) {
-                        if (entry.isDirectory() || !entry.getName().toLowerCase(Locale.ROOT).endsWith(".txt")) {
-                            continue;
-                        }
-                        byte[] content = zip.readNBytes(MAX_TOTAL_BYTES);
-                        total += content.length;
-                        if (total > MAX_TOTAL_BYTES) {
-                            throw new IOException("The chat files are too large.");
-                        }
-                        texts.add(new String(content, StandardCharsets.UTF_8));
-                    }
+            if (name.endsWith(".zip") || SafeZip.isZip(data)) {
+                // Opened from its table of contents: only .txt entries are decompressed (see SafeZip).
+                for (SafeZip.Item item : SafeZip.read(data, n -> n.toLowerCase(Locale.ROOT).endsWith(".txt"),
+                        MAX_TOTAL_BYTES - total, "The chat files are too large.")) {
+                    total += item.data().length;
+                    texts.add(new String(item.data(), StandardCharsets.UTF_8));
                 }
             } else {
                 total += data.length;

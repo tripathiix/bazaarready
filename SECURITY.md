@@ -32,14 +32,14 @@ Sites made before accounts existed are claimed by the first signed-in person who
 Set in `SecurityConfig` and `SecurityHeadersFilter`:
 
 - **Content-Security-Policy** with a fresh nonce on every page: only this site's scripts, or inline scripts carrying the nonce, can run. No inline event handlers anywhere. Images only from this site, Wikimedia and Pexels; fonts only from Google Fonts.
-- `frame-ancestors 'none'` and `X-Frame-Options: DENY` (no clickjacking).
+- `frame-ancestors 'self'` and `X-Frame-Options: SAMEORIGIN`: pages can only be framed by bazaarready.com itself (the template previews), so other sites can't clickjack them.
 - `Strict-Transport-Security` over HTTPS, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`.
 - `Permissions-Policy`: microphone for "Speak instead" only; camera, location, payment and USB off.
 
 ## Abuse and cost controls
 
 - **Rate limits per address** (`RateLimitFilter`): AI requests 12 a minute and 250 a day; sign-in and sign-up 10 per 15 minutes; customer orders and messages 20 per 10 minutes; owner edits and uploads 40 per 10 minutes. The client address is taken from the proxy only when the proxy is on a private network, so it can't be spoofed.
-- **Daily AI spending cap** (`ClaudeClient`): every call to Claude is counted in the database, per day and per account. Defaults: 3,000 calls a day for the whole service and 400 per account (`CLAUDE_DAILY_CAP`, `CLAUDE_PER_ACCOUNT_DAILY_CAP`).
+- **Daily AI spending cap** (`ClaudeClient`): every call to Claude is counted in the database, per day and per account. Defaults: 3,000 calls a day for the whole service and 400 per account (`CLAUDE_DAILY_CAP`, `CLAUDE_PER_ACCOUNT_DAILY_CAP`). Features anyone can use without signing in (bargaining, customer chat, page and label translation) count in their own bucket, capped at 40% of the daily total, so public traffic can never use up the budget owners need to build their sites.
 - **Scope guardrail** (`ScopeGuard`): a small model checks that free text is about the user's business or website before it reaches the builder, the update agent or the Idea coach. Requests like "write binary search in Java" are refused, so the service can't be used as a free general-purpose AI.
 
 ## AI safety
@@ -52,9 +52,12 @@ Set in `SecurityConfig` and `SecurityHeadersFilter`:
 ## Data handling
 
 - WhatsApp chat exports are read in memory. Customers' names and phone numbers are replaced before anything reaches the model, and the files are never stored.
-- Instagram "Download your information" exports are handled the same way: only the message files inside the zip are read (photos are skipped unread), names, numbers and emails are replaced, and nothing is stored. Uploads are limited to 60 MB, and at most 12 MB of messages are read.
+- Instagram "Download your information" exports are handled the same way: names, numbers and emails are replaced, and nothing is stored. The browser opens the zip itself and sends only the message files, so photos and videos never leave the device. Uploads are limited to 60 MB, and at most 12 MB of messages are read.
+- Uploaded zips (WhatsApp or Instagram) are opened from their table of contents (`SafeZip`): only the files we need are decompressed, never past their size limit, and the number of entries is capped. A crafted "zip bomb" is rejected in about a second instead of keeping a CPU busy.
 - Uploaded photos: 3 MB limit, file type checked from the content (not the name), served with `nosniff`.
 - All SQL uses bound parameters. Input lengths are limited on the server, not just in the browser.
+- The database is backed up every night on the server (the last 14 are kept), and `scripts/pull-backups.sh` copies the newest one off the server. See `scripts/restore-backup.md`.
+- Own-domain costs on the owner dashboard are labelled as estimates (checked November 2026) and link to the registrar's real price.
 
 ## Secrets
 
