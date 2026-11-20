@@ -14,6 +14,7 @@ import { canSpeakAloud, speakAloud, useSpeech } from "./useSpeech";
 import { InstagramZipError, canOpenZips, instagramFiles } from "./igZip";
 import { NOTES, useShowcase } from "./showcase";
 import { BUILT_IN, CHIPS, MORE, RTL, loadLanguage, nativeName, pickerName, registerTable, savedExtraLanguage } from "./globalLang";
+import { LanguageOffer } from "./LanguageOffer";
 
 /** One activity-log line in the owner's language, built from what the agent did. */
 function actionText(action: ActionView, t: Strings, readChats: string): string {
@@ -338,6 +339,7 @@ export default function App() {
 
   return (
     <>
+      <LanguageOffer current={language} onPick={(code) => (BUILT_IN.includes(code) ? chooseLanguage(code as LanguageCode) : void pickMore(code))} />
       <Petals trigger={celebrations} />
       <SideDecor sites={showcase?.recent ?? []} language={language} />
 
@@ -945,6 +947,12 @@ export default function App() {
         </a>
         <span className="holo">
           Crafted with <span aria-label="love">♥</span> by Yashi Tripathi
+        </span>
+        <span className="foot-geo" translate="no">
+          Language suggestions use{" "}
+          <a href="https://db-ip.com" rel="noopener">
+            IP Geolocation by DB-IP
+          </a>
         </span>
       </footer>
     </>

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -53,7 +54,10 @@ class UiStringsController {
     }
 
     @PostMapping("/api/ui-strings/{code}")
-    ResponseEntity<JsonNode> translate(@PathVariable String code, @RequestBody String english) throws Exception {
+    ResponseEntity<JsonNode> translate(@PathVariable String code, @RequestBody String english,
+                                       @RequestParam(defaultValue = "ui") String kind) throws Exception {
+        // "site" = a shop's own page read by a visitor in their language: stricter about prices and names.
+        boolean site = "site".equals(kind);
         Languages.Language language = Languages.of(code);
         if (!code.matches("[a-z]{2,3}") || (language.code().equals("en") && !code.equals("en"))) {
             return ResponseEntity.badRequest().build();
@@ -66,7 +70,11 @@ class UiStringsController {
         if (!source.isObject()) {
             return ResponseEntity.badRequest().build();
         }
-        String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        if (site) {
+            digest.update("site:".getBytes(StandardCharsets.UTF_8)); // kept apart from builder translations
+        }
+        String hash = HexFormat.of().formatHex(digest.digest(bytes));
         List<String> stored = jdbc.queryForList("select strings from ui_strings where language = ? and hash = ?", String.class, code, hash);
         if (!stored.isEmpty()) {
             return ResponseEntity.ok(json.readTree(stored.get(0)));
@@ -79,7 +87,7 @@ class UiStringsController {
         for (Iterator<Map.Entry<String, JsonNode>> it = source.fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> part = it.next();
             keys.add(part.getKey());
-            parts.add(CompletableFuture.supplyAsync(() -> translatePart(part.getValue(), language)));
+            parts.add(CompletableFuture.supplyAsync(() -> translatePart(part.getValue(), language, site)));
         }
         boolean complete = true;
         for (int i = 0; i < keys.size(); i++) {
@@ -97,8 +105,8 @@ class UiStringsController {
         return ResponseEntity.ok(result);
     }
 
-    private JsonNode translatePart(JsonNode english, Languages.Language language) {
-        String system = """
+    private JsonNode translatePart(JsonNode english, Languages.Language language, boolean site) {
+        String system = site ? SITE_PROMPT.formatted(language.englishName()) : """
                 You translate the words on a website builder for small businesses and creators. Translate every \
                 text value in the JSON into %s, in its usual script, short and natural, the way apps in that \
                 language word things. Keep the JSON keys and structure exactly. Keep placeholders such as {name} \
@@ -119,6 +127,11 @@ class UiStringsController {
             return null;
         }
     }
+
+    /** For a small business's own page: nothing about the business itself may change. */
+    private static final String SITE_PROMPT = """
+            You translate the words on a small business's own website for a visitor who reads %s. Translate             every text value in the JSON into that language, in its usual script, short and natural. Keep the             JSON keys and structure exactly. Never change prices, amounts, currency symbols, quantities,             phone numbers, email addresses, street addresses, dates, times, the business's name, people's             names, brand names or emoji: copy them exactly as they are. Keep placeholders such as {name}.             Text already in that language stays as it is. Reply with the JSON only.
+            """;
 
     private static int index(String s, char c) {
         int i = s.indexOf(c);

@@ -695,6 +695,48 @@
     <p class="credits" th:if="${!credits.isEmpty()}">Photos:
         <th:block th:each="c, it : ${credits}"><a th:href="${c.pageUrl()}" rel="noopener" th:text="${c.photographer()}">Name</a><span th:if="${c.licence()}"> (<a th:href="${c.licenceUrl()}" rel="noopener license" th:text="${c.licence()}">CC BY</a>)</span> <span th:text="${'via ' + c.source()}">via Pexels</span><span th:unless="${it.last}">; </span></th:block>
     </p>
+    <!-- Read this shop in your language: offered from the browser's language and the visitor's country,
+         never switched by itself. Prices, names and numbers are kept exactly (kind=site). -->
+    <script src="/lang-offer.js" th:attr="nonce=${cspNonce}"></script>
+    <script th:inline="none" th:attr="nonce=${cspNonce}">
+    (function () {
+        if (!window.BRLang) return;
+        var KEY = "bazaarready.siteLanguage";
+        var page = (document.documentElement.lang || "en").toLowerCase().split("-")[0];
+        var chosen = null;
+        var link = new URLSearchParams(location.search).get("lang");
+        try {
+            if (link && /^[a-z]{2,3}$/.test(link)) localStorage.setItem(KEY, link);
+            chosen = localStorage.getItem(KEY);
+        } catch (e) { chosen = link; }
+        function original() {
+            // A small switch back to the shop's own language, shown while the page is translated.
+            var pill = document.createElement("button");
+            pill.type = "button";
+            pill.setAttribute("translate", "no");
+            pill.lang = page;
+            pill.textContent = "🌐 " + BRLang.nativeName(page);
+            pill.setAttribute("aria-label", "Show this page in " + BRLang.nativeName(page));
+            pill.style.cssText = "position:fixed;left:1rem;bottom:1rem;z-index:65;border:0;border-radius:999px;padding:0.5rem 0.9rem;" +
+                "background:#1f2a5c;color:#fff;font:600 14px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)";
+            pill.addEventListener("click", function () {
+                try { localStorage.removeItem(KEY); localStorage.setItem("bazaarready.langOffer", "1"); } catch (e) { /* fine */ }
+                var url = new URL(location.href); url.searchParams.delete("lang"); location.href = url.toString();
+            });
+            document.body.appendChild(pill);
+        }
+        function read(code) {
+            BRLang.translate(code, { kind: "site", note: "🌐 " + BRLang.nativeName(code) + "…" }).then(original);
+        }
+        if (chosen && chosen !== page) { read(chosen); return; }
+        if (chosen) return;
+        BRLang.offer({
+            current: page,
+            extra: [navigator.language || ""],
+            onPick: function (code) { try { localStorage.setItem(KEY, code); } catch (e) { /* this page only */ } read(code); }
+        });
+    })();
+    </script>
     <script th:inline="none" th:attr="nonce=${cspNonce}">
     (function () {
         var body = document.body;

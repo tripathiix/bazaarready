@@ -65,6 +65,11 @@ bazaarready:
     username: ${SMTP_USERNAME:support@bazaarready.com}
     password: ${SMTP_PASSWORD:}
     to: ${SUPPORT_EMAIL:support@bazaarready.com}
+  # The free DB-IP country database (CC BY 4.0), downloaded when the Docker image is built. Only the
+  # visitor's country is looked up, to suggest a language; addresses are never stored or sent anywhere.
+  # Without the file, no language is suggested.
+  geo:
+    database: ${GEO_DATABASE:/app/geo/dbip-country-lite.mmdb}
   claude:
     daily-cap: ${CLAUDE_DAILY_CAP:3000}
     per-account-daily-cap: ${CLAUDE_PER_ACCOUNT_DAILY_CAP:400}
