@@ -100,6 +100,8 @@ class SiteController {
     @org.springframework.beans.factory.annotation.Autowired
     private com.bazaarready.extras.HaggleService haggle;
     @org.springframework.beans.factory.annotation.Autowired
+    private com.bazaarready.extras.PaymentService payments;
+    @org.springframework.beans.factory.annotation.Autowired
     private com.bazaarready.extras.OwnerExtrasController ownerExtras;
 
     SiteController(ProfileService profiles, SiteLabelService labelService, OrderService orders, ObjectMapper json,
@@ -316,23 +318,78 @@ class SiteController {
     @GetMapping("/s/{slug}/pay/{orderId}")
     String pay(@PathVariable String slug, @PathVariable UUID orderId, Model model) {
         ProfileResponse shop = common(slug, model, "cart");
-        addOrder(model, shop, orders.find(shop.id(), orderId));
+        ShopOrder order = orders.find(shop.id(), orderId);
+        addOrder(model, shop, order);
+        var pay = payments.get(shop.id());
+        List<String> methods = pay.methods(isRupees(shop), whatsappDigits(shop) != null);
+        model.addAttribute("payMethods", methods);
+        if (methods.contains("upi")) {
+            String link = com.bazaarready.extras.PaymentService.upiLink(pay.upiId(), shop.name(), order.getTotalPaise(), order.getNumber());
+            model.addAttribute("upiLink", link);
+            model.addAttribute("upiQr", com.bazaarready.extras.PaymentService.qrDataUri(link));
+            model.addAttribute("upiId", pay.upiId());
+        }
         return "site/pay";
     }
 
+    /** The customer's payment choice. Only the methods this shop offers are accepted. */
     @PostMapping("/s/{slug}/pay/{orderId}")
-    String payDemo(@PathVariable String slug, @PathVariable UUID orderId, @RequestParam String method) {
+    String payChoice(@PathVariable String slug, @PathVariable UUID orderId, @RequestParam String method,
+                     @RequestParam(defaultValue = "") String ref) {
         String sampleStop = sampleStop(slug);
         if (sampleStop != null) {
             return sampleStop;
         }
         ProfileResponse shop = profiles.getBySlug(slug);
-        if ("demo".equals(method)) {
-            orders.markPaidDemo(shop.id(), orderId);
-        } else {
-            orders.find(shop.id(), orderId);
+        String digits = whatsappDigits(shop);
+        List<String> allowed = payments.get(shop.id()).methods(isRupees(shop), digits != null);
+        if (!allowed.contains(method)) {
+            return "redirect:/s/" + slug + "/pay/" + orderId;
+        }
+        String reference = "upi".equals(method) ? clip(ref.replaceAll("[^A-Za-z0-9-]", ""), 40) : null;
+        ShopOrder order = orders.choosePayment(shop.id(), orderId, method, isBlank(reference) ? null : reference);
+        if ("whatsapp".equals(method)) {
+            return "redirect:" + com.bazaarready.extras.PaymentService.whatsappOrderLink(digits, whatsappOrderText(shop, order));
         }
         return "redirect:/s/" + slug + "/order/" + orderId;
+    }
+
+    private static boolean isRupees(ProfileResponse shop) {
+        String c = shop.currency() == null ? "" : shop.currency().trim();
+        return c.equals("₹") || c.equalsIgnoreCase("INR") || c.equalsIgnoreCase("Rs");
+    }
+
+    private static String whatsappDigits(ProfileResponse shop) {
+        if (shop.whatsappNumber() == null) {
+            return null;
+        }
+        String digits = shop.whatsappNumber().replaceAll("[^0-9]", "");
+        if (digits.length() == 10) {
+            digits = "91" + digits;
+        }
+        return digits.length() < 8 ? null : digits;
+    }
+
+    /** The order written out for WhatsApp, in the site's language. */
+    private String whatsappOrderText(ProfileResponse shop, ShopOrder order) {
+        String language = shop.ownerLanguage() == null ? "en" : shop.ownerLanguage().toLowerCase();
+        SiteLabels labels = labelService.labelsFor(language);
+        Money money = new Money(shop.currency());
+        StringBuilder text = new StringBuilder(labels.of("wa_order_intro", "name", shop.name()).replace("{number}", order.getNumber()));
+        for (var line : orders.linesOf(order)) {
+            text.append("\n- ").append(line.quantity()).append(" × ").append(line.name());
+            if (line.unitPricePaise() > 0) {
+                text.append(": ").append(money.minor(line.lineTotalPaise()));
+            }
+        }
+        if (order.getTotalPaise() > 0) {
+            text.append("\n").append(labels.of("wa_order_total")).append(": ").append(money.minor(order.getTotalPaise()));
+        }
+        text.append("\n").append(labels.of("wa_order_name")).append(": ").append(order.getCustomerName());
+        if (order.getAddress() != null) {
+            text.append("\n").append(labels.of("wa_order_address")).append(": ").append(order.getAddress());
+        }
+        return text.toString();
     }
 
     @GetMapping("/s/{slug}/order/{orderId}")

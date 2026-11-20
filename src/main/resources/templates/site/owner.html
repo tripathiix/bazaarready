@@ -19,6 +19,7 @@
             <a href="#haggle">🪙 Haggle</a>
             <a href="#launch">🚀 Test my idea</a>
             <a href="#mediakit">🎤 Media kit</a>
+            <a href="#payments">💳 Payments</a>
             <a href="#domain">🌐 Own domain</a>
             <a href="#tests">🤖 Test with AI customers</a>
             <a href="#collabs">🛡️ Is this collab real?</a>
@@ -55,7 +56,7 @@
         <div class="panel" th:each="o : ${orders}" style="margin-bottom:1rem">
             <div class="head-row">
                 <strong><span th:text="${o.getKind().name() == 'BOOKING'} ? 'Booking' : 'Order'">Order</span> <span th:text="${o.getNumber()}">ABC12345</span></strong>
-                <span class="chip" th:text="${o.getKind().name() == 'BOOKING'} ? 'Request' : (${o.getStatus().name() == 'PAID_DEMO'} ? 'Paid (demo)' : 'Pay on delivery')">Status</span>
+                <span class="chip" th:text="${o.getKind().name() == 'BOOKING'} ? 'Request' : (${o.getStatus().name() == 'PAID_DEMO'} ? 'Paid (demo)' : (${o.getStatus().name() == 'PAID'} ? '✅ Paid' : (${o.getStatus().name() == 'PAY_CHECK'} ? '⏳ UPI: check your bank app' : (${o.getPaymentMethod() == 'whatsapp'} ? 'Ordered on WhatsApp' : (${o.getPaymentMethod() == null} ? 'Payment not chosen yet' : 'Cash on delivery')))))">Status</span>
             </div>
             <p style="margin:0.5rem 0"><span th:text="${o.getCustomerName()}">Customer</span> · <span th:text="${o.getCustomerPhone()}">Phone</span></p>
             <p style="margin:0.5rem 0" th:if="${o.getAddress()}" th:text="${o.getAddress()}">Address</p>
@@ -70,6 +71,10 @@
             </table>
             <div class="total" th:if="${o.getTotalPaise() > 0}"><span>Total</span><span th:text="${money.minor(o.getTotalPaise())}">0</span></div>
             <p style="margin:0.6rem 0 0;color:var(--muted)" th:if="${o.getNote()}">Note: <span th:text="${o.getNote()}">Note</span></p>
+            <p style="margin:0.6rem 0 0;color:var(--muted)" th:if="${o.getPaymentRef()}">UPI reference: <strong th:text="${o.getPaymentRef()}">123</strong></p>
+            <form th:if="${o.getStatus().name() == 'PAY_CHECK'}" method="post" th:action="${'/owner/' + ownerKey + '/orders/' + o.getId() + '/paid'}" style="margin-top:0.6rem">
+                <button class="btn small">Payment received</button>
+            </form>
             <p style="margin:0.6rem 0 0;color:var(--muted);font-size:0.9rem" th:text="${placed.get(o.getId())}">time</p>
         </div>
     </section>
@@ -77,6 +82,7 @@
     <section th:replace="~{site/owner-extras :: haggle}"></section>
     <section th:replace="~{site/owner-extras :: launch}"></section>
     <section th:replace="~{site/owner-extras :: mediakit}"></section>
+    <section th:replace="~{site/owner-extras :: payments}"></section>
     <section th:replace="~{site/owner-extras :: domain}"></section>
 
     <section aria-labelledby="change-title" id="change">

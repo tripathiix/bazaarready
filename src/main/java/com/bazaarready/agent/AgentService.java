@@ -51,6 +51,7 @@ public class AgentService {
     private final ObjectMapper json;
     private final Validator validator;
     private final ArrayNode tools;
+    private final com.bazaarready.extras.PaymentService payments;
 
     private final com.bazaarready.claude.ScopeGuard scope;
     private final com.bazaarready.account.AccountService accounts;
@@ -58,7 +59,9 @@ public class AgentService {
 
     AgentService(com.bazaarready.account.AccountService accounts, com.bazaarready.account.OwnerAccess owners,
                  com.bazaarready.claude.ScopeGuard scope, ClaudeClient claude, ProfileService profiles, SiteLabelService siteLabels, ImageService images, AgentSessionRepository sessions,
-                 AgentActionRepository actions, ObjectMapper json, Validator validator) throws JsonProcessingException {
+                 AgentActionRepository actions, ObjectMapper json, Validator validator,
+                 com.bazaarready.extras.PaymentService payments) throws JsonProcessingException {
+        this.payments = payments;
         this.scope = scope;
         this.accounts = accounts;
         this.owners = owners;
@@ -258,6 +261,8 @@ public class AgentService {
         ProfileRequest request;
         try {
             ObjectNode copy = input.deepCopy();
+            copy.remove("paymentMethods"); // saved separately, after the profile (see below)
+            copy.remove("upiId");
             copy.put("source", "WHATSAPP".equals(session.getSource()) ? Business.Source.WHATSAPP.name()
                     : "INSTAGRAM".equals(session.getSource()) ? Business.Source.INSTAGRAM.name() : Business.Source.DESCRIPTION.name());
             if ("UPDATE".equals(session.getSource())) {
@@ -285,6 +290,16 @@ public class AgentService {
                 ? profiles.create(request)
                 : profiles.update(session.getBusinessId(), request);
         session.setBusinessId(saved.id());
+        // How customers pay (UPI to the owner's ID, cash on delivery, order on WhatsApp), if the owner said.
+        if (input.path("paymentMethods").isArray() && !input.path("paymentMethods").isEmpty()) {
+            List<String> methods = new java.util.ArrayList<>();
+            input.path("paymentMethods").forEach(m -> methods.add(m.asText()));
+            try {
+                payments.saveFromAgent(saved.id(), methods, input.path("upiId").asText(null));
+            } catch (IllegalArgumentException e) {
+                payments.saveFromAgent(saved.id(), methods, null); // an unreadable UPI ID: keep the other methods
+            }
+        }
         owners.claimIfSignedIn(saved.id()); // a new site belongs to the signed-in owner, if any
         // The site's buttons and headings are translated once per language, here, so page views never wait.
         siteLabels.ensure(saved.ownerLanguage());

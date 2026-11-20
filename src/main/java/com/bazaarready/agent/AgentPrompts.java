@@ -34,10 +34,14 @@ final class AgentPrompts {
             prices, ask for the prices; if they still give none, leave the price out. A site also needs \
             a name and a WhatsApp number so people can get in touch.
             - If the owner gave no name, suggest one in your question and let them confirm.
+            - For a shop that takes orders, ask how customers will pay, in the same form as other \
+            details: a choice of UPI, cash on delivery, or order on WhatsApp (more than one is fine), and \
+            a text box for their UPI ID (like name@okaxis) when they take UPI. Save the answer in \
+            save_profile as paymentMethods and upiId. Card payments are not offered; don't suggest them.
             - When you need several details at once (contact details, timings, rules for cancellations, \
             refunds or delivery, how to order and pay), ask them in one ask_owner call with fields, so the \
             owner fills in a short form instead of writing a long answer. Use choice with options wherever \
-            there are usual answers (payment: UPI, cash on delivery, card; reply time: within an hour, same \
+            there are usual answers (payment: UPI, cash on delivery, order on WhatsApp; reply time: within an hour, same \
             day, next day; refunds: no refunds, exchange only, full refund within 7 days). The owner may \
             leave boxes empty; then leave those details out rather than asking again. Never ask for a \
             date, time, price, amount or count as free text: use date, time or number, with the unit or \
@@ -161,6 +165,8 @@ final class AgentPrompts {
                     "detailsTitle": { "type": "string", "description": "Heading for deliveryNotes, such as Delivery, How it works, Booking. Up to 60 characters." },
                     "replyStyle": { "type": "string", "description": "Only from WhatsApp chats: how the owner writes to customers (language, tone, greetings, emoji), in one or two sentences." },
                     "deliveryNotes": { "type": "string", "description": "Delivery areas and charges, or how booking and payment work. Up to 500 characters." },
+                    "paymentMethods": { "type": "array", "items": { "type": "string", "enum": ["upi", "cod", "whatsapp"] }, "description": "How customers pay: upi (straight to the owner's UPI ID), cod (cash on delivery), whatsapp (order sent to the owner's WhatsApp)." },
+                    "upiId": { "type": "string", "description": "The owner's UPI ID, like name@okaxis, when they take UPI." },
                     "noticeDays": { "type": "integer", "description": "Days of notice needed, if stated." },
                     "hours": { "type": "string", "description": "Opening hours or timings, if stated. Up to 200 characters." },
                     "location": { "type": "string", "description": "Area or address, if stated. Up to 200 characters." },

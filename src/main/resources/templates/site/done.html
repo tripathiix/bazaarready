@@ -38,7 +38,7 @@
                     <span th:text="${L.of('total')}">Total</span><span th:text="${money.minor(order.getTotalPaise())}">0</span>
                 </div>
                 <p th:if="${doneKind == 'order'}" style="margin:0.8rem 0 0">
-                    <span class="chip" th:text="${order.getStatus().name() == 'PAID_DEMO'} ? ${L.of('paid_demo')} : ${L.of('pay_on_delivery')}">Payment</span>
+                    <span class="chip" th:text="${order.getStatus().name() == 'PAID_DEMO'} ? ${L.of('paid_demo')} : (${order.getStatus().name() == 'PAID'} ? ${L.of('pay_paid')} : (${order.getStatus().name() == 'PAY_CHECK'} ? ${L.of('pay_upi_check')} : (${order.getPaymentMethod() == 'whatsapp'} ? ${L.of('pay_whatsapp_sent')} : ${L.of('pay_on_delivery')})))">Payment</span>
                 </p>
             </div>
         </th:block>
