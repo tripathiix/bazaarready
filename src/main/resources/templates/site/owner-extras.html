@@ -83,6 +83,7 @@
         <a href="#chats"><strong>💬 Chat in any language</strong><span>They write in theirs, you read and reply in yours.</span></a>
         <a href="#launch"><strong>🚀 Test my idea</strong><span>An AI focus group, a waitlist and a price test.</span></a>
         <a href="#mediakit"><strong>🎤 Media kit</strong><span>For creators: your numbers, rates and safe collab requests.</span></a>
+        <a href="#payments"><strong>💳 Payments</strong><span>UPI straight to you, cash on delivery, or orders on WhatsApp.</span></a>
         <a href="#domain"><strong>🌐 Your own domain</strong><span>See what yourshop.com, your own server and business email would cost.</span></a>
     </div>
 </section>
@@ -133,6 +134,24 @@
         </div>
         <p class="ox-note" style="margin-top:0.6rem">After you ask, the BazaarReady team sets it up with you: buys nothing without your OK, connects your name, moves your site and sets up email. Setup help is free.</p>
     </div>
+</section>
+
+<!-- ============ Payments: how customers pay this shop ============ -->
+<section th:fragment="payments" aria-labelledby="payments-title" id="payments">
+    <h2 id="payments-title">💳 Payments</h2>
+    <p class="ox-note">Choose how customers can pay. Only these show at checkout. <strong>UPI money goes straight to your UPI ID</strong>; BazaarReady never holds it. When a customer says they paid by UPI, check your bank app and tap "Payment received" on the order. Card payments are not offered yet.</p>
+    <p class="chip ox-ok" th:if="${param.payments != null and param.payments[0] == 'saved'}">Saved.</p>
+    <p class="demo" th:if="${param.payments != null and param.payments[0] == 'badupi'}">That UPI ID doesn't look right. It looks like name@bank, for example sunita@okaxis.</p>
+    <form method="post" th:action="${'/owner/' + ownerKey + '/payments'}" class="panel form" style="max-width:40rem">
+        <label class="switch-row"><input type="checkbox" name="upi" value="true" th:checked="${pay.upi()}"> UPI (GPay, PhonePe, Paytm, any bank app)</label>
+        <div><label for="upi-id">Your UPI ID</label>
+            <input id="upi-id" name="upiId" maxlength="300" placeholder="sunita@okaxis" autocomplete="off" spellcheck="false" th:value="${pay.upiId()}"></div>
+        <p class="ox-note" th:unless="${payRupees}" style="margin:0">UPI shows only for shops priced in rupees (₹).</p>
+        <label class="switch-row"><input type="checkbox" name="cod" value="true" th:checked="${pay.cod()}"> Cash on delivery</label>
+        <label class="switch-row"><input type="checkbox" name="whatsapp" value="true" th:checked="${pay.whatsapp()}"> Order on WhatsApp (the order is sent to your WhatsApp; agree payment there)</label>
+        <p class="ox-note" th:if="${shop.whatsappNumber() == null}" style="margin:0">Add a WhatsApp number to your site to use this.</p>
+        <button class="btn">Save</button>
+    </form>
 </section>
 
 <!-- ============ Living shutter ============ -->

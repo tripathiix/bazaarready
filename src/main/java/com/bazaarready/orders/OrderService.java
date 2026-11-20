@@ -97,6 +97,22 @@ public class OrderService {
         return order;
     }
 
+    /** The customer's payment choice at checkout (upi, cod or whatsapp), with a UPI reference if given. */
+    @Transactional
+    public ShopOrder choosePayment(UUID businessId, UUID orderId, String method, String reference) {
+        ShopOrder order = find(businessId, orderId);
+        order.choosePayment(method, reference);
+        return order;
+    }
+
+    /** The owner confirms the money arrived. */
+    @Transactional
+    public ShopOrder markPaid(UUID businessId, UUID orderId) {
+        ShopOrder order = find(businessId, orderId);
+        order.markPaid();
+        return order;
+    }
+
     @Transactional(readOnly = true)
     public ShopOrder find(UUID businessId, UUID orderId) {
         return orders.findById(orderId)

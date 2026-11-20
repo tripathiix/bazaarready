@@ -18,8 +18,11 @@ public class ShopOrder {
 
     public enum Kind { ORDER, BOOKING }
 
-    /** NEW: placed, payment on delivery. PAID_DEMO: the customer went through the demo payment page. */
-    public enum Status { NEW, PAID_DEMO }
+    /**
+     * NEW: placed, to be paid on delivery or as agreed. PAY_CHECK: the customer says they paid by UPI and the
+     * owner should check. PAID: the owner confirmed the payment. PAID_DEMO: older orders from the demo page.
+     */
+    public enum Status { NEW, PAY_CHECK, PAID, PAID_DEMO }
 
     @Id
     private UUID id;
@@ -61,6 +64,14 @@ public class ShopOrder {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    /** upi, cod or whatsapp, once the customer has chosen. */
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    /** The UPI transaction reference the customer gave, if any. */
+    @Column(name = "payment_ref")
+    private String paymentRef;
+
     protected ShopOrder() {
         // for JPA
     }
@@ -81,6 +92,18 @@ public class ShopOrder {
         this.status = Status.PAID_DEMO;
     }
 
+    /** The customer's choice at checkout. A UPI payment waits for the owner to check it. */
+    public void choosePayment(String method, String reference) {
+        this.paymentMethod = method;
+        this.paymentRef = reference;
+        this.status = "upi".equals(method) ? Status.PAY_CHECK : Status.NEW;
+    }
+
+    /** The owner has seen the money arrive. */
+    public void markPaid() {
+        this.status = Status.PAID;
+    }
+
     /** A short number a customer can read out: the first eight characters of the id. */
     public String getNumber() {
         return id.toString().substring(0, 8).toUpperCase();
@@ -99,6 +122,8 @@ public class ShopOrder {
     public long getTotalPaise() { return totalPaise; }
     public Status getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public String getPaymentRef() { return paymentRef; }
 
     public void setAddress(String address) { this.address = address; }
     public void setNote(String note) { this.note = note; }

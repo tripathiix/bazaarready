@@ -44,9 +44,14 @@ public class OwnerExtrasController {
     private final FocusGroupService focus;
     private final ClaudeClient claude;
     private final ObjectMapper json;
+    private final PaymentService payments;
+    private final com.bazaarready.orders.OrderService orders;
 
     OwnerExtrasController(OwnerAccess owners, ExtrasService extras, ChatService chat, FocusGroupService focus,
-                          ClaudeClient claude, ObjectMapper json) {
+                          ClaudeClient claude, ObjectMapper json, PaymentService payments,
+                          com.bazaarready.orders.OrderService orders) {
+        this.payments = payments;
+        this.orders = orders;
         this.owners = owners;
         this.extras = extras;
         this.chat = chat;
@@ -59,6 +64,9 @@ public class OwnerExtrasController {
     public void addTo(Model model, ProfileResponse shop) {
         ExtrasService.Extras ex = extras.get(shop.id());
         model.addAttribute("ex", ex);
+        model.addAttribute("pay", payments.get(shop.id()));
+        String currency = shop.currency() == null ? "" : shop.currency().trim();
+        model.addAttribute("payRupees", currency.equals("₹") || currency.equalsIgnoreCase("INR") || currency.equalsIgnoreCase("Rs"));
         try {
             model.addAttribute("domainPricesJson", new ObjectMapper().writeValueAsString(DomainPrices.table()));
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
@@ -139,6 +147,29 @@ public class OwnerExtrasController {
         ProfileResponse shop = owners.open(ownerKey);
         extras.setHaggle(shop.id(), on, maxOff, minQty);
         return "redirect:/owner/" + ownerKey + "?haggle=saved#haggle";
+    }
+
+    // ---- Payments ----
+
+    @PostMapping("/owner/{ownerKey}/payments")
+    String payments(@PathVariable UUID ownerKey, @RequestParam(defaultValue = "false") boolean upi,
+                    @RequestParam(defaultValue = "") String upiId, @RequestParam(defaultValue = "false") boolean cod,
+                    @RequestParam(defaultValue = "false") boolean whatsapp) {
+        ProfileResponse shop = owners.open(ownerKey);
+        try {
+            payments.save(shop.id(), upi, upiId, cod, whatsapp);
+        } catch (IllegalArgumentException e) {
+            return "redirect:/owner/" + ownerKey + "?payments=badupi#payments";
+        }
+        return "redirect:/owner/" + ownerKey + "?payments=saved#payments";
+    }
+
+    /** The owner has seen a UPI payment arrive in their bank app. */
+    @PostMapping("/owner/{ownerKey}/orders/{orderId}/paid")
+    String orderPaid(@PathVariable UUID ownerKey, @PathVariable UUID orderId) {
+        ProfileResponse shop = owners.open(ownerKey);
+        orders.markPaid(shop.id(), orderId);
+        return "redirect:/owner/" + ownerKey + "#orders-section";
     }
 
     // ---- Two-language chat ----

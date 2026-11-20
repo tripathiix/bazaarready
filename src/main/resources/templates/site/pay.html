@@ -4,11 +4,14 @@
 <body th:class="'theme-' + ${shop.theme()} + ' layout-' + ${layout}" th:style="${fontVars}" th:attr="data-slug=${shop.slug()}">
 <header th:replace="~{site/parts :: nav}"></header>
 
+<!-- Checkout: only the ways this shop takes payment. UPI goes straight to the owner's UPI ID; BazaarReady
+     never holds the money, and the owner confirms UPI payments on their dashboard. No card payments. -->
 <main class="wrap">
-    <section aria-labelledby="title" style="max-width:36rem">
+    <section aria-labelledby="title" style="max-width:40rem">
         <h1 id="title" style="color:var(--brand)" th:text="${L.of('pay_title')}">Payment</h1>
+        <p class="lead" th:text="${L.of('pay_choose')}">Choose how you'd like to pay.</p>
 
-        <div class="panel" style="margin-top:1.5rem">
+        <div class="panel" style="margin-top:1.2rem">
             <table>
                 <tbody>
                 <tr th:each="line : ${orderLines}">
@@ -20,19 +23,54 @@
             <div class="total"><span th:text="${L.of('total')}">Total</span><span th:text="${money.minor(order.getTotalPaise())}">0</span></div>
         </div>
 
-        <p class="demo" role="note" style="margin:1.5rem 0" th:text="${L.of('pay_demo')}">This is a demo payment page.</p>
-
-        <!-- The card number below is a fixed sample and cannot be edited, so nobody types a real card here. -->
-        <form class="panel form" method="post" th:action="${base + '/pay/' + order.getId()}">
-            <div>
-                <label for="card" th:text="${L.of('pay_card')}">Card number</label>
-                <input id="card" value="4242 4242 4242 4242" readonly aria-readonly="true">
+        <!-- UPI -->
+        <div class="panel pay-way" th:if="${payMethods.contains('upi')}" style="margin-top:1.2rem">
+            <h2 th:text="${L.of('pay_upi_title')}">Pay by UPI</h2>
+            <div class="upi-grid">
+                <div>
+                    <a class="btn wide" th:href="${upiLink}" th:text="${L.of('pay_upi_button', 'amount', money.minor(order.getTotalPaise()))}">Pay with a UPI app</a>
+                    <p class="note" th:text="${L.of('pay_upi_apps')}">Opens GPay, PhonePe, Paytm or your bank app on this phone.</p>
+                    <p class="note"><span th:text="${L.of('pay_upi_to')}">UPI ID</span>: <strong th:text="${upiId}" translate="no">name@bank</strong></p>
+                </div>
+                <figure class="upi-qr" th:if="${upiQr}">
+                    <img th:src="${upiQr}" width="180" height="180" th:alt="${L.of('pay_upi_scan')}">
+                    <figcaption th:text="${L.of('pay_upi_scan')}">On a computer? Scan with your phone.</figcaption>
+                </figure>
             </div>
-            <button type="submit" name="method" value="demo" class="btn wide" th:text="${L.of('pay_now', 'amount', money.minor(order.getTotalPaise()))}">Pay</button>
-            <button type="submit" name="method" value="later" class="btn outline wide" th:text="${L.of('pay_later')}">Pay on delivery</button>
+            <form class="form" method="post" th:action="${base + '/pay/' + order.getId()}" style="margin-top:1rem">
+                <input type="hidden" name="method" value="upi">
+                <div>
+                    <label for="ref" th:text="${L.of('pay_upi_ref')}">UPI reference number (optional)</label>
+                    <input id="ref" name="ref" maxlength="40" inputmode="numeric" autocomplete="off">
+                </div>
+                <button type="submit" class="btn outline wide" th:text="${L.of('pay_upi_done')}">I've paid</button>
+            </form>
+        </div>
+
+        <!-- Cash on delivery -->
+        <form class="panel pay-way" th:if="${payMethods.contains('cod')}" method="post" th:action="${base + '/pay/' + order.getId()}" style="margin-top:1.2rem">
+            <h2 th:text="${L.of('pay_cod_title')}">Cash on delivery</h2>
+            <p class="note" th:text="${L.of('pay_cod_note')}">Pay when your order arrives.</p>
+            <button type="submit" name="method" value="cod" class="btn wide" th:text="${L.of('pay_cod_button')}">Place order, pay on delivery</button>
+        </form>
+
+        <!-- Order on WhatsApp -->
+        <form class="panel pay-way" th:if="${payMethods.contains('whatsapp')}" method="post" th:action="${base + '/pay/' + order.getId()}" style="margin-top:1.2rem">
+            <h2 th:text="${L.of('pay_wa_title')}">Order on WhatsApp</h2>
+            <p class="note" th:text="${L.of('pay_wa_note')}">Send your order to the shop on WhatsApp and agree how to pay.</p>
+            <button type="submit" name="method" value="whatsapp" class="btn wa wide" th:text="${L.of('pay_wa_button')}">Send order on WhatsApp</button>
         </form>
     </section>
 </main>
+<style th:attr="nonce=${cspNonce}">
+    .pay-way h2 { margin-top: 0; }
+    .pay-way .note { color: var(--muted); margin: 0.6rem 0 0; font-size: 0.95rem; }
+    .upi-grid { display: grid; grid-template-columns: 1fr auto; gap: 1.2rem; align-items: center; }
+    .upi-qr { margin: 0; text-align: center; }
+    .upi-qr img { display: block; border-radius: 12px; border: 1px solid var(--line); background: #fff; padding: 6px; }
+    .upi-qr figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; max-width: 11rem; }
+    @media (max-width: 560px) { .upi-grid { grid-template-columns: 1fr; } .upi-qr { display: none; } }
+</style>
 
 <footer th:replace="~{site/parts :: foot}"></footer>
 </body>

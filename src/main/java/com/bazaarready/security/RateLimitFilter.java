@@ -34,7 +34,7 @@ class RateLimitFilter extends OncePerRequestFilter {
     private static final Pattern OWNER_AI = Pattern.compile("^/owner/[0-9a-f-]{36}/(test|check|focus|shutter/voice|chat/[0-9a-f-]{36})$");
     /** Shopper actions on a generated site that call Claude: bargaining and chat messages. */
     private static final Pattern SHOPPER_AI = Pattern.compile("^/s/[^/]+/(haggle|chat(/[0-9a-f-]{36})?)$");
-    private static final Pattern OWNER_EDIT = Pattern.compile("^/owner/[0-9a-f-]{36}/(photo|products.*|shutter.*|haggle|mediakit|comingsoon)$");
+    private static final Pattern OWNER_EDIT = Pattern.compile("^/owner/[0-9a-f-]{36}/(photo|products.*|shutter.*|haggle|mediakit|comingsoon|payments|orders/[0-9a-f-]{36}/paid)$");
 
     private static boolean post(HttpServletRequest r) {
         return "POST".equalsIgnoreCase(r.getMethod());
