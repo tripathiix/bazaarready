@@ -24,6 +24,7 @@ Millions of small sellers and creators already sell through WhatsApp and Instagr
 | Haggle mode | Customers bargain by text or voice; the lowest price is enforced on the server, and agreed deals go into the cart |
 | Living shutter | The site opens and closes with the shop's hours; the owner can close it by voice, and customers can still pre-order |
 | Payments | The owner picks UPI (to their own UPI ID), cash on delivery and/or ordering on WhatsApp, by telling the agent or from the dashboard. UPI opens the customer's UPI app with the amount and order number filled in (a QR code on a computer); the money goes straight to the owner, who marks it received. No card payments yet |
+| Your language, by location | A visitor whose browser is in English is offered the main languages of their country (Hindi, Tamil, Kannada and more in India; Spanish in Mexico), on BazaarReady and on every shop site. It's an offer, never a switch; the country comes from a database on our own server and the address isn't stored. Shop pages keep prices and names exactly when translated |
 | Two-language chat | Customer and owner each write and read in their own language |
 | For creators | A media kit page, and a scam check for every brand-collab request |
 | Test my idea | A coming-soon page with a waitlist that tests up to three prices, plus an AI focus group |

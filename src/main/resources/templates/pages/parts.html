@@ -46,6 +46,8 @@
             font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: -.02em; color: rgba(246,239,228,.35); }
         .foot-mail { font-family: "Anek Latin", sans-serif; font-weight: 400; letter-spacing: 0; font-size: .92rem; color: var(--muted); }
         .foot-mail:hover { color: var(--ivory); }
+        .foot-geo { font-family: "Anek Latin", sans-serif; font-size: .78rem; color: var(--muted); }
+        .foot-geo a { color: inherit; }
         .holo { font-family: "Anek Latin", sans-serif; font-weight: 600; font-size: .82rem; letter-spacing: .04em; padding: .35rem .95rem; border-radius: 999px;
             border: 1px solid rgba(255,255,255,.18); background: linear-gradient(110deg, #8c9cff, #ec7a8c, #f4a83a, #4fc3a1, #8c9cff) text, rgba(255,255,255,.04);
             -webkit-background-clip: text; color: transparent; background-size: 300% 100%;
@@ -141,6 +143,8 @@
     <a class="foot-mail" href="/contact">Contact us · support@bazaarready.com</a>
     <a class="foot-mail" href="/usage">How we use AI</a>
     <span class="holo">Crafted with <span aria-label="love">♥</span> by Yashi Tripathi</span>
+    <span class="foot-geo">Language suggestions use <a href="https://db-ip.com" rel="noopener">IP Geolocation by DB-IP</a></span>
+    <script src="/lang-offer.js" th:attr="nonce=${cspNonce}"></script>
     <script th:replace="~{pages/parts :: pagelang}"></script>
 </footer>
 
@@ -177,10 +181,11 @@
 (function () {
     var KEY = "bazaarready.language";
     var RTL = ["ar", "fa", "ur", "he", "ps", "sd", "ug", "yi"];
+    var chose = false; // a language picked on an earlier visit, or given in the link
     function saved() {
         var link = new URLSearchParams(location.search).get("lang");
-        if (link && /^[a-z]{2,3}$/.test(link)) { try { localStorage.setItem(KEY, link); } catch (e) {} return link; }
-        try { var v = localStorage.getItem(KEY); if (v && /^(hinglish|[a-z]{2,3})$/.test(v)) return v; } catch (e) {}
+        if (link && /^[a-z]{2,3}$/.test(link)) { chose = true; try { localStorage.setItem(KEY, link); } catch (e) {} return link; }
+        try { var v = localStorage.getItem(KEY); if (v && /^(hinglish|[a-z]{2,3})$/.test(v)) { chose = true; return v; } } catch (e) {}
         return "en";
     }
     function nameOf(c) { try { return new Intl.DisplayNames([c], { type: "language" }).of(c) || c; } catch (e) { return c; } }
@@ -196,6 +201,17 @@
         pick.addEventListener("change", function () {
             try { localStorage.setItem(KEY, pick.value); } catch (e) {}
             var url = new URL(location.href); url.searchParams.delete("lang"); location.href = url.toString();
+        });
+    }
+    // Nothing chosen yet: offer the browser's language and the languages of the visitor's country.
+    if (!chose && window.BRLang) {
+        BRLang.offer({
+            current: "en",
+            extra: [navigator.language || ""],
+            onPick: function (c) {
+                try { localStorage.setItem(KEY, c); } catch (e) {}
+                var url = new URL(location.href); url.searchParams.delete("lang"); location.href = url.toString();
+            }
         });
     }
     if (code === "en") return;
