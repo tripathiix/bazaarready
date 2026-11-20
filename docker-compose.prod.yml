@@ -5,6 +5,8 @@
 #     because Docker-published ports bypass the server firewall.
 #   - Secure cookies and the real domain.
 #   - Containers restart automatically after a crash or a server reboot.
+#   - A backup service dumps the database every night into ./backups (last 14 kept);
+#     scripts/pull-backups.sh copies them off the server.
 
 services:
   db:
@@ -30,6 +32,36 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+
+  # Nightly database backup: a compressed pg_dump on start and every 24 hours after, into ./backups on the
+  # server, keeping the last 14. Copy them off the server with scripts/pull-backups.sh; restore with
+  # pg_restore (see scripts/restore-backup.md).
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGUSER: ${DB_USER:-bazaarready}
+      PGPASSWORD: ${DB_PASSWORD}
+      PGDATABASE: ${DB_NAME:-bazaarready}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          f=/backups/bazaarready-$$(date -u +%Y-%m-%d-%H%M).dump
+          if pg_dump -Fc -f "$$f.part" && mv "$$f.part" "$$f"; then
+            echo "backup ok: $$f ($$(du -h "$$f" | cut -f1))"
+          else
+            rm -f "$$f.part"; echo "backup FAILED"
+          fi
+          ls -1t /backups/bazaarready-*.dump 2>/dev/null | tail -n +15 | xargs -r rm -f
+          sleep 86400
+        done
 
 volumes:
   caddy_data:

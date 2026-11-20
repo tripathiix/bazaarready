@@ -3,7 +3,6 @@ package com.bazaarready.intake;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -13,8 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Reads Instagram direct messages from the "Download your information" export (JSON format): either the
@@ -53,13 +50,10 @@ public final class InstagramChat {
         if (name.endsWith(".json")) {
             return true;
         }
-        if (data.length > 3 && data[0] == 'P' && data[1] == 'K') {
-            try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data))) {
-                ZipEntry entry;
-                while ((entry = zip.getNextEntry()) != null) {
-                    if (MESSAGE_FILE.matcher(entry.getName()).matches()) {
-                        return true;
-                    }
+        if (SafeZip.isZip(data)) {
+            for (String entry : SafeZip.names(data)) {
+                if (MESSAGE_FILE.matcher(entry).matches()) {
+                    return true;
                 }
             }
         }
@@ -74,20 +68,12 @@ public final class InstagramChat {
         for (int i = 0; i < files.size(); i++) {
             byte[] data = files.get(i);
             String name = names.get(i) == null ? "upload-" + i : names.get(i);
-            if (data.length > 3 && data[0] == 'P' && data[1] == 'K') {
-                try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data))) {
-                    ZipEntry entry;
-                    while ((entry = zip.getNextEntry()) != null) {
-                        if (entry.isDirectory() || !MESSAGE_FILE.matcher(entry.getName()).matches()) {
-                            continue;
-                        }
-                        byte[] content = zip.readNBytes((int) MAX_JSON_BYTES);
-                        total += content.length;
-                        if (total > MAX_JSON_BYTES) {
-                            throw new IOException("The Instagram messages are too large. Choose a shorter date range when downloading.");
-                        }
-                        byConversation.computeIfAbsent(folderOf(entry.getName()), k -> new ArrayList<>()).add(content);
-                    }
+            if (SafeZip.isZip(data)) {
+                // Only the message files are decompressed; photos and videos are never inflated (see SafeZip).
+                for (SafeZip.Item item : SafeZip.read(data, n -> MESSAGE_FILE.matcher(n).matches(), MAX_JSON_BYTES - total,
+                        "The Instagram messages are too large. Choose a shorter date range when downloading.")) {
+                    total += item.data().length;
+                    byConversation.computeIfAbsent(folderOf(item.name()), k -> new ArrayList<>()).add(item.data());
                 }
             } else if (name.toLowerCase(Locale.ROOT).endsWith(".json")) {
                 total += data.length;

@@ -93,9 +93,20 @@ public class ClaudeClient {
      * Counts this call against today's caps: one for the whole service and one per signed-in account.
      * Work with no signed-in person (photo checks, AI test customers) counts only towards the total.
      */
-    private void countAndCheckCap() {
+    /**
+     * Features anyone can use without signing in (bargaining, customer chat, page translation). When nobody is
+     * signed in, these count in their own bucket, capped at a share of the daily total, so traffic from the
+     * public can never use up the budget that owners need to build and fix their sites.
+     */
+    private static final java.util.Set<Feature> PUBLIC_FEATURES = java.util.EnumSet.of(
+            Feature.HAGGLE, Feature.CHAT_TRANSLATE, Feature.UI_TRANSLATE, Feature.LABELS);
+    private static final String PUBLIC_BUCKET = "~public";
+    private static final int PUBLIC_SHARE_PERCENT = 40;
+
+    private void countAndCheckCap(Feature feature) {
         String account = com.bazaarready.account.AccountService.currentEmail();
-        String key = account == null ? "" : account;
+        boolean isPublic = account == null && PUBLIC_FEATURES.contains(feature);
+        String key = isPublic ? PUBLIC_BUCKET : account == null ? "" : account;
         Integer mine = jdbc.queryForObject("""
                 insert into claude_usage (day, account, calls) values (current_date, ?, 1)
                 on conflict (day, account) do update set calls = claude_usage.calls + 1
@@ -104,6 +115,9 @@ public class ClaudeClient {
         Integer total = jdbc.queryForObject("select coalesce(sum(calls), 0) from claude_usage where day = current_date", Integer.class);
         if (total != null && total > dailyCap) {
             throw new ClaudeException("BazaarReady has reached today's limit for AI requests. Please try again tomorrow.");
+        }
+        if (isPublic && mine != null && mine > dailyCap * PUBLIC_SHARE_PERCENT / 100) {
+            throw new ClaudeException("This is busy right now. Please try again tomorrow, or message the shop on WhatsApp.");
         }
         if (account != null && mine != null && mine > perAccountCap) {
             throw new ClaudeException("Your account has reached today's limit for AI requests. It resets tomorrow.");
@@ -133,7 +147,7 @@ public class ClaudeClient {
         if (!isConfigured()) {
             throw new ClaudeException("The Claude API key is not set. Add ANTHROPIC_API_KEY to the .env file and restart.");
         }
-        countAndCheckCap();
+        countAndCheckCap(feature);
         ObjectNode body = json.createObjectNode();
         body.put("model", model);
         body.put("max_tokens", maxTokens);

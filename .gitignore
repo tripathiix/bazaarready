@@ -23,3 +23,6 @@ uploads/
 
 # Screenshots dropped into the project folder
 /image.png
+
+# Database backups (made on the server, copied to a laptop)
+backups/
