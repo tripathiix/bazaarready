@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * falls back to English. Requests are size-limited and count against the AI rate limits and daily cap.
  */
 @RestController
-class UiStringsController {
+public class UiStringsController {
 
     private static final Logger log = LoggerFactory.getLogger(UiStringsController.class);
     private static final int MAX_BYTES = 60_000;
@@ -103,6 +103,31 @@ class UiStringsController {
                     code, hash, result.toString());
         }
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Translates a shop page's words the way a visitor's browser asks for them (kind=site): in parts of 30,
+     * keeping prices, names and numbers. Used by AI test customers, who cannot run the page's script. Words
+     * that could not be translated come back unchanged.
+     */
+    public Map<String, String> translateSiteTexts(String code, List<String> texts) throws Exception {
+        Map<String, String> out = new java.util.LinkedHashMap<>();
+        List<String> unique = texts.stream().map(String::trim).filter(t -> !t.isEmpty()).distinct().limit(300).toList();
+        if (unique.isEmpty()) {
+            return out;
+        }
+        ObjectNode parts = json.createObjectNode();
+        for (int i = 0; i < unique.size(); i += 30) {
+            ArrayNode part = parts.putArray("p" + (i / 30));
+            unique.subList(i, Math.min(unique.size(), i + 30)).forEach(part::add);
+        }
+        ResponseEntity<JsonNode> response = translate(code, parts.toString(), "site");
+        JsonNode result = response.getBody();
+        for (int i = 0; i < unique.size(); i++) {
+            JsonNode got = result == null ? null : result.path("p" + (i / 30)).path(i % 30);
+            out.put(unique.get(i), got != null && got.isTextual() && !got.asText().isBlank() ? got.asText() : unique.get(i));
+        }
+        return out;
     }
 
     private JsonNode translatePart(JsonNode english, Languages.Language language, boolean site) {

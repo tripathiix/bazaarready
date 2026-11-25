@@ -21,9 +21,10 @@ class TestController {
     }
 
     @PostMapping("/owner/{ownerKey}/test")
-    String start(@PathVariable UUID ownerKey) {
+    String start(@PathVariable UUID ownerKey,
+                 @org.springframework.web.bind.annotation.RequestParam(defaultValue = "false") boolean deep) {
         ProfileResponse shop = profiles.open(ownerKey);
-        tests.start(shop.id());
+        tests.start(shop.id(), deep);
         return "redirect:/owner/" + ownerKey + "#tests";
     }
 

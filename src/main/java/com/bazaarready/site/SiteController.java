@@ -513,6 +513,7 @@ class SiteController {
         model.addAttribute("enquiries", orders.enquiriesFor(shop.id()));
         model.addAttribute("ownerKey", ownerKey);
         model.addAttribute("run", tests.latest(shop.id()));
+        model.addAttribute("deepAllowed", tests.deepAllowed(shop.id()));
         var allChecks = checks.recent(shop.id());
         model.addAttribute("pastedChecks", allChecks.stream().filter(c -> c.enquiryId() == null).toList());
         Map<UUID, com.bazaarready.guard.MessageCheckService.CheckView> byEnquiry = new HashMap<>();
@@ -693,6 +694,11 @@ class SiteController {
                 case "poppy" -> "Big Shoulders Display";
                 case "gradient" -> "Outfit";
                 case "neon" -> "Nunito";
+                case "stay" -> "Bodoni Moda";
+                case "menu" -> "Rubik";
+                case "celebrate" -> "Cinzel";
+                case "listing" -> "Sora";
+                case "clinic" -> "Plus Jakarta Sans";
                 default -> "Baloo 2";
             }, "Anek Latin"};
         }

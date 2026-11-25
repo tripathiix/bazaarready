@@ -115,10 +115,12 @@
 
     <section aria-labelledby="tests-title" id="tests">
         <h2 id="tests-title">Test my site</h2>
-        <p style="color:var(--muted)">Eight AI customers try your site in ten situations: a quick order or booking, someone who makes mistakes, someone who checks every number, a gift or group buyer, a careful buyer who checks whether to trust you and your rules, a student working out the full cost, someone who wants to reach a person, a blind visitor using a screen reader, and someone new to the internet who reads only your language. It takes two or three minutes. Their test orders and messages are removed afterwards.</p>
-        <form method="post" th:action="${'/owner/' + ownerKey + '/test'}">
+        <p style="color:var(--muted)">Ten AI customers try your site, chosen from forty. Four always do the main job: a quick order or booking, someone who makes mistakes, someone who checks every number, and a gift or group buyer. Six more are picked for your site, such as a bargainer if you allow haggling, visitors who read Spanish, Chinese or Arabic, a careful buyer checking whether to trust you, a blind visitor using a screen reader, someone on slow phone data or someone with no email. Each test meets different people. It takes two or three minutes, and their test orders and messages are removed afterwards.</p>
+        <form method="post" th:action="${'/owner/' + ownerKey + '/test'}" style="display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center">
             <button class="btn" th:disabled="${run != null and run.running()}" th:text="${run != null and run.running()} ? 'Testing…' : (${run == null} ? 'Test my site' : 'Test again')">Test my site</button>
+            <button class="btn outline" name="deep" value="true" th:disabled="${(run != null and run.running()) or !deepAllowed}">Deep test: everyone who fits (up to 40)</button>
         </form>
+        <p style="color:var(--muted);font-size:0.92rem;margin-top:0.5rem" th:text="${deepAllowed} ? 'A deep test sends every customer that fits your site. It takes about five to ten minutes, and you can leave this page and come back. You can run one deep test a day.' : 'You have used today''s deep test, or deep tests are busy right now. Try again tomorrow; normal tests work any time.'">Deep test note</p>
 
         <th:block th:if="${run != null}">
             <div class="panel test-summary" th:if="${run.summary() != null}" style="margin-top:1.4rem">

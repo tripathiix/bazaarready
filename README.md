@@ -10,8 +10,8 @@ Millions of small sellers and creators already sell through WhatsApp and Instagr
 
 1. **Describe** the business by typing, speaking, or uploading WhatsApp chats and Instagram downloads, in 50+ languages. An Idea coach helps when the idea is still fuzzy.
 2. **Answer a short form.** The agent asks only what is missing (prices, area, hours); every box can be answered by voice.
-3. **Test.** Ten AI customers, including a blind visitor and someone new to the internet, try to order, book and get in touch, then report what they couldn't find.
-4. **Publish** with one tap, in one of 11 designs (four of them 3D). Every site gets its own link.
+3. **Test.** Ten AI customers, picked from a pool of forty for your kind of site (a bargainer, Spanish, Chinese and Arabic readers, a blind visitor, someone on slow phone data, someone new to the internet and more), try to order, book, bargain and get in touch, then report what they couldn't find. A deep test once a day sends everyone who fits.
+4. **Publish** with one tap, in one of 16 designs (four of them 3D, five made for one trade). Every site gets its own link.
 5. **Keep running** with the owner dashboard: orders, bargaining, opening hours, chat, and an upgrade path to the owner's own domain.
 
 ## Features
@@ -29,7 +29,7 @@ Millions of small sellers and creators already sell through WhatsApp and Instagr
 | For creators | A media kit page, and a scam check for every brand-collab request |
 | Test my idea | A coming-soon page with a waitlist that tests up to three prices, plus an AI focus group |
 | Own domain estimate | A line-by-line cost of the owner's own .com, server and Titan email, in their currency, showing who gets each part of the money |
-| 11 designs | Classic, Boutique, Mart, Split, Bento, Magazine and Noir, plus Globe, Poppy, Gradient and Neon in 3D; each has a live sample site on the [Templates](https://bazaarready.com/templates) page |
+| 16 designs | Classic, Boutique, Mart, Split, Bento, Magazine and Noir; Globe, Poppy, Gradient and Neon in 3D; and Stay, Menu, Celebrate, Listing and Clinic for hotels, restaurants, weddings, rentals and clinics. 41 live sample sites from around the world on the [Templates](https://bazaarready.com/templates) page |
 | Open about AI use | [bazaarready.com/usage](https://bazaarready.com/usage) shows every AI call, tokens, cost and what prompt caching saves |
 
 ## Architecture
@@ -48,7 +48,7 @@ Millions of small sellers and creators already sell through WhatsApp and Instagr
 ```
 
 - **Builder screens** (`frontend/`): React 18, TypeScript and Vite. The 8 hand-checked languages ship with the page; any other language is translated once by Claude and cached.
-- **Shop sites** (`src/main/resources/templates/site/`): server-rendered Thymeleaf pages, one engine for all 11 designs.
+- **Shop sites** (`src/main/resources/templates/site/`): server-rendered Thymeleaf pages, one engine for all 16 designs.
 - **Backend** (`src/main/java/com/bazaarready/`): `agent` (the builder agent and its tools), `site` (shop pages and BazaarReady's own pages), `extras` (haggle, shutter, chat, focus group, own-domain prices), `intake` (WhatsApp and Instagram import), `testing` (AI test customers), `coach`, `guard` (scope guardrail), `security`, `orders`, `account`, `support`.
 - **Database**: PostgreSQL 16 with Flyway migrations in `src/main/resources/db/migration/`.
 

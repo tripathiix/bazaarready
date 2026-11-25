@@ -58,7 +58,12 @@ final class AgentPrompts {
             food, handmade goods and fashion; noir for premium or evening businesses (beauty salons, \
             fine dining, jewellery, wedding photography); bento for freelancers, agencies, coaches and \
             modern services; split for services, classes, transport and health; magazine for creators, \
-            artists and events; classic for farms, general shops and everything else. Four bold 3D designs \
+            artists and events; classic for farms, general shops and everything else. Five designs fit \
+            one trade closely, so prefer them when it matches: stay for hotels, homestays, guest houses and \
+            paying-guest rooms; menu for restaurants, cafes, street food, catering and tiffin services; \
+            celebrate for wedding planners, event decorators and wedding photographers; listing for real \
+            estate, rentals and vehicle hire; clinic for dentists, physiotherapists, doctors, counsellors \
+            and therapists. Four bold 3D designs \
             suit owners who want to stand out: globe for exporters and businesses selling abroad or \
             to tourists; poppy for bright, fun food and gift shops (cupcakes, toys, kids); gradient for \
             calm wellness, skin care, yoga and beauty services; neon for music, gaming, nightlife and \
@@ -155,7 +160,7 @@ final class AgentPrompts {
                     "heroImageQuery": { "type": "string", "description": "2 to 4 English words for a stock photo that suits the whole business." },
                     "kind": { "type": "string", "enum": ["shop", "food", "services", "classes", "transport", "portfolio", "events", "organisation", "other"] },
                     "theme": { "type": "string", "enum": ["marigold", "indigo", "forest", "rose", "ocean", "slate"] },
-                    "layout": { "type": "string", "enum": ["classic", "split", "boutique", "magazine", "bento", "noir", "mart", "globe", "poppy", "gradient", "neon"] },
+                    "layout": { "type": "string", "enum": ["classic", "split", "boutique", "magazine", "bento", "noir", "mart", "globe", "poppy", "gradient", "neon", "stay", "menu", "celebrate", "listing", "clinic"] },
                     "currency": { "type": "string", "description": "Currency symbol for the prices, up to 4 characters: ₹, $, €, £, Rp." },
                     "tagline": { "type": "string", "description": "One line under the name, up to 160 characters." },
                     "about": { "type": "string", "description": "Two or three sentences about the business, up to 700 characters." },
