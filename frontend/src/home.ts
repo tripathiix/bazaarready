@@ -50,7 +50,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "Design: {name}",
     removeDesign: "Let the agent choose",
     strip: [
-      { big: "16 designs", small: "picked for your business", link: "See templates" },
+      { big: "41 templates", small: "16 layouts, picked for your business", link: "See templates" },
       { big: "40 AI customers", small: "test it before launch", link: "How it works" },
       { big: "Scam check", small: "for every collab offer", link: "Features" },
       { big: "50+ languages", small: "type or speak", link: "Features" },
@@ -81,7 +81,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "डिज़ाइन: {name}",
     removeDesign: "एजेंट को चुनने दें",
     strip: [
-      { big: "16 डिज़ाइन", small: "आपके काम के हिसाब से", link: "डिज़ाइन देखें" },
+      { big: "41 डिज़ाइन", small: "16 लेआउट, आपके काम के हिसाब से", link: "डिज़ाइन देखें" },
       { big: "40 AI ग्राहक", small: "लॉन्च से पहले जाँच", link: "यह कैसे काम करता है" },
       { big: "धोखे की जाँच", small: "हर कोलैब ऑफ़र के लिए", link: "खूबियाँ" },
       { big: "50+ भाषाएँ", small: "लिखें या बोलें", link: "खूबियाँ" },
@@ -112,7 +112,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "ವಿನ್ಯಾಸ: {name}",
     removeDesign: "ಏಜೆಂಟ್ ಆಯ್ಕೆ ಮಾಡಲಿ",
     strip: [
-      { big: "16 ವಿನ್ಯಾಸಗಳು", small: "ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ತಕ್ಕಂತೆ", link: "ವಿನ್ಯಾಸಗಳನ್ನು ನೋಡಿ" },
+      { big: "41 ವಿನ್ಯಾಸಗಳು", small: "16 ಲೇಔಟ್‌ಗಳು, ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ತಕ್ಕಂತೆ", link: "ವಿನ್ಯಾಸಗಳನ್ನು ನೋಡಿ" },
       { big: "40 AI ಗ್ರಾಹಕರು", small: "ಆರಂಭಕ್ಕೂ ಮುನ್ನ ಪರೀಕ್ಷೆ", link: "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ" },
       { big: "ಮೋಸ ಪರಿಶೀಲನೆ", small: "ಪ್ರತಿ ಕೊಲ್ಯಾಬ್ ಆಫರ್‌ಗೆ", link: "ವೈಶಿಷ್ಟ್ಯಗಳು" },
       { big: "50+ ಭಾಷೆಗಳು", small: "ಬರೆಯಿರಿ ಅಥವಾ ಮಾತನಾಡಿ", link: "ವೈಶಿಷ್ಟ್ಯಗಳು" },
@@ -143,7 +143,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "வடிவமைப்பு: {name}",
     removeDesign: "ஏஜென்ட் தேர்வு செய்யட்டும்",
     strip: [
-      { big: "16 வடிவமைப்புகள்", small: "உங்கள் தொழிலுக்கு ஏற்றவை", link: "வடிவமைப்புகளைப் பார்" },
+      { big: "41 வடிவமைப்புகள்", small: "16 அமைப்புகள், உங்கள் தொழிலுக்கு ஏற்றவை", link: "வடிவமைப்புகளைப் பார்" },
       { big: "40 AI வாடிக்கையாளர்கள்", small: "தொடங்கும் முன் சோதனை", link: "இது எப்படி வேலை செய்கிறது" },
       { big: "மோசடி சோதனை", small: "ஒவ்வொரு கொலாப் சலுகைக்கும்", link: "அம்சங்கள்" },
       { big: "50+ மொழிகள்", small: "எழுதுங்கள் அல்லது பேசுங்கள்", link: "அம்சங்கள்" },
@@ -174,7 +174,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "డిజైన్: {name}",
     removeDesign: "ఏజెంట్ ఎంచుకోనివ్వండి",
     strip: [
-      { big: "16 డిజైన్లు", small: "మీ వ్యాపారానికి తగినవి", link: "డిజైన్లు చూడండి" },
+      { big: "41 డిజైన్లు", small: "16 లేఅవుట్‌లు, మీ వ్యాపారానికి తగినవి", link: "డిజైన్లు చూడండి" },
       { big: "40 AI కస్టమర్లు", small: "ప్రారంభానికి ముందే పరీక్ష", link: "ఇది ఎలా పనిచేస్తుంది" },
       { big: "మోసం తనిఖీ", small: "ప్రతి కొలాబ్ ఆఫర్‌కు", link: "ప్రత్యేకతలు" },
       { big: "50+ భాషలు", small: "రాయండి లేదా మాట్లాడండి", link: "ప్రత్యేకతలు" },
@@ -205,7 +205,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "डिझाइन: {name}",
     removeDesign: "एजंटला निवडू द्या",
     strip: [
-      { big: "16 डिझाइन", small: "तुमच्या व्यवसायानुसार", link: "डिझाइन पहा" },
+      { big: "41 डिझाइन", small: "16 लेआउट, तुमच्या व्यवसायानुसार", link: "डिझाइन पहा" },
       { big: "40 AI ग्राहक", small: "सुरू करण्याआधी तपासणी", link: "हे कसं काम करतं" },
       { big: "फसवणूक तपासणी", small: "प्रत्येक कोलॅब ऑफरसाठी", link: "वैशिष्ट्ये" },
       { big: "50+ भाषा", small: "लिहा किंवा बोला", link: "वैशिष्ट्ये" },
@@ -236,7 +236,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "ডিজাইন: {name}",
     removeDesign: "এজেন্টকে বেছে নিতে দিন",
     strip: [
-      { big: "16টি ডিজাইন", small: "আপনার ব্যবসা অনুযায়ী", link: "ডিজাইন দেখুন" },
+      { big: "41টি ডিজাইন", small: "16টি লেআউট, আপনার ব্যবসা অনুযায়ী", link: "ডিজাইন দেখুন" },
       { big: "40 জন AI ক্রেতা", small: "চালুর আগেই পরীক্ষা", link: "কীভাবে কাজ করে" },
       { big: "প্রতারণা যাচাই", small: "প্রতিটি কোলাব অফারের জন্য", link: "বৈশিষ্ট্য" },
       { big: "50+ ভাষা", small: "লিখুন বা বলুন", link: "বৈশিষ্ট্য" },
@@ -267,7 +267,7 @@ export const HOME: Record<LanguageCode, HomeStrings> = {
     design: "ડિઝાઇન: {name}",
     removeDesign: "એજન્ટને પસંદ કરવા દો",
     strip: [
-      { big: "16 ડિઝાઇન", small: "તમારા વેપાર મુજબ", link: "ડિઝાઇન જુઓ" },
+      { big: "41 ડિઝાઇન", small: "16 લેઆઉટ, તમારા વેપાર મુજબ", link: "ડિઝાઇન જુઓ" },
       { big: "40 AI ગ્રાહકો", small: "શરૂ કરતાં પહેલાં ચકાસણી", link: "આ કેવી રીતે કામ કરે છે" },
       { big: "છેતરપિંડી તપાસ", small: "દરેક કોલૅબ ઑફર માટે", link: "ખાસિયતો" },
       { big: "50+ ભાષાઓ", small: "લખો અથવા બોલો", link: "ખાસિયતો" },
