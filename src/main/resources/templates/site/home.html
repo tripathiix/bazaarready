@@ -159,6 +159,117 @@
     </div>
 </section>
 
+<!-- Stay: a wide photo with a booking card resting on it, for rooms and homestays. -->
+<section class="hero-stay" th:if="${layout == 'stay'}">
+    <div class="stay-photo">
+        <img th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
+    </div>
+    <div class="wrap">
+        <div class="stay-card">
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn" th:unless="${booking}" th:href="${base + '/contact'}" th:text="${L.of('contact_title')}">Contact</a>
+                <a class="btn outline" th:if="${!shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Rooms</a>
+            </div>
+            <ul class="facts">
+                <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+                <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">rooms</span></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Menu: a dark menu board with the dishes and prices, for restaurants, cafes and tiffin services. -->
+<section class="hero-menu" th:if="${layout == 'menu'}">
+    <div class="wrap menu-grid">
+        <div>
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${store}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Order</a>
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+            </div>
+            <ul class="facts">
+                <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+            </ul>
+        </div>
+        <div class="menu-board" th:if="${!shop.products().isEmpty()}">
+            <p class="menu-board-title" th:text="${offeringsTitle}">Menu</p>
+            <ul>
+                <li th:each="p, it : ${shop.products()}" th:if="${it.index < 7}">
+                    <a th:href="${base + '/item/' + p.id()}" th:text="${p.name()}">Dish</a>
+                    <i aria-hidden="true"></i>
+                    <span th:if="${p.priceRupees() != null}" th:text="${money.format(p.priceRupees())}">0</span>
+                    <span th:unless="${p.priceRupees() != null}" th:text="${p.priceNote() ?: L.of('price_on_request')}">On request</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Celebrate: an arched photo, a fine rule and a centred name, for weddings and events. -->
+<section class="hero-celebrate" th:if="${layout == 'celebrate'}">
+    <div class="wrap">
+        <div class="arch" th:if="${hero != null}"><img th:src="${hero.url()}" alt="" fetchpriority="high"></div>
+        <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+        <h1 th:text="${shop.name()}">Name</h1>
+        <div class="rule" aria-hidden="true"><span></span></div>
+        <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+        <div class="cta">
+            <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+            <a class="btn" th:unless="${booking}" th:href="${base + '/contact'}" th:text="${L.of('contact_title')}">Contact</a>
+            <a class="btn outline" th:if="${!shop.products().isEmpty()}" th:href="${base + '/catalogue'}" th:text="${offeringsTitle}">Packages</a>
+        </div>
+    </div>
+</section>
+
+<!-- Listing: a search bar over a photo, then property or rental cards, for real estate and rentals. -->
+<section class="hero-listing" th:if="${layout == 'listing'}" th:classappend="${hero != null} ? 'has-photo'">
+    <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">
+    <div class="wrap">
+        <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+        <h1 th:text="${shop.name()}">Name</h1>
+        <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+        <form class="mart-search listing-search" th:action="${base + '/catalogue'}" method="get" role="search">
+            <label for="listing-q" style="position:absolute;left:-9999px" th:text="${L.of('search')}">Search</label>
+            <input id="listing-q" name="q" type="search" th:placeholder="${L.of('search_placeholder')}">
+            <button class="btn" th:text="${L.of('search')}">Search</button>
+        </form>
+        <ul class="facts">
+            <li th:if="${!shop.products().isEmpty()}"><strong th:text="${shop.products().size()}">3</strong> <span th:text="${offeringsTitle}">listings</span></li>
+            <li th:if="${shop.hours()}" th:text="${shop.hours()}">Timings</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Clinic: calm and clear, with timings and the booking button first, for clinics and therapists. -->
+<section class="hero-clinic" th:if="${layout == 'clinic'}">
+    <div class="wrap clinic-grid">
+        <div>
+            <p class="eyebrow" th:if="${shop.location()}" th:text="${shop.location()}">Location</p>
+            <h1 th:text="${shop.name()}">Name</h1>
+            <p class="tagline" th:if="${shop.tagline()}" th:text="${shop.tagline()}">Tagline</p>
+            <div class="cta">
+                <a class="btn" th:if="${booking}" th:href="${base + '/book'}" th:text="${L.of('book_title')}">Book</a>
+                <a class="btn" th:unless="${booking}" th:href="${base + '/contact'}" th:text="${L.of('contact_title')}">Contact</a>
+                <a class="btn outline" th:if="${whatsappLink}" th:href="${whatsappLink}" rel="noopener" th:text="${L.of('whatsapp_button')}">WhatsApp</a>
+            </div>
+        </div>
+        <div class="clinic-side">
+            <div class="clinic-photo" th:if="${hero != null}"><img th:src="${hero.url()}" alt="" fetchpriority="high"></div>
+            <dl class="clinic-facts">
+                <div th:if="${shop.hours()}"><dt th:text="${L.of('hours')}">Timings</dt><dd th:text="${shop.hours()}">Hours</dd></div>
+                <div th:if="${!shop.products().isEmpty()}"><dt th:text="${offeringsTitle}">Treatments</dt><dd th:text="${shop.products().size()}">3</dd></div>
+            </dl>
+        </div>
+    </div>
+</section>
+
 <!-- Classic: the name over the banner photo. -->
 <section class="hero" th:if="${layout == 'classic'}" th:classappend="${hero != null} ? 'has-photo'">
     <img class="hero-photo" th:if="${hero != null}" th:src="${hero.url()}" alt="" fetchpriority="high">

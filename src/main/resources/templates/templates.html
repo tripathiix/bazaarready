@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head th:replace="~{pages/parts :: head('BazaarReady templates', 'Eleven website designs for small businesses, four of them in 3D, each shown as a real sample site. The agent picks one for you, and you can switch any time.')}"></head>
+<head th:replace="~{pages/parts :: head('BazaarReady templates', 'Sixteen website designs for small businesses, shown as more than forty real sample sites, from a Coorg homestay to a Lisbon bookshop. The agent picks one for you, and you can switch any time.')}"></head>
 <body>
 <div th:replace="~{pages/parts :: top('templates')}"></div>
 <style>
@@ -48,8 +48,8 @@
 
     <div class="grid">
         <article class="card tpl rise" th:each="t : ${designs}" th:id="${t.key()}" th:attr="data-group=${t.group()}">
-            <a class="shot" th:classappend="${t.shot() != null} ? 'framed'" th:href="${t.sitePath() != null} ? ${'/templates/' + t.key()} : ${'/?design=' + t.key()}"
-               th:attr="aria-label=${'Preview the ' + t.name() + ' design'}">
+            <a class="shot" th:classappend="${t.shot() != null} ? 'framed'" th:href="${t.sitePath() != null} ? ${'/templates/' + t.key()} : ${'/?design=' + t.layout()}"
+               th:attr="aria-label=${t.siteName() != null} ? ${'Preview ' + t.siteName() + ', a ' + t.name() + ' design'} : ${'Preview the ' + t.name() + ' design'}">
                 <span class="browser" th:if="${t.shot() != null}" aria-hidden="true"><i></i><i></i><i></i></span>
                 <img th:if="${t.shot() != null}" th:src="${t.shot()}" alt="" loading="lazy" width="1280" height="800">
                 <img th:if="${t.shot() == null and t.photo() != null}" th:src="${t.photo()}" alt="" loading="lazy">
@@ -57,14 +57,13 @@
             </a>
             <div class="body">
                 <span class="tag" th:text="${t.groupLabel()}">Shops</span>
-                <h2 th:text="${t.name()}">Classic</h2>
-                <p th:text="${t.blurb()}">Blurb</p>
-                <p class="example" th:if="${t.siteName() != null}">Example: <span translate="no" th:text="${t.siteName()}">Name</span></p>
+                <h2 translate="no" th:text="${t.siteName() != null} ? ${t.siteName()} : ${t.name()}">Classic</h2>
+                <p><strong th:text="${t.name() + ' design.'}">Classic design.</strong> <span th:text="${t.blurb()}">Blurb</span></p>
                 <p class="for" th:text="${'Great for ' + t.goodFor()}">Great for</p>
                 <div class="actions">
                     <a class="btn" th:if="${t.sitePath() != null}" th:href="${'/templates/' + t.key()}"
-                       th:attr="aria-label=${'Preview the ' + t.name() + ' design'}">Preview</a>
-                    <a class="use" th:href="${'/?design=' + t.key()}">Use this design →</a>
+                       th:attr="aria-label=${'Preview ' + t.siteName()}">Preview</a>
+                    <a class="use" th:href="${'/?design=' + t.layout()}" th:attr="aria-label=${'Use the ' + t.name() + ' design'}">Use this design →</a>
                 </div>
             </div>
         </article>
